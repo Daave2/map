@@ -3,20 +3,24 @@ import react from '@vitejs/plugin-react'
 
 // https://vite.dev/config/
 export default defineConfig({
+  base: '/map/',
   plugins: [react(), saveLayoutPlugin()],
 })
 
 import fs from 'fs';
 import path from 'path';
 
+import type { ViteDevServer } from 'vite';
+import type { IncomingMessage, ServerResponse } from 'http';
+
 function saveLayoutPlugin() {
   return {
     name: 'save-layout-plugin',
-    configureServer(server) {
-      server.middlewares.use('/api/save-layout', (req, res, next) => {
+    configureServer(server: ViteDevServer) {
+      server.middlewares.use('/api/save-layout', (req: IncomingMessage, res: ServerResponse, next: () => void) => {
         if (req.method === 'POST') {
           let body = '';
-          req.on('data', chunk => {
+          req.on('data', (chunk: Buffer) => {
             body += chunk.toString();
           });
           req.on('end', () => {
