@@ -57,6 +57,9 @@ function App() {
   const [rangeData, setRangeData] = useState<RangeActivity[]>([]);
   const [selectedRangeCategory, setSelectedRangeCategory] = useState<string | null>(null);
 
+  // App Mode: 'view' (default - clean, no editing) or 'edit' (full editor)
+  const [appMode, setAppMode] = useState<'view' | 'edit'>('view');
+
   // Get selected range activity for details panel
   const selectedRangeActivity = rangeData.find(r => r.category === selectedRangeCategory) || null;
 
@@ -359,33 +362,37 @@ function App() {
         onToggleGrid={handleToggleGrid}
         onToggleSnap={handleToggleSnap}
         onSetGridSize={handleSetGridSize}
+        appMode={appMode}
       />
 
       <div className="main-content">
-        <aside className={`sidebar left-sidebar ${leftSidebarCollapsed ? 'collapsed' : ''}`}>
-          <button
-            className="sidebar-toggle"
-            onClick={() => setLeftSidebarCollapsed(!leftSidebarCollapsed)}
-            title={leftSidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-          >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              {leftSidebarCollapsed ? (
-                <polyline points="9,18 15,12 9,6" />
-              ) : (
-                <polyline points="15,18 9,12 15,6" />
-              )}
-            </svg>
-          </button>
-          {!leftSidebarCollapsed && (
-            <AisleList
-              aisles={layout.aisles}
-              selectedAisleIds={selectedAisleIds}
-              onSelectAisle={handleSelectionChange}
-              searchTerm={searchTerm}
-              onSearchChange={setSearchTerm}
-            />
-          )}
-        </aside>
+        {/* Left sidebar - only in edit mode */}
+        {appMode === 'edit' && (
+          <aside className={`sidebar left-sidebar ${leftSidebarCollapsed ? 'collapsed' : ''}`}>
+            <button
+              className="sidebar-toggle"
+              onClick={() => setLeftSidebarCollapsed(!leftSidebarCollapsed)}
+              title={leftSidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                {leftSidebarCollapsed ? (
+                  <polyline points="9,18 15,12 9,6" />
+                ) : (
+                  <polyline points="15,18 9,12 15,6" />
+                )}
+              </svg>
+            </button>
+            {!leftSidebarCollapsed && (
+              <AisleList
+                aisles={layout.aisles}
+                selectedAisleIds={selectedAisleIds}
+                onSelectAisle={handleSelectionChange}
+                searchTerm={searchTerm}
+                onSearchChange={setSearchTerm}
+              />
+            )}
+          </aside>
+        )}
 
         <main className="canvas-area">
           <MapCanvas
@@ -418,22 +425,24 @@ function App() {
           </button>
           {!rightSidebarCollapsed && (
             <>
-              <div className="sidebar-tabs">
+              {/* Mode toggle - subtle at top */}
+              <div className="mode-toggle">
                 <button
-                  className={`sidebar-tab ${activeTab === 'range' ? 'active' : ''}`}
-                  onClick={() => setActiveTab('range')}
+                  className={`mode-btn ${appMode === 'view' ? 'active' : ''}`}
+                  onClick={() => setAppMode('view')}
                 >
-                  Range
+                  View
                 </button>
                 <button
-                  className={`sidebar-tab ${activeTab === 'edit' ? 'active' : ''}`}
-                  onClick={() => setActiveTab('edit')}
+                  className={`mode-btn ${appMode === 'edit' ? 'active' : ''}`}
+                  onClick={() => setAppMode('edit')}
                 >
                   Edit
                 </button>
               </div>
 
-              {activeTab === 'range' ? (
+              {appMode === 'view' ? (
+                /* View Mode: Clean Range panel only */
                 <>
                   <RangePanel
                     rangeData={rangeData}
@@ -450,12 +459,48 @@ function App() {
                   )}
                 </>
               ) : (
-                <AisleEditor
-                  aisle={primarySelectedAisle}
-                  selectedCount={selectedAisles.length}
-                  onUpdateAisle={handleUpdateAisle}
-                  onDeleteAisle={(id) => handleDeleteAisles([id])}
-                />
+                /* Edit Mode: Tabs for Range/Aisle editing */
+                <>
+                  <div className="sidebar-tabs">
+                    <button
+                      className={`sidebar-tab ${activeTab === 'range' ? 'active' : ''}`}
+                      onClick={() => setActiveTab('range')}
+                    >
+                      Range
+                    </button>
+                    <button
+                      className={`sidebar-tab ${activeTab === 'edit' ? 'active' : ''}`}
+                      onClick={() => setActiveTab('edit')}
+                    >
+                      Aisle
+                    </button>
+                  </div>
+
+                  {activeTab === 'range' ? (
+                    <>
+                      <RangePanel
+                        rangeData={rangeData}
+                        onImport={setRangeData}
+                        onClear={() => { setRangeData([]); setSelectedRangeCategory(null); }}
+                        selectedCategory={selectedRangeCategory}
+                        onSelectCategory={setSelectedRangeCategory}
+                      />
+                      {selectedRangeActivity && (
+                        <RangeDetails
+                          activity={selectedRangeActivity}
+                          onClose={() => setSelectedRangeCategory(null)}
+                        />
+                      )}
+                    </>
+                  ) : (
+                    <AisleEditor
+                      aisle={primarySelectedAisle}
+                      selectedCount={selectedAisles.length}
+                      onUpdateAisle={handleUpdateAisle}
+                      onDeleteAisle={(id) => handleDeleteAisles([id])}
+                    />
+                  )}
+                </>
               )}
             </>
           )}

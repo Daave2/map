@@ -975,6 +975,49 @@ body {
 }
 
 /* ============================================
+   Mode Toggle (View/Edit)
+   ============================================ */
+
+.mode-toggle {
+  display: flex;
+  justify-content: center;
+  padding: 8px;
+  background: var(--bg-tertiary);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.mode-btn {
+  padding: 6px 16px;
+  background: transparent;
+  border: 1px solid var(--border-color);
+  color: var(--text-muted);
+  font-size: 11px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.mode-btn:first-child {
+  border-radius: 4px 0 0 4px;
+  border-right: none;
+}
+
+.mode-btn:last-child {
+  border-radius: 0 4px 4px 0;
+}
+
+.mode-btn:hover {
+  color: var(--text-primary);
+  background: var(--bg-hover);
+}
+
+.mode-btn.active {
+  color: var(--text-primary);
+  background: var(--accent-primary);
+  border-color: var(--accent-primary);
+}
+
+/* ============================================
    Range Panel
    ============================================ */
 
