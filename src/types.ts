@@ -96,3 +96,17 @@ export interface ViewState {
 }
 
 export type Tool = 'select' | 'pan' | 'add';
+
+// Range Activity Types
+export interface RangeActivity {
+  date: string;           // "Mon 5th Jan"
+  category: string;       // "Baby Foods"
+  brief?: string;
+  capacityHours: number;  // 1.5
+  newLines: number;       // 2
+  delistLines: number;    // 4
+  reason: string;         // "Branded NPD"
+  buyer?: string;
+  merchandiser?: string;
+  supplyChain?: string;
+}

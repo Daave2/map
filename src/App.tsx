@@ -1,10 +1,12 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
-import type { MapLayout, Aisle, ViewState, EditorSettings } from './types';
+import type { MapLayout, Aisle, ViewState, EditorSettings, RangeActivity } from './types';
 import { DEFAULT_MAP_LAYOUT, REFERENCE_STORE_LAYOUT, PDF_ACCURATE_LAYOUT } from './constants/referenceLayout';
 import { MapCanvas } from './components/MapCanvas';
 import { AisleEditor } from './components/AisleEditor';
 import { AisleList } from './components/AisleList';
 import { Toolbar } from './components/Toolbar';
+import { RangePanel } from './components/RangePanel';
+import { RangeDetails } from './components/RangeDetails';
 import { useHistory } from './hooks/useHistory';
 import { useClipboard } from './hooks/useClipboard';
 import './App.css';
@@ -49,6 +51,14 @@ function App() {
 
   // Search state (lifted for highlighting)
   const [searchTerm, setSearchTerm] = useState('');
+
+  // Tab and Range state
+  const [activeTab, setActiveTab] = useState<'range' | 'edit'>('range');
+  const [rangeData, setRangeData] = useState<RangeActivity[]>([]);
+  const [selectedRangeCategory, setSelectedRangeCategory] = useState<string | null>(null);
+
+  // Get selected range activity for details panel
+  const selectedRangeActivity = rangeData.find(r => r.category === selectedRangeCategory) || null;
 
   // Manual save handler
   const handleSave = useCallback(async () => {
@@ -387,6 +397,8 @@ function App() {
             onViewChange={setViewState}
             editorSettings={editorSettings}
             searchTerm={searchTerm}
+            rangeData={rangeData}
+            activeTab={activeTab}
           />
         </main>
 
@@ -405,12 +417,47 @@ function App() {
             </svg>
           </button>
           {!rightSidebarCollapsed && (
-            <AisleEditor
-              aisle={primarySelectedAisle}
-              selectedCount={selectedAisles.length}
-              onUpdateAisle={handleUpdateAisle}
-              onDeleteAisle={(id) => handleDeleteAisles([id])}
-            />
+            <>
+              <div className="sidebar-tabs">
+                <button
+                  className={`sidebar-tab ${activeTab === 'range' ? 'active' : ''}`}
+                  onClick={() => setActiveTab('range')}
+                >
+                  Range
+                </button>
+                <button
+                  className={`sidebar-tab ${activeTab === 'edit' ? 'active' : ''}`}
+                  onClick={() => setActiveTab('edit')}
+                >
+                  Edit
+                </button>
+              </div>
+
+              {activeTab === 'range' ? (
+                <>
+                  <RangePanel
+                    rangeData={rangeData}
+                    onImport={setRangeData}
+                    onClear={() => { setRangeData([]); setSelectedRangeCategory(null); }}
+                    selectedCategory={selectedRangeCategory}
+                    onSelectCategory={setSelectedRangeCategory}
+                  />
+                  {selectedRangeActivity && (
+                    <RangeDetails
+                      activity={selectedRangeActivity}
+                      onClose={() => setSelectedRangeCategory(null)}
+                    />
+                  )}
+                </>
+              ) : (
+                <AisleEditor
+                  aisle={primarySelectedAisle}
+                  selectedCount={selectedAisles.length}
+                  onUpdateAisle={handleUpdateAisle}
+                  onDeleteAisle={(id) => handleDeleteAisles([id])}
+                />
+              )}
+            </>
           )}
         </aside>
       </div>

@@ -1,6 +1,28 @@
 import React, { useRef, useEffect, useCallback, useState } from 'react';
-import type { Aisle, ViewState, Point, EditorSettings } from '../types';
+import type { Aisle, ViewState, Point, EditorSettings, RangeActivity } from '../types';
 import { getGridLines } from '../utils/grid';
+
+// Helper: Check if section category matches a range category (fuzzy)
+function matchesRangeCategory(sectionCategory: string, rangeCategory: string): boolean {
+    const normalize = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, '');
+    const sectionNorm = normalize(sectionCategory);
+    const rangeNorm = normalize(rangeCategory);
+    // Match if one contains the other
+    return sectionNorm.includes(rangeNorm) || rangeNorm.includes(sectionNorm);
+}
+
+// Helper: Find range activity for a section category
+function findRangeForSection(sectionCategory: string, rangeData: RangeActivity[]): RangeActivity | null {
+    return rangeData.find(r => matchesRangeCategory(sectionCategory, r.category)) || null;
+}
+
+// Helper: Get workload color based on capacity hours
+function getWorkloadColor(hours: number): string {
+    if (hours < 1) return 'rgba(34, 197, 94, 0.7)'; // green
+    if (hours < 2) return 'rgba(234, 179, 8, 0.7)'; // yellow
+    if (hours < 3) return 'rgba(249, 115, 22, 0.7)'; // orange
+    return 'rgba(239, 68, 68, 0.7)'; // red
+}
 
 interface MapCanvasProps {
     aisles: Aisle[];
@@ -11,6 +33,9 @@ interface MapCanvasProps {
     onViewChange: (state: ViewState) => void;
     editorSettings?: EditorSettings;
     searchTerm?: string;
+    // Range highlighting
+    rangeData?: RangeActivity[];
+    activeTab?: 'range' | 'edit';
 }
 
 export const MapCanvas: React.FC<MapCanvasProps> = ({
@@ -22,6 +47,8 @@ export const MapCanvas: React.FC<MapCanvasProps> = ({
     onViewChange,
     editorSettings,
     searchTerm = '',
+    rangeData = [],
+    activeTab = 'edit',
 }) => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
@@ -471,6 +498,21 @@ export const MapCanvas: React.FC<MapCanvasProps> = ({
                                 // Dim non-matching items if search is active
                                 ctx.fillStyle = catColor.replace(/[\d.]+\)$/, '0.1)');
                                 ctx.strokeStyle = 'rgba(100, 116, 139, 0.2)';
+                            }
+
+                            // Range Activity Highlighting (when Range tab is active)
+                            if (activeTab === 'range' && rangeData.length > 0 && !searchTerm) {
+                                const rangeMatch = findRangeForSection(section.category, rangeData);
+                                if (rangeMatch) {
+                                    ctx.fillStyle = getWorkloadColor(rangeMatch.capacityHours);
+                                    ctx.strokeStyle = '#fff';
+                                    ctx.lineWidth = 2;
+                                } else {
+                                    // Dim sections not in range data
+                                    ctx.fillStyle = catColor.replace(/[\d.]+\)$/, '0.15)');
+                                    ctx.strokeStyle = 'rgba(100, 116, 139, 0.2)';
+                                    ctx.lineWidth = 0.5;
+                                }
                             }
 
                             ctx.beginPath();
@@ -936,7 +978,7 @@ export const MapCanvas: React.FC<MapCanvasProps> = ({
         });
 
         ctx.restore();
-    }, [aisles, selectedAisleIds, viewState, getAisleBounds, editorSettings, searchTerm]);
+    }, [aisles, selectedAisleIds, viewState, getAisleBounds, editorSettings, searchTerm, rangeData, activeTab]);
 
     // Handle resize
     useEffect(() => {
