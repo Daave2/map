@@ -63,6 +63,9 @@ function App() {
   // Theme: 'dark' (default) or 'light'
   const [theme, setTheme] = useState<'dark' | 'light'>('dark');
 
+  // Print mode: B&W friendly rendering for Range view
+  const [printMode, setPrintMode] = useState(false);
+
   // Get selected range activity for details panel
   const selectedRangeActivity = rangeData.find(r => r.category === selectedRangeCategory) || null;
 
@@ -409,6 +412,8 @@ function App() {
             searchTerm={searchTerm}
             rangeData={rangeData}
             activeTab={activeTab}
+            printMode={printMode}
+            theme={theme}
           />
         </main>
 
@@ -467,6 +472,21 @@ function App() {
                     </svg>
                   )}
                 </button>
+
+                {/* Print toggle (only in view mode) */}
+                {appMode === 'view' && (
+                  <button
+                    className={`theme-toggle-btn ${printMode ? 'active' : ''}`}
+                    onClick={() => setPrintMode(!printMode)}
+                    title={printMode ? 'Exit Print Mode' : 'Print-Friendly Mode'}
+                  >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <polyline points="6 9 6 2 18 2 18 9" />
+                      <path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2" />
+                      <rect x="6" y="14" width="12" height="8" />
+                    </svg>
+                  </button>
+                )}
               </div>
 
               {appMode === 'view' ? (

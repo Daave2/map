@@ -1381,7 +1381,7 @@ export const PDF_ACCURATE_LAYOUT: MapLayout = {
                 },
                 {
                     "bay": "2368",
-                    "category": "kids zone mugs",
+                    "category": "kids zone mags",
                     "side": "L"
                 },
                 {
@@ -1801,7 +1801,7 @@ export const PDF_ACCURATE_LAYOUT: MapLayout = {
         {
             "id": "Wall-3",
             "label": "Wall 3 - Butchery",
-            "type": "counter",
+            "type": "chilled",
             "p1": [
                 320.7501253928203,
                 46.25
@@ -1826,7 +1826,7 @@ export const PDF_ACCURATE_LAYOUT: MapLayout = {
         {
             "id": "Wall-4",
             "label": "Wall 4 - Bakery",
-            "type": "bakery",
+            "type": "chilled",
             "p1": [
                 450,
                 45
@@ -1961,7 +1961,7 @@ export const PDF_ACCURATE_LAYOUT: MapLayout = {
         {
             "id": "Wall-9",
             "label": "Wall 9 - Hot Food",
-            "type": "counter",
+            "type": "chilled",
             "p1": [
                 943.84709564282,
                 103.47521972405046
@@ -1990,7 +1990,7 @@ export const PDF_ACCURATE_LAYOUT: MapLayout = {
         {
             "id": "Wall-10",
             "label": "Wall 10 - Fish",
-            "type": "counter",
+            "type": "chilled",
             "p1": [
                 1326.5459391387499,
                 50.31270346055027
@@ -2887,11 +2887,6 @@ export const PDF_ACCURATE_LAYOUT: MapLayout = {
                 {
                     "bay": "3186",
                     "category": "dried pasta inc pasta sauce & trad sauce",
-                    "side": "L"
-                },
-                {
-                    "bay": "3002",
-                    "category": "eve",
                     "side": "L"
                 },
                 {

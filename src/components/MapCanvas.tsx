@@ -36,6 +36,10 @@ interface MapCanvasProps {
     // Range highlighting
     rangeData?: RangeActivity[];
     activeTab?: 'range' | 'edit';
+    // Print mode for B&W friendly output
+    printMode?: boolean;
+    // Theme for canvas rendering
+    theme?: 'dark' | 'light';
 }
 
 export const MapCanvas: React.FC<MapCanvasProps> = ({
@@ -49,6 +53,8 @@ export const MapCanvas: React.FC<MapCanvasProps> = ({
     searchTerm = '',
     rangeData = [],
     activeTab = 'edit',
+    printMode = false,
+    theme = 'dark',
 }) => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
@@ -297,8 +303,10 @@ export const MapCanvas: React.FC<MapCanvasProps> = ({
         const ctx = canvas?.getContext('2d');
         if (!canvas || !ctx) return;
 
-        // Clear canvas
-        ctx.fillStyle = '#1a1a2e';
+        // Clear canvas with theme-aware background (pure white for print mode)
+        let bgColor = theme === 'light' ? '#f8fafc' : '#1a1a2e';
+        if (printMode) bgColor = '#ffffff';
+        ctx.fillStyle = bgColor;
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
         // Apply view transform
@@ -306,15 +314,15 @@ export const MapCanvas: React.FC<MapCanvasProps> = ({
         ctx.translate(viewState.offsetX, viewState.offsetY);
         ctx.scale(viewState.scale, viewState.scale);
 
-        // Draw grid (conditional based on editorSettings)
-        const gridEnabled = editorSettings?.gridEnabled ?? false;
+        // Draw grid (conditional based on editorSettings, disabled in print mode)
+        const gridEnabled = (editorSettings?.gridEnabled ?? false) && !printMode;
         const gridSize = editorSettings?.gridSize ?? 20;
 
         if (gridEnabled) {
             const { horizontal, vertical } = getGridLines(viewState, canvas.width, canvas.height, gridSize);
 
-            // Minor grid lines
-            ctx.strokeStyle = 'rgba(100, 100, 140, 0.3)';
+            // Minor grid lines - theme aware
+            ctx.strokeStyle = theme === 'light' ? 'rgba(100, 100, 140, 0.15)' : 'rgba(100, 100, 140, 0.3)';
             ctx.lineWidth = 0.5;
 
             vertical.forEach((x) => {
@@ -349,8 +357,8 @@ export const MapCanvas: React.FC<MapCanvasProps> = ({
                 ctx.lineTo(vertical[vertical.length - 1] || canvas.width, y);
                 ctx.stroke();
             });
-        } else {
-            // Draw subtle background grid when grid is disabled
+        } else if (!printMode) {
+            // Draw subtle background grid when grid is disabled (but NOT in print mode)
             ctx.strokeStyle = '#2a2a4a';
             ctx.lineWidth = 0.5;
             const bgGridSize = 100;
@@ -372,6 +380,15 @@ export const MapCanvas: React.FC<MapCanvasProps> = ({
                 ctx.stroke();
             }
         }
+
+        // Collect labels for print mode (draw them all at the end, on top)
+        interface PrintLabel {
+            x: number;
+            y: number;
+            text: string;
+            isRangeAffected: boolean;
+        }
+        const printLabels: PrintLabel[] = [];
 
         // Draw aisles
         aisles.forEach((aisle) => {
@@ -465,23 +482,21 @@ export const MapCanvas: React.FC<MapCanvasProps> = ({
                             const secCenterX = (sectionMinX + sectionMaxX) / 2;
                             const secCenterY = (sectionMinY + sectionMaxY) / 2;
 
-                            // Determine Semantic Color
-                            let catColor = 'rgba(100, 116, 139, 0.4)'; // Slate default
-                            const lowerCat = section.category.toLowerCase();
-                            if (lowerCat.includes('frozen') || lowerCat.includes('ice')) catColor = 'rgba(56, 189, 248, 0.4)';
-                            else if (lowerCat.includes('chilled') || lowerCat.includes('dairy') || lowerCat.includes('cheese') || lowerCat.includes('milk')) catColor = 'rgba(6, 182, 212, 0.4)';
-                            else if (lowerCat.includes('produce') || lowerCat.includes('fruit') || lowerCat.includes('veg') || lowerCat.includes('salad')) catColor = 'rgba(34, 197, 94, 0.4)';
-                            else if (lowerCat.includes('meat') || lowerCat.includes('fish') || lowerCat.includes('poultry')) catColor = 'rgba(239, 68, 68, 0.4)';
-                            else if (lowerCat.includes('bakery') || lowerCat.includes('bread') || lowerCat.includes('cake')) catColor = 'rgba(249, 115, 22, 0.4)';
-                            else if (lowerCat.includes('bws') || lowerCat.includes('beer') || lowerCat.includes('wine') || lowerCat.includes('spirit') || lowerCat.includes('lager') || lowerCat.includes('cider')) catColor = 'rgba(168, 85, 247, 0.4)';
-                            else if (lowerCat.includes('baby') || lowerCat.includes('medicine') || lowerCat.includes('health') || lowerCat.includes('chem') || lowerCat.includes('toilet') || lowerCat.includes('bath') || lowerCat.includes('soap') || lowerCat.includes('dental')) catColor = 'rgba(236, 72, 153, 0.4)';
-                            else if (lowerCat.includes('home') || lowerCat.includes('electronic') || lowerCat.includes('leisure') || lowerCat.includes('cook') || lowerCat.includes('clean') || lowerCat.includes('laundry')) catColor = 'rgba(20, 184, 166, 0.4)';
-                            else if (lowerCat.includes('pet') || lowerCat.includes('cat') || lowerCat.includes('dog')) catColor = 'rgba(251, 191, 36, 0.4)'; // Amber for Pet
-                            else if (lowerCat.includes('confec') || lowerCat.includes('chocolate') || lowerCat.includes('sweet') || lowerCat.includes('biscuit')) catColor = 'rgba(244, 114, 182, 0.4)'; // Pink for Confec
+                            // Simple type-based colors (subtle, lighter)
+                            let catColor = 'rgba(100, 116, 139, 0.25)'; // Default neutral gray
+                            const aisleType = aisle.type?.toLowerCase() || 'gondola';
+                            if (aisleType === 'chilled' || aisleType === 'frozen') {
+                                catColor = 'rgba(59, 130, 246, 0.25)'; // Light blue for chilled/frozen
+                            } else if (aisleType === 'bakery') {
+                                catColor = 'rgba(234, 179, 8, 0.25)'; // Light warm/amber for bakery
+                            } else if (aisleType === 'counter') {
+                                catColor = 'rgba(239, 68, 68, 0.2)'; // Light red for fresh counters
+                            }
+                            // gondola/fixture/promo all stay neutral gray
 
                             // Draw section rectangle
                             ctx.fillStyle = isSelected ? 'rgba(99, 102, 241, 0.6)' : catColor;
-                            ctx.strokeStyle = isSelected ? '#818cf8' : '#64748b';
+                            ctx.strokeStyle = isSelected ? '#818cf8' : (theme === 'light' ? '#94a3b8' : '#64748b');
                             ctx.lineWidth = isSelected ? 2 : 0.5;
 
                             // Search Highlight Logic
@@ -500,9 +515,26 @@ export const MapCanvas: React.FC<MapCanvasProps> = ({
                                 ctx.strokeStyle = 'rgba(100, 116, 139, 0.2)';
                             }
 
-                            // Range Activity Highlighting (when Range tab is active)
-                            if (activeTab === 'range' && rangeData.length > 0 && !searchTerm) {
+                            // PRINT MODE: B&W friendly rendering (works even without range data)
+                            if (printMode && activeTab === 'range') {
+                                const rangeMatch = rangeData.length > 0
+                                    ? findRangeForSection(section.category, rangeData)
+                                    : null;
+
+                                if (rangeMatch) {
+                                    ctx.fillStyle = 'rgba(200, 200, 200, 0.4)'; // Light gray shade
+                                    ctx.strokeStyle = '#000'; // Bold black outline
+                                    ctx.lineWidth = 2.5;
+                                } else {
+                                    ctx.fillStyle = 'rgba(255, 255, 255, 0.8)'; // White/transparent
+                                    ctx.strokeStyle = '#333'; // Gray outline (darker for B&W)
+                                    ctx.lineWidth = 0.75;
+                                }
+                            }
+                            // Range Activity Highlighting (when Range tab is active, NOT print mode)
+                            else if (activeTab === 'range' && rangeData.length > 0 && !searchTerm) {
                                 const rangeMatch = findRangeForSection(section.category, rangeData);
+
                                 if (rangeMatch) {
                                     ctx.fillStyle = getWorkloadColor(rangeMatch.capacityHours);
                                     ctx.strokeStyle = '#fff';
@@ -520,9 +552,17 @@ export const MapCanvas: React.FC<MapCanvasProps> = ({
                             ctx.fill();
                             ctx.stroke();
 
+                            // Check if this is a range-affected section
+                            const rangeMatchForLabel = activeTab === 'range' && rangeData.length > 0
+                                ? findRangeForSection(section.category, rangeData)
+                                : null;
+
                             // Determine Label
                             let labelText = "";
-                            if (isSearchMatch || viewState.scale >= 1.5) {
+                            if (printMode && rangeMatchForLabel) {
+                                // PRINT MODE: Always show category for range-affected sections
+                                labelText = section.category;
+                            } else if (isSearchMatch || viewState.scale >= 1.5) {
                                 labelText = `${section.bay} ${section.category}`;
                             } else if (viewState.scale >= 0.7) {
                                 labelText = section.category;
@@ -539,8 +579,15 @@ export const MapCanvas: React.FC<MapCanvasProps> = ({
                             }
 
                             if (labelText) {
-                                if (!isSearchMatch) {
-                                    ctx.fillStyle = isSelected ? '#fff' : 'rgba(255,255,255,0.9)';
+                                if (printMode) {
+                                    // Print mode: black text
+                                    ctx.fillStyle = '#000';
+                                } else if (!isSearchMatch) {
+                                    // Theme-aware label colors
+                                    const labelColor = theme === 'light'
+                                        ? (isSelected ? '#1e293b' : 'rgba(15, 23, 42, 0.85)')
+                                        : (isSelected ? '#fff' : 'rgba(255,255,255,0.9)');
+                                    ctx.fillStyle = labelColor;
                                 }
                                 const fontSize = Math.max(6, 12 / viewState.scale); // Slightly larger base for readability
                                 ctx.font = `bold ${fontSize}px Inter, system-ui, sans-serif`;
@@ -550,15 +597,30 @@ export const MapCanvas: React.FC<MapCanvasProps> = ({
                                 const textWidth = ctx.measureText(labelText).width;
                                 const availableWidth = isVertical ? secHeight : secWidth;
 
-                                if (textWidth < availableWidth * 1.2) { // Allow 20% overflow before hiding
-                                    if (isVertical) {
-                                        ctx.save();
-                                        ctx.translate(secCenterX, secCenterY);
-                                        ctx.rotate(-Math.PI / 2);
-                                        ctx.fillText(labelText, 0, 0);
-                                        ctx.restore();
-                                    } else {
-                                        ctx.fillText(labelText, secCenterX, secCenterY);
+                                // In print mode, collect labels for later rendering on top
+                                if (printMode && activeTab === 'range') {
+                                    // Only add range-affected sections to print labels
+                                    if (rangeMatchForLabel) {
+                                        printLabels.push({
+                                            x: secCenterX,
+                                            y: secCenterY,
+                                            text: labelText,
+                                            isRangeAffected: true
+                                        });
+                                    }
+                                } else {
+                                    // Normal mode drawing
+                                    const textFits = textWidth < availableWidth * 1.2;
+                                    if (textFits) {
+                                        if (isVertical) {
+                                            ctx.save();
+                                            ctx.translate(secCenterX, secCenterY);
+                                            ctx.rotate(-Math.PI / 2);
+                                            ctx.fillText(labelText, 0, 0);
+                                            ctx.restore();
+                                        } else {
+                                            ctx.fillText(labelText, secCenterX, secCenterY);
+                                        }
                                     }
                                 }
                             }
@@ -612,17 +674,18 @@ export const MapCanvas: React.FC<MapCanvasProps> = ({
                         const secCenterX = (sectionMinX + sectionMaxX) / 2;
                         const secCenterY = (sectionMinY + sectionMaxY) / 2;
 
-                        // Determine Semantic Color
-                        let catColor = 'rgba(100, 116, 139, 0.4)';
-                        const lowerCat = section.category.toLowerCase();
-                        if (lowerCat.includes('frozen') || lowerCat.includes('ice')) catColor = 'rgba(56, 189, 248, 0.4)';
-                        else if (lowerCat.includes('chilled') || lowerCat.includes('dairy') || lowerCat.includes('cheese') || lowerCat.includes('milk')) catColor = 'rgba(6, 182, 212, 0.4)';
-                        else if (lowerCat.includes('produce') || lowerCat.includes('fruit') || lowerCat.includes('veg') || lowerCat.includes('salad')) catColor = 'rgba(34, 197, 94, 0.4)';
-                        else if (lowerCat.includes('meat') || lowerCat.includes('fish') || lowerCat.includes('poultry')) catColor = 'rgba(239, 68, 68, 0.4)';
-                        else if (lowerCat.includes('bakery') || lowerCat.includes('bread') || lowerCat.includes('cake')) catColor = 'rgba(249, 115, 22, 0.4)';
-                        else if (lowerCat.includes('bws') || lowerCat.includes('beer') || lowerCat.includes('wine') || lowerCat.includes('spirit')) catColor = 'rgba(168, 85, 247, 0.4)';
-                        else if (lowerCat.includes('baby') || lowerCat.includes('medicine') || lowerCat.includes('chem') || lowerCat.includes('toilet')) catColor = 'rgba(236, 72, 153, 0.4)';
-                        else if (lowerCat.includes('home') || lowerCat.includes('electronic') || lowerCat.includes('leisure') || lowerCat.includes('cook')) catColor = 'rgba(20, 184, 166, 0.4)';
+                        // Simple type-based colors (subtle, lighter)
+                        let catColor = 'rgba(100, 116, 139, 0.25)'; // Default neutral gray
+                        const aisleType = aisle.type?.toLowerCase() || 'gondola';
+                        if (aisleType === 'chilled' || aisleType === 'frozen') {
+                            catColor = 'rgba(59, 130, 246, 0.25)'; // Light blue for chilled/frozen
+                        } else if (aisleType === 'bakery') {
+                            catColor = 'rgba(234, 179, 8, 0.25)'; // Light warm/amber for bakery
+                        } else if (aisleType === 'counter') {
+                            catColor = 'rgba(239, 68, 68, 0.2)'; // Light red for fresh counters
+                        }
+                        // gondola/fixture/promo all stay neutral gray
+
 
                         ctx.fillStyle = isSelected ? 'rgba(99, 102, 241, 0.6)' : catColor;
                         ctx.strokeStyle = isSelected ? '#818cf8' : '#3b82f6';
@@ -642,6 +705,23 @@ export const MapCanvas: React.FC<MapCanvasProps> = ({
                             // Dim non-matching items if search is active
                             ctx.fillStyle = catColor.replace(/[\d.]+\)$/, '0.1)');
                             ctx.strokeStyle = 'rgba(100, 116, 139, 0.2)';
+                        }
+
+                        // PRINT MODE: B&W skeleton for single-sided sections too
+                        if (printMode && activeTab === 'range') {
+                            const rangeMatch = rangeData.length > 0
+                                ? findRangeForSection(section.category, rangeData)
+                                : null;
+
+                            if (rangeMatch) {
+                                ctx.fillStyle = 'rgba(200, 200, 200, 0.4)';
+                                ctx.strokeStyle = '#000';
+                                ctx.lineWidth = 2.5;
+                            } else {
+                                ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+                                ctx.strokeStyle = '#333';
+                                ctx.lineWidth = 0.75;
+                            }
                         }
 
                         ctx.beginPath();
@@ -667,26 +747,43 @@ export const MapCanvas: React.FC<MapCanvasProps> = ({
                         }
 
                         if (labelText) {
-                            if (!isSearchMatch) {
-                                ctx.fillStyle = isSelected ? '#fff' : 'rgba(255,255,255,0.9)';
-                            }
-                            const fontSize = Math.max(6, 12 / viewState.scale); // Slightly larger base for readability
-                            ctx.font = `bold ${fontSize}px Inter, system-ui, sans-serif`;
-                            ctx.textAlign = 'center';
-                            ctx.textBaseline = 'middle';
+                            // In print mode, collect labels for range-affected sections only
+                            if (printMode && activeTab === 'range') {
+                                // rangeMatch was already calculated above for styling
+                                const rangeMatch = rangeData.length > 0
+                                    ? findRangeForSection(section.category, rangeData)
+                                    : null;
+                                if (rangeMatch) {
+                                    printLabels.push({
+                                        x: secCenterX,
+                                        y: secCenterY,
+                                        text: labelText,
+                                        isRangeAffected: true
+                                    });
+                                }
+                            } else {
+                                // Normal mode drawing
+                                if (!isSearchMatch) {
+                                    ctx.fillStyle = isSelected ? '#fff' : 'rgba(255,255,255,0.9)';
+                                }
+                                const fontSize = Math.max(6, 12 / viewState.scale);
+                                ctx.font = `bold ${fontSize}px Inter, system-ui, sans-serif`;
+                                ctx.textAlign = 'center';
+                                ctx.textBaseline = 'middle';
 
-                            const textWidth = ctx.measureText(labelText).width;
-                            const availableWidth = isVertical ? secHeight : secWidth;
+                                const textWidth = ctx.measureText(labelText).width;
+                                const availableWidth = isVertical ? secHeight : secWidth;
 
-                            if (textWidth < availableWidth * 1.2) { // Allow 20% overflow before hiding
-                                if (isVertical) {
-                                    ctx.save();
-                                    ctx.translate(secCenterX, secCenterY);
-                                    ctx.rotate(-Math.PI / 2);
-                                    ctx.fillText(labelText, 0, 0);
-                                    ctx.restore();
-                                } else {
-                                    ctx.fillText(labelText, secCenterX, secCenterY);
+                                if (textWidth < availableWidth * 1.2) {
+                                    if (isVertical) {
+                                        ctx.save();
+                                        ctx.translate(secCenterX, secCenterY);
+                                        ctx.rotate(-Math.PI / 2);
+                                        ctx.fillText(labelText, 0, 0);
+                                        ctx.restore();
+                                    } else {
+                                        ctx.fillText(labelText, secCenterX, secCenterY);
+                                    }
                                 }
                             }
                         }
@@ -694,17 +791,29 @@ export const MapCanvas: React.FC<MapCanvasProps> = ({
                 }
 
                 // Draw outer border for the whole gondola
-                ctx.strokeStyle = isSelected ? '#818cf8' : '#60a5fa';
-                ctx.lineWidth = isSelected ? 3 : 1.5;
+                if (printMode && activeTab === 'range') {
+                    ctx.strokeStyle = '#333';
+                    ctx.lineWidth = 0.75;
+                } else {
+                    ctx.strokeStyle = isSelected ? '#818cf8' : '#60a5fa';
+                    ctx.lineWidth = isSelected ? 3 : 1.5;
+                }
                 ctx.beginPath();
                 ctx.roundRect(bounds.minX, bounds.minY, width, height, 2);
                 ctx.stroke();
 
             } else {
                 // Draw as single rectangle (no sections or just one)
-                ctx.fillStyle = isSelected ? 'rgba(99, 102, 241, 0.5)' : 'rgba(59, 130, 246, 0.3)';
-                ctx.strokeStyle = isSelected ? '#818cf8' : '#3b82f6';
-                ctx.lineWidth = isSelected ? 3 : 1.5;
+                if (printMode && activeTab === 'range') {
+                    // Print mode: B&W skeleton
+                    ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+                    ctx.strokeStyle = '#333';
+                    ctx.lineWidth = 0.75;
+                } else {
+                    ctx.fillStyle = isSelected ? 'rgba(99, 102, 241, 0.5)' : 'rgba(59, 130, 246, 0.3)';
+                    ctx.strokeStyle = isSelected ? '#818cf8' : '#3b82f6';
+                    ctx.lineWidth = isSelected ? 3 : 1.5;
+                }
 
                 ctx.beginPath();
                 ctx.roundRect(bounds.minX, bounds.minY, width, height, 4);
@@ -712,35 +821,57 @@ export const MapCanvas: React.FC<MapCanvasProps> = ({
                 ctx.stroke();
 
                 // Draw aisle label
-                ctx.fillStyle = isSelected ? '#fff' : '#e2e8f0';
+                if (printMode && activeTab === 'range') {
+                    ctx.fillStyle = '#000'; // Black text for print mode
+                } else {
+                    ctx.fillStyle = isSelected ? '#fff' : '#e2e8f0';
+                }
                 const fontSize = Math.max(10, 12 / viewState.scale);
                 ctx.font = `bold ${fontSize}px Inter, system-ui, sans-serif`;
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
 
-                // Calculate available space for text
-                const availableSpace = isVertical ? height : width;
-                const charWidth = fontSize * 0.6;
-                const maxChars = Math.floor(availableSpace / charWidth);
+                // In print mode, check if this unit should show a label (range-affected check)
+                if (printMode && activeTab === 'range') {
+                    // Check if any of the single sections match range data
+                    const sections = aisle.sections || [];
+                    let rangeMatch = null;
+                    if (sections.length >= 1) {
+                        rangeMatch = findRangeForSection(sections[0].category, rangeData);
+                    }
 
-                // Truncate label if needed
-                const displayLabel = aisle.label.length > maxChars && maxChars > 3
-                    ? aisle.label.substring(0, maxChars - 2) + '…'
-                    : aisle.label.length > maxChars ? aisle.label.substring(0, maxChars) : aisle.label;
-
-                // Draw rotated text for vertical aisles
-                const labelX = aisle.labelPosition?.x ?? centerX;
-                const labelY = aisle.labelPosition?.y ?? centerY;
-
-                // Draw rotated text for vertical aisles
-                if (isVertical) {
-                    ctx.save();
-                    ctx.translate(labelX, labelY);
-                    ctx.rotate(-Math.PI / 2);
-                    ctx.fillText(displayLabel, 0, 0);
-                    ctx.restore();
+                    // Only add to printLabels if range-affected
+                    if (rangeMatch) {
+                        printLabels.push({
+                            x: centerX,
+                            y: centerY,
+                            text: aisle.label,
+                            isRangeAffected: true
+                        });
+                    }
+                    // SKIP all inline label drawing in print mode
                 } else {
-                    ctx.fillText(displayLabel, labelX, labelY);
+                    // Normal mode: draw label inline
+                    const availableSpace = isVertical ? height : width;
+                    const charWidth = fontSize * 0.6;
+                    const maxChars = Math.floor(availableSpace / charWidth);
+
+                    const displayLabel = aisle.label.length > maxChars && maxChars > 3
+                        ? aisle.label.substring(0, maxChars - 2) + '…'
+                        : aisle.label.length > maxChars ? aisle.label.substring(0, maxChars) : aisle.label;
+
+                    const labelX = aisle.labelPosition?.x ?? centerX;
+                    const labelY = aisle.labelPosition?.y ?? centerY;
+
+                    if (isVertical) {
+                        ctx.save();
+                        ctx.translate(labelX, labelY);
+                        ctx.rotate(-Math.PI / 2);
+                        ctx.fillText(displayLabel, 0, 0);
+                        ctx.restore();
+                    } else {
+                        ctx.fillText(displayLabel, labelX, labelY);
+                    }
                 }
             }
 
@@ -752,34 +883,42 @@ export const MapCanvas: React.FC<MapCanvasProps> = ({
 
                 // Helper to draw promo box
                 const drawPromoBox = (x: number, y: number, w: number, h: number, label: string) => {
-                    ctx.fillStyle = isSelected ? '#a855f7' : '#9333ea'; // Purple for promos
-                    ctx.strokeStyle = '#e9d5ff';
-                    ctx.lineWidth = 1;
+                    if (printMode) {
+                        ctx.fillStyle = 'rgba(220, 220, 220, 0.5)';
+                        ctx.strokeStyle = '#333';
+                        ctx.lineWidth = 1.5;
+                    } else {
+                        ctx.fillStyle = isSelected ? '#a855f7' : '#9333ea'; // Purple for promos
+                        ctx.strokeStyle = '#e9d5ff';
+                        ctx.lineWidth = 1;
+                    }
 
                     ctx.beginPath();
                     ctx.roundRect(x, y, w, h, 2);
                     ctx.fill();
                     ctx.stroke();
 
-                    // Draw label
-                    const fontSize = Math.max(7, 9 / viewState.scale);
-                    ctx.font = `bold ${fontSize}px Inter, system-ui, sans-serif`;
-                    ctx.fillStyle = '#fff';
-                    ctx.textAlign = 'center';
-                    ctx.textBaseline = 'middle';
+                    // Draw label (skip in print mode - promo ends not part of range data)
+                    if (!(printMode && activeTab === 'range')) {
+                        const fontSize = Math.max(7, 9 / viewState.scale);
+                        ctx.font = `bold ${fontSize}px Inter, system-ui, sans-serif`;
+                        ctx.fillStyle = '#fff';
+                        ctx.textAlign = 'center';
+                        ctx.textBaseline = 'middle';
 
-                    const textWidth = ctx.measureText(label).width;
-                    const availableWidth = isVertical ? h : w;
+                        const textWidth = ctx.measureText(label).width;
+                        const availableWidth = isVertical ? h : w;
 
-                    if (textWidth < availableWidth * 1.3) { // Allow slight overflow for small promo codes
-                        if (isVertical) {
-                            ctx.save();
-                            ctx.translate(x + w / 2, y + h / 2);
-                            ctx.rotate(-Math.PI / 2);
-                            ctx.fillText(label, 0, 0);
-                            ctx.restore();
-                        } else {
-                            ctx.fillText(label, x + w / 2, y + h / 2);
+                        if (textWidth < availableWidth * 1.3) { // Allow slight overflow for small promo codes
+                            if (isVertical) {
+                                ctx.save();
+                                ctx.translate(x + w / 2, y + h / 2);
+                                ctx.rotate(-Math.PI / 2);
+                                ctx.fillText(label, 0, 0);
+                                ctx.restore();
+                            } else {
+                                ctx.fillText(label, x + w / 2, y + h / 2);
+                            }
                         }
                     }
                 };
@@ -977,8 +1116,42 @@ export const MapCanvas: React.FC<MapCanvasProps> = ({
             }
         });
 
+        // PRINT MODE: Draw all collected labels on top with consistent diagonal style
+        if (printMode && activeTab === 'range' && printLabels.length > 0) {
+            const fontSize = Math.max(8, 10 / viewState.scale);
+            ctx.font = `bold ${fontSize}px Inter, system-ui, sans-serif`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+
+            printLabels.forEach(label => {
+                ctx.save();
+                ctx.translate(label.x, label.y);
+                ctx.rotate(-Math.PI / 4); // 45 degree angle for all labels
+
+                // Measure text for background
+                const textWidth = ctx.measureText(label.text).width;
+                const padding = 3;
+                const bgWidth = textWidth + padding * 2;
+                const bgHeight = fontSize + padding * 2;
+
+                // Draw white background box
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
+                ctx.fillRect(-bgWidth / 2, -bgHeight / 2, bgWidth, bgHeight);
+
+                // Draw border (bold for range-affected)
+                ctx.strokeStyle = label.isRangeAffected ? '#000' : '#888';
+                ctx.lineWidth = label.isRangeAffected ? 1 : 0.5;
+                ctx.strokeRect(-bgWidth / 2, -bgHeight / 2, bgWidth, bgHeight);
+
+                // Draw text
+                ctx.fillStyle = '#000';
+                ctx.fillText(label.text, 0, 0);
+                ctx.restore();
+            });
+        }
+
         ctx.restore();
-    }, [aisles, selectedAisleIds, viewState, getAisleBounds, editorSettings, searchTerm, rangeData, activeTab]);
+    }, [aisles, selectedAisleIds, viewState, getAisleBounds, editorSettings, searchTerm, rangeData, activeTab, printMode, theme]);
 
     // Handle resize
     useEffect(() => {
@@ -1017,9 +1190,10 @@ export const MapCanvas: React.FC<MapCanvasProps> = ({
             setDragStart({ x: e.clientX, y: e.clientY });
             setDragOffset({ x: viewState.offsetX, y: viewState.offsetY });
         } else if (e.button === 0) {
-            // Check if clicking on a resize/rotate handle first (Only if exactly one item selected)
+            // Check if clicking on a resize/rotate handle first (Only if exactly one item selected AND in edit mode)
             let handleClicked = false;
-            if (selectedAisleIds.length === 1) {
+            // Only allow handles if in edit mode
+            if (activeTab === 'edit' && selectedAisleIds.length === 1) {
                 const singleAisleId = selectedAisleIds[0];
                 const aisle = aisles.find(a => a.id === singleAisleId);
                 if (aisle && !aisle.locked) {
@@ -1053,7 +1227,8 @@ export const MapCanvas: React.FC<MapCanvasProps> = ({
                     // If clicking an ALREADY selected item without Shift, we keep selection to allow drag
                 }
 
-                if (!clickedAisle.locked && !isMultiSelect) {
+                // Only allow drag moving if in edit mode
+                if (activeTab === 'edit' && !clickedAisle.locked && !isMultiSelect) {
                     setIsDragging(true);
                     setDragMode('move');
                     setDragStart(worldPoint);
