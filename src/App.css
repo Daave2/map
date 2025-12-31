@@ -339,7 +339,8 @@ body {
   border-right: 1px solid var(--border-color);
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  overflow-y: auto;
+  overflow-x: hidden;
   position: relative;
   transition: width var(--transition-normal);
 }
@@ -1075,6 +1076,7 @@ body {
 
 .range-panel {
   padding: 16px;
+  flex-shrink: 0;
 }
 
 .range-import-section {
@@ -1150,7 +1152,7 @@ body {
   display: flex;
   flex-direction: column;
   gap: 4px;
-  max-height: 400px;
+  max-height: calc(100vh - 350px);
   overflow-y: auto;
   margin-bottom: 16px;
 }
@@ -1227,6 +1229,10 @@ body {
   background: var(--bg-secondary);
   border-radius: var(--border-radius-lg);
   margin: 16px;
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  overflow: visible;
 }
 
 .range-details-header {
@@ -1245,6 +1251,10 @@ body {
   display: flex;
   flex-direction: column;
   gap: 12px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  flex: 1;
+  min-height: 0;
 }
 
 .detail-row {
@@ -1327,4 +1337,190 @@ body {
 .contact-name {
   font-size: 12px;
   font-weight: 500;
+}
+/* ============================================
+   Category Mapping Controls
+   ============================================ */
+
+.mapping-controls {
+  background: var(--bg-tertiary);
+  border-radius: var(--border-radius);
+  padding: 12px;
+  margin-bottom: 16px;
+}
+
+.current-mapping {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  background: rgba(34, 197, 94, 0.1);
+  border: 1px solid rgba(34, 197, 94, 0.3);
+  border-radius: var(--border-radius);
+  margin-bottom: 8px;
+}
+
+.current-mapping.ignored {
+  background: rgba(239, 68, 68, 0.1);
+  border-color: rgba(239, 68, 68, 0.3);
+}
+
+.current-mapping .mapping-label {
+  font-size: 11px;
+  color: var(--success);
+  font-weight: 500;
+}
+
+.current-mapping.ignored .mapping-label {
+  color: var(--danger);
+}
+
+.current-mapping .mapping-value {
+  font-size: 12px;
+  color: var(--text-primary);
+  flex: 1;
+}
+
+.mapping-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.mapping-actions .btn {
+  flex: 1;
+}
+
+.link-dropdown {
+  margin-top: 8px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  overflow: hidden;
+}
+
+.link-search {
+  width: 100%;
+  padding: 8px 12px;
+  background: var(--bg-tertiary);
+  border: none;
+  border-bottom: 1px solid var(--border-color);
+  color: var(--text-primary);
+  font-size: 12px;
+}
+
+.link-search:focus {
+  outline: none;
+  background: var(--bg-hover);
+}
+
+.link-options {
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.link-option {
+  width: 100%;
+  padding: 8px 12px;
+  text-align: left;
+  background: transparent;
+  border: none;
+  color: var(--text-primary);
+  font-size: 12px;
+  cursor: pointer;
+  transition: background var(--transition-fast);
+}
+
+.link-option:hover {
+  background: var(--accent-primary);
+}
+
+.no-options, .more-options {
+  padding: 8px 12px;
+  font-size: 11px;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+.btn-warning {
+  background: var(--warning);
+  color: #000;
+}
+
+.btn-warning:hover {
+  background: #d97706;
+}
+
+.btn-xs {
+  padding: 2px 6px;
+  font-size: 10px;
+}
+
+/* Multi-section linking chips */
+.linked-sections {
+  margin-bottom: 8px;
+}
+
+.mapping-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.section-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.section-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  background: rgba(34, 197, 94, 0.15);
+  border: 1px solid rgba(34, 197, 94, 0.3);
+  border-radius: 12px;
+  font-size: 11px;
+  color: var(--text-primary);
+}
+
+.section-chip .chip-remove {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 0;
+  font-size: 14px;
+  line-height: 1;
+  transition: color var(--transition-fast);
+}
+
+.section-chip .chip-remove:hover {
+  color: var(--danger);
+}
+
+.link-done {
+  width: 100%;
+  margin-top: 4px;
+  border-top: 1px solid var(--border-color);
+}
+
+/* Mappings Export/Import Controls */
+.mappings-controls {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border-color);
+}
+
+.mappings-controls .btn {
+  flex: 1;
+  font-size: 11px;
+}
+
+.mappings-controls .btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }

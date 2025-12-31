@@ -109,4 +109,6 @@ export interface RangeActivity {
   buyer?: string;
   merchandiser?: string;
   supplyChain?: string;
+  implementationGuidance?: string;
+  kitRequirements?: string;
 }

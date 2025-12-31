@@ -1,20 +1,10 @@
 import React, { useRef, useEffect, useCallback, useState } from 'react';
 import type { Aisle, ViewState, Point, EditorSettings, RangeActivity } from '../types';
 import { getGridLines } from '../utils/grid';
+import { matchesRangeCategory } from '../utils/categoryMatching';
 
-// Helper: Check if section category matches a range category (fuzzy)
-function matchesRangeCategory(sectionCategory: string, rangeCategory: string): boolean {
-    const normalize = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, '');
-    const sectionNorm = normalize(sectionCategory);
-    const rangeNorm = normalize(rangeCategory);
-    // Match if one contains the other
-    return sectionNorm.includes(rangeNorm) || rangeNorm.includes(sectionNorm);
-}
 
-// Helper: Find range activity for a section category
-function findRangeForSection(sectionCategory: string, rangeData: RangeActivity[]): RangeActivity | null {
-    return rangeData.find(r => matchesRangeCategory(sectionCategory, r.category)) || null;
-}
+
 
 // Helper: Get workload color based on capacity hours
 function getWorkloadColor(hours: number): string {
@@ -40,6 +30,10 @@ interface MapCanvasProps {
     printMode?: boolean;
     // Theme for canvas rendering
     theme?: 'dark' | 'light';
+    // User defined mappings
+    customMappings?: Record<string, string>;
+    // Callback for drag-and-drop mapping
+    onAssignMapping?: (rangeCategory: string, storeSectionCategory: string) => void;
 }
 
 export const MapCanvas: React.FC<MapCanvasProps> = ({
@@ -55,9 +49,61 @@ export const MapCanvas: React.FC<MapCanvasProps> = ({
     activeTab = 'edit',
     printMode = false,
     theme = 'dark',
+    customMappings = {},
+    onAssignMapping,
 }) => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
+
+    // ... (rest of component)
+
+    // ATTACH HANDLERS TO CANVAS
+    // Since we are inside the component body, we need to find the return statement
+    // But replace_file_content works on the file content.
+    // I need to find where the <canvas> is rendered and add the props.
+
+    // WAITING: I will do this in a separate step or just target the return block if I can find it.
+    // Let me target the props definition first.
+
+
+    // Memoize matching function to avoid recreating it
+    // Updated helper to check custom mappings first (supports multiple sections via pipe separator)
+    const isCategoryMatch = useCallback((sectionCat: string, rangeCat: string) => {
+        // 1. Check custom mappings
+        const rangeNorm = rangeCat.toLowerCase().trim();
+        const sectionNorm = sectionCat.toLowerCase().trim();
+
+        if (customMappings[rangeCat] || customMappings[rangeNorm]) {
+            const mappedTarget = customMappings[rangeCat] || customMappings[rangeNorm];
+            if (mappedTarget === 'IGNORE_ITEM') return { matched: false };
+
+            // Split by pipe to support multiple linked sections
+            const linkedSections = mappedTarget.split('|');
+            for (const linked of linkedSections) {
+                const linkedNorm = linked.toLowerCase().trim();
+                if (sectionNorm.includes(linkedNorm) || linkedNorm.includes(sectionNorm)) {
+                    return { matched: true, reason: `Custom mapping to "${linked}"` };
+                }
+            }
+            // If custom mappings exist but none matched, don't fall back
+            return { matched: false };
+        }
+
+        // 2. Fallback to standard logic (only if no custom mapping exists)
+        return matchesRangeCategory(sectionCat, rangeCat);
+    }, [customMappings]);
+
+    // Helper to find range activity using the context-aware matcher
+    const findRangeActivity = useCallback((sectionCategory: string) => {
+        for (const r of rangeData) {
+            const result = isCategoryMatch(sectionCategory, r.category);
+            if (result.matched) {
+                return { activity: r, reason: result.reason };
+            }
+        }
+        return null;
+    }, [rangeData, isCategoryMatch]);
+
     const [isPanning, setIsPanning] = useState(false);
     const [isDragging, setIsDragging] = useState(false);
     // dragStart stores the SCREEN COORDINATES of the mouse at start of drag
@@ -72,6 +118,7 @@ export const MapCanvas: React.FC<MapCanvasProps> = ({
     const [activeHandle, setActiveHandle] = useState<string | null>(null);
     // For multi-item drag: Store original positions map: { id: { p1, p2, labelPosition? } }
     const [dragOrigins, setDragOrigins] = useState<Record<string, { p1: [number, number], p2: [number, number], labelPosition?: { x: number, y: number } }>>({});
+    const [dragHoverTarget, setDragHoverTarget] = useState<{ aisleId: string; sectionIndex: number } | null>(null);
 
     // Convert screen coordinates to world coordinates
     const screenToWorld = useCallback((screenX: number, screenY: number): Point => {
@@ -505,7 +552,13 @@ export const MapCanvas: React.FC<MapCanvasProps> = ({
                                 section.bay.toLowerCase().includes(searchTerm.toLowerCase())
                             );
 
-                            if (isSearchMatch) {
+                            const isDragHover = dragHoverTarget?.aisleId === aisle.id && dragHoverTarget?.sectionIndex === index;
+
+                            if (isDragHover) {
+                                ctx.fillStyle = 'rgba(34, 197, 94, 0.4)'; // Green drag highlight
+                                ctx.strokeStyle = '#22c55e';
+                                ctx.lineWidth = 4;
+                            } else if (isSearchMatch) {
                                 ctx.fillStyle = 'rgba(250, 204, 21, 0.8)'; // Yellow highlight
                                 ctx.strokeStyle = '#eab308';
                                 ctx.lineWidth = 3;
@@ -515,11 +568,12 @@ export const MapCanvas: React.FC<MapCanvasProps> = ({
                                 ctx.strokeStyle = 'rgba(100, 116, 139, 0.2)';
                             }
 
-                            // PRINT MODE: B&W friendly rendering (works even without range data)
-                            if (printMode && activeTab === 'range') {
-                                const rangeMatch = rangeData.length > 0
-                                    ? findRangeForSection(section.category, rangeData)
+                            // PRINT MODE: B&W friendly rendering
+                            if (printMode && activeTab === 'range' && !isDragHover) {
+                                const matchResult = rangeData.length > 0
+                                    ? findRangeActivity(section.category)
                                     : null;
+                                const rangeMatch = matchResult?.activity;
 
                                 if (rangeMatch) {
                                     ctx.fillStyle = 'rgba(200, 200, 200, 0.4)'; // Light gray shade
@@ -531,16 +585,26 @@ export const MapCanvas: React.FC<MapCanvasProps> = ({
                                     ctx.lineWidth = 0.75;
                                 }
                             }
-                            // Range Activity Highlighting (when Range tab is active, NOT print mode)
-                            else if (activeTab === 'range' && rangeData.length > 0 && !searchTerm) {
-                                const rangeMatch = findRangeForSection(section.category, rangeData);
+                            // 4. Fallback / Search Dimming
+                            else if (searchTerm && !isSelected) {
+                                ctx.fillStyle = catColor.replace(/[\d.]+\)$/, '0.1)');
+                                ctx.strokeStyle = 'rgba(100, 116, 139, 0.2)';
+                            }
 
+                            // 3. Range Activity Highlighting (lowest priority override)
+                            else if (
+                                activeTab === 'range' &&
+                                rangeData.length > 0 &&
+                                !searchTerm &&
+                                !isDragHover // CRITICAL: Skip if we are hovering!
+                            ) {
+                                const matchResult = findRangeActivity(section.category);
+                                const rangeMatch = matchResult?.activity;
                                 if (rangeMatch) {
                                     ctx.fillStyle = getWorkloadColor(rangeMatch.capacityHours);
                                     ctx.strokeStyle = '#fff';
                                     ctx.lineWidth = 2;
                                 } else {
-                                    // Dim sections not in range data
                                     ctx.fillStyle = catColor.replace(/[\d.]+\)$/, '0.15)');
                                     ctx.strokeStyle = 'rgba(100, 116, 139, 0.2)';
                                     ctx.lineWidth = 0.5;
@@ -553,20 +617,27 @@ export const MapCanvas: React.FC<MapCanvasProps> = ({
                             ctx.stroke();
 
                             // Check if this is a range-affected section
-                            const rangeMatchForLabel = activeTab === 'range' && rangeData.length > 0
-                                ? findRangeForSection(section.category, rangeData)
+                            const matchResultForLabel = activeTab === 'range' && rangeData.length > 0
+                                ? findRangeActivity(section.category)
                                 : null;
+                            const rangeMatchForLabel = matchResultForLabel?.activity;
 
                             // Determine Label
                             let labelText = "";
+
+                            // Use the mapped range category name if available in Range Mode
+                            const displayCategory = (activeTab === 'range' && rangeMatchForLabel)
+                                ? rangeMatchForLabel.category
+                                : section.category;
+
                             if (printMode && rangeMatchForLabel) {
                                 // PRINT MODE: Always show category for range-affected sections
-                                labelText = section.category;
+                                labelText = displayCategory;
                             } else if (isSearchMatch || viewState.scale >= 1.5) {
-                                labelText = `${section.bay} ${section.category}`;
+                                labelText = `${section.bay} ${displayCategory}`;
                             } else if (viewState.scale >= 0.7) {
-                                labelText = section.category;
-                                if (labelText.length > 10) labelText = labelText.substring(0, 8) + '..';
+                                labelText = displayCategory;
+                                if (labelText.length > 15) labelText = labelText.substring(0, 13) + '..'; // Slightly longer limit
                             }
 
                             // Always show label for search matches
@@ -691,13 +762,19 @@ export const MapCanvas: React.FC<MapCanvasProps> = ({
                         ctx.strokeStyle = isSelected ? '#818cf8' : '#3b82f6';
                         ctx.lineWidth = isSelected ? 2 : 0.5;
 
+                        const isDragHover = dragHoverTarget?.aisleId === aisle.id && dragHoverTarget?.sectionIndex === index;
+
                         // Search Highlight Logic
                         const isSearchMatch = searchTerm && (
                             section.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
                             section.bay.toLowerCase().includes(searchTerm.toLowerCase())
                         );
 
-                        if (isSearchMatch) {
+                        if (isDragHover) {
+                            ctx.fillStyle = 'rgba(34, 197, 94, 0.4)'; // Green drag highlight
+                            ctx.strokeStyle = '#22c55e';
+                            ctx.lineWidth = 4;
+                        } else if (isSearchMatch) {
                             ctx.fillStyle = 'rgba(250, 204, 21, 0.8)'; // Yellow highlight
                             ctx.strokeStyle = '#eab308';
                             ctx.lineWidth = 3;
@@ -708,10 +785,11 @@ export const MapCanvas: React.FC<MapCanvasProps> = ({
                         }
 
                         // PRINT MODE: B&W skeleton for single-sided sections too
-                        if (printMode && activeTab === 'range') {
-                            const rangeMatch = rangeData.length > 0
-                                ? findRangeForSection(section.category, rangeData)
+                        if (printMode && activeTab === 'range' && !isDragHover) {
+                            const matchResult = rangeData.length > 0
+                                ? findRangeActivity(section.category)
                                 : null;
+                            const rangeMatch = matchResult?.activity;
 
                             if (rangeMatch) {
                                 ctx.fillStyle = 'rgba(200, 200, 200, 0.4)';
@@ -730,11 +808,26 @@ export const MapCanvas: React.FC<MapCanvasProps> = ({
                         ctx.stroke();
 
                         let labelText = "";
-                        if (isSearchMatch || viewState.scale >= 1.5) {
-                            labelText = `${section.bay} ${section.category}`;
+
+                        // Check if range affected for label purposes
+                        const matchResultForLabel = activeTab === 'range' && rangeData.length > 0
+                            ? findRangeActivity(section.category)
+                            : null;
+                        const rangeMatchForLabel = matchResultForLabel?.activity;
+
+                        // Check if range affected for print mode forcing
+                        let isRangeAffected = !!rangeMatchForLabel;
+
+                        // Use the mapped range category name if available in Range Mode
+                        const displayCategory = (activeTab === 'range' && rangeMatchForLabel)
+                            ? rangeMatchForLabel.category
+                            : section.category;
+
+                        if (isSearchMatch || viewState.scale >= 1.5 || (printMode && isRangeAffected)) {
+                            labelText = displayCategory;
                         } else if (viewState.scale >= 0.7) {
-                            labelText = section.category;
-                            if (labelText.length > 10) labelText = labelText.substring(0, 8) + '..';
+                            labelText = displayCategory;
+                            if (labelText.length > 15) labelText = labelText.substring(0, 13) + '..';
                         }
 
                         // Always show label for search matches
@@ -749,11 +842,7 @@ export const MapCanvas: React.FC<MapCanvasProps> = ({
                         if (labelText) {
                             // In print mode, collect labels for range-affected sections only
                             if (printMode && activeTab === 'range') {
-                                // rangeMatch was already calculated above for styling
-                                const rangeMatch = rangeData.length > 0
-                                    ? findRangeForSection(section.category, rangeData)
-                                    : null;
-                                if (rangeMatch) {
+                                if (rangeMatchForLabel) {
                                     printLabels.push({
                                         x: secCenterX,
                                         y: secCenterY,
@@ -837,7 +926,8 @@ export const MapCanvas: React.FC<MapCanvasProps> = ({
                     const sections = aisle.sections || [];
                     let rangeMatch = null;
                     if (sections.length >= 1) {
-                        rangeMatch = findRangeForSection(sections[0].category, rangeData);
+                        const matchResult = findRangeActivity(sections[0].category);
+                        rangeMatch = matchResult?.activity;
                     }
 
                     // Only add to printLabels if range-affected
@@ -1151,7 +1241,7 @@ export const MapCanvas: React.FC<MapCanvasProps> = ({
         }
 
         ctx.restore();
-    }, [aisles, selectedAisleIds, viewState, getAisleBounds, editorSettings, searchTerm, rangeData, activeTab, printMode, theme]);
+    }, [aisles, selectedAisleIds, viewState, getAisleBounds, editorSettings, searchTerm, rangeData, activeTab, printMode, theme, dragHoverTarget]);
 
     // Handle resize
     useEffect(() => {
@@ -1261,6 +1351,124 @@ export const MapCanvas: React.FC<MapCanvasProps> = ({
                 setDragOffset({ x: viewState.offsetX, y: viewState.offsetY });
             }
         }
+    };
+
+    // Helper: Check if point is inside a rotated rectangle
+    const isPointInRotatedRect = (point: Point, rect: { x: number, y: number, w: number, h: number, rotation: number }) => {
+        const center = { x: rect.x + rect.w / 2, y: rect.y + rect.h / 2 };
+        const local = rotatePoint(point, center, -rect.rotation);
+        return local.x >= rect.x && local.x <= rect.x + rect.w &&
+            local.y >= rect.y && local.y <= rect.y + rect.h;
+    };
+
+    // Helper: Get section at world point
+    const getSectionAtPoint = useCallback((point: Point) => {
+        for (const aisle of aisles) {
+            const bounds = getAisleBounds(aisle);
+            // Quick bounds check first
+            if (point.x < bounds.minX || point.x > bounds.maxX ||
+                point.y < bounds.minY || point.y > bounds.maxY) continue;
+
+            // Detailed geometric check
+            // Use bounds directly as they include aisleWidth padding
+            const width = bounds.maxX - bounds.minX;
+            const height = bounds.maxY - bounds.minY;
+            const isVertical = height > width * 1.5; // Match drawing logic threshold
+            const length = isVertical ? height : width;
+
+            // Check if inside aisle rect (considering rotation)
+            // Aisle rect in world space but unrotated axis-aligned definition
+            const aisleRect = {
+                x: bounds.minX,
+                y: bounds.minY,
+                w: width,
+                h: height,
+                rotation: aisle.rotation || 0
+            };
+
+            if (!isPointInRotatedRect(point, aisleRect)) continue;
+
+            // If inside aisle, find which section
+            // Transform point to aisle local space (0,0 at top-left of unrotated aisle)
+            const aisleCenter = { x: aisleRect.x + aisleRect.w / 2, y: aisleRect.y + aisleRect.h / 2 };
+            const localPoint = rotatePoint(point, aisleCenter, -aisleRect.rotation);
+
+            // Relative to top-left
+            const relX = localPoint.x - aisleRect.x;
+            const relY = localPoint.y - aisleRect.y;
+
+            // Calculate section position along the main axis
+            const posAlongAxis = isVertical ? relY : relX;
+
+            // Find section based on accumulated length
+            const totalSectionLength = (aisle.sections || []).length;
+            // Warning: We don't have explicit lengths stored, usually assumed equal or specific logic?
+            // Re-checking draw logic: "const sectionHeight = height / sections.length"
+
+            if (totalSectionLength > 0) {
+                const sectionSize = length / totalSectionLength;
+                const sectionIndex = Math.floor(posAlongAxis / sectionSize);
+
+                if (sectionIndex >= 0 && sectionIndex < totalSectionLength) {
+                    return { aisle, section: aisle.sections![sectionIndex], index: sectionIndex };
+                }
+            }
+        }
+        return null;
+    }, [aisles, getAisleBounds]);
+
+
+
+    // Handle Drop
+    const handleCanvasDrop = (e: React.DragEvent) => {
+        e.preventDefault();
+        setDragHoverTarget(null); // Clear highlight on drop
+
+        const category = e.dataTransfer.getData('text/plain');
+        if (!category) return;
+
+        const rect = canvasRef.current?.getBoundingClientRect();
+        if (!rect) return;
+
+        const screenX = e.clientX - rect.left;
+        const screenY = e.clientY - rect.top;
+        const worldPoint = screenToWorld(screenX, screenY);
+
+        const hit = getSectionAtPoint(worldPoint);
+
+        if (hit && customMappings) {
+            // Found a target section!
+            // Callback to update mapping
+            onAssignMapping?.(category, hit.section.category);
+        }
+    };
+
+    const handleCanvasDragOver = (e: React.DragEvent) => {
+        e.preventDefault(); // allow drop
+        e.dataTransfer.dropEffect = 'link';
+
+        const rect = canvasRef.current?.getBoundingClientRect();
+        if (!rect) return;
+
+        const screenX = e.clientX - rect.left;
+        const screenY = e.clientY - rect.top;
+        const worldPoint = screenToWorld(screenX, screenY);
+
+        const hit = getSectionAtPoint(worldPoint);
+
+        if (hit) {
+            if (dragHoverTarget?.aisleId !== hit.aisle.id || dragHoverTarget?.sectionIndex !== hit.index) {
+                setDragHoverTarget({ aisleId: hit.aisle.id, sectionIndex: hit.index });
+            }
+        } else {
+            if (dragHoverTarget) {
+                setDragHoverTarget(null);
+            }
+        }
+    };
+
+    const handleCanvasDragLeave = () => {
+        setDragHoverTarget(null);
     };
 
     // Handle mouse move
@@ -1434,6 +1642,9 @@ export const MapCanvas: React.FC<MapCanvasProps> = ({
                 onMouseLeave={handleMouseUp}
                 onWheel={handleWheel}
                 onContextMenu={(e) => e.preventDefault()}
+                onDrop={handleCanvasDrop}
+                onDragOver={handleCanvasDragOver}
+                onDragLeave={handleCanvasDragLeave}
             />
             <div className="map-canvas-info">
                 <span>Zoom: {Math.round(viewState.scale * 100)}%</span>

@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef, useEffect } from 'react';
+import { useState, useCallback, useRef, useEffect, useMemo } from 'react';
 import type { MapLayout, Aisle, ViewState, EditorSettings, RangeActivity } from './types';
 import { DEFAULT_MAP_LAYOUT, REFERENCE_STORE_LAYOUT, PDF_ACCURATE_LAYOUT } from './constants/referenceLayout';
 import { MapCanvas } from './components/MapCanvas';
@@ -7,11 +7,14 @@ import { AisleList } from './components/AisleList';
 import { Toolbar } from './components/Toolbar';
 import { RangePanel } from './components/RangePanel';
 import { RangeDetails } from './components/RangeDetails';
+import { RangeMapper } from './components/RangeMapper';
 import { useHistory } from './hooks/useHistory';
 import { useClipboard } from './hooks/useClipboard';
+import { matchesRangeCategory } from './utils/categoryMatching';
 import './App.css';
 
 const STORAGE_KEY = 'store_map_editor_layout';
+const MAPPINGS_KEY = 'store_map_editor_mappings';
 
 function App() {
   // Initialize with saved layout if available, otherwise default
@@ -25,6 +28,16 @@ function App() {
       console.error('Failed to load from storage', e);
     }
     return PDF_ACCURATE_LAYOUT;
+  };
+
+  // Load saved mappings
+  const getInitialMappings = (): Record<string, string> => {
+    try {
+      const saved = localStorage.getItem(MAPPINGS_KEY);
+      return saved ? JSON.parse(saved) : {};
+    } catch {
+      return {};
+    }
   };
 
   const { layout, set: setLayout, undo, redo, canUndo, canRedo, reset: resetHistory } = useHistory(getInitialLayout());
@@ -56,6 +69,25 @@ function App() {
   const [activeTab, setActiveTab] = useState<'range' | 'edit'>('range');
   const [rangeData, setRangeData] = useState<RangeActivity[]>([]);
   const [selectedRangeCategory, setSelectedRangeCategory] = useState<string | null>(null);
+  const [categoryMappings, setCategoryMappings] = useState<Record<string, string>>(getInitialMappings());
+
+  // Mapper Modal State
+  const [showMapper, setShowMapper] = useState(false);
+  const [unmatchedCategories, setUnmatchedCategories] = useState<string[]>([]);
+
+  // Collect all available store categories for the mapper
+  const getStoreCategories = useCallback(() => {
+    const categories = new Set<string>();
+    layout.aisles.forEach(a => {
+      if (a.sections) {
+        a.sections.forEach(s => categories.add(s.category));
+      } else {
+        // Add fixed labels if appropriate (usually aisle labels are generic, but sometimes useful)
+        // categories.add(a.label); 
+      }
+    });
+    return Array.from(categories);
+  }, [layout]);
 
   // App Mode: 'view' (default - clean, no editing) or 'edit' (full editor)
   const [appMode, setAppMode] = useState<'view' | 'edit'>('view');
@@ -67,7 +99,107 @@ function App() {
   const [printMode, setPrintMode] = useState(false);
 
   // Get selected range activity for details panel
+  // Get selected range activity for details panel
   const selectedRangeActivity = rangeData.find(r => r.category === selectedRangeCategory) || null;
+  // Compute match reason if a section is selected
+
+  // Wait, selectedAisleIds refers to AISLES. RangeDetails usually shows simply the selected RANGE item.
+  // But if I clicked a SECTION, I want to know why THAT section matched.
+  // MapCanvas handles visuals. App handles logic.
+  // I need to know the SECTION associated with the selection.
+  // Actually, MapCanvas onSelectAisle passes aisle ID.
+  // If I click a section, MapCanvas passes `aisleId`. The `sectionIndex` is local to MapCanvas?
+  // No, `onSelectAisle(id)` selects the whole aisle usually.
+  // MapCanvas `onSelectAisle` prop: `(id: string | null, multi?: boolean) => void`.
+  // It selects the AISLE.
+  // Store Map Editor selects AISLES, not Sections.
+  // BUT Range View highlights SECTIONS.
+  // If I want to debug "Why did this section light up?", I need to know WHICH section I clicked.
+  // Currently App.tsx doesn't know about individual section selection.
+  // However, I can compute the reason for the *best match*?
+  // `selectedRangeActivity` is the RANGE item.
+  // If I have the Range Item "Brought in Bread".
+  // And I want to know "Why did it match 'Ice Cream'?"
+  // I need to scan all sections, find which one matched "Brought in Bread", and get the reason.
+
+  const matchReason = useMemo(() => {
+    if (!selectedRangeActivity) return undefined;
+    const storeCats = getStoreCategories();
+    for (const sectionCat of storeCats) {
+      const result = matchesRangeCategory(sectionCat, selectedRangeActivity.category);
+      if (result.matched) return `Matched Section "${sectionCat}": ${result.reason}`;
+    }
+    return undefined;
+  }, [selectedRangeActivity, getStoreCategories]);
+
+  // Save Mappings
+  const handleSaveMappings = (newMappings: Record<string, string>) => {
+    const updated = { ...categoryMappings, ...newMappings };
+    setCategoryMappings(updated);
+    localStorage.setItem(MAPPINGS_KEY, JSON.stringify(updated));
+    // Re-trigger range match check? Or just let React reactivity handle it via props to MapCanvas
+  };
+
+  // Handle Range Import with Unmatched Check
+  const handleRangeImport = (data: RangeActivity[]) => {
+    // 1. Set data immediately
+    setRangeData(data);
+
+    // 2. Check for unmatched categories
+    // Ideally we should reuse matchesRangeCategory logic from MapCanvas, but it's internal there.
+    // We can duplicate the basic check or just check against strict store categories first. 
+    // A truly "smart" check needs the same logic as MapCanvas.
+    // For now, let's assume we pass the mappings to MapCanvas, which handles the complex logic.
+    // But to FIND unmatched ones here, we need a helper.
+
+    // Simplified check for now: just strict match against store categories + known mappings
+    // Real check happens in MapCanvas visualization, but we need to prompt user HERE.
+    // Strategy: Filter data items where we can't find a store section.
+
+    const storeCats = getStoreCategories();
+    // Use raw mapping keys for precise checking, plus normalized fallback if needed
+
+    const unmatched = data.filter(item => {
+      // 1. Check Custom Mappings (Exact or Normalized Key)
+      if (categoryMappings[item.category]) return false;
+      const itemNorm = item.category.toLowerCase().trim();
+      if (Object.keys(categoryMappings).some(k => k.toLowerCase().trim() === itemNorm)) return false;
+
+      // 2. Check Shared Logic (MapCanvas Logic)
+      // Check if this item matches ANY store section category
+      return !storeCats.some(sectionCat => matchesRangeCategory(sectionCat, item.category).matched);
+    }).map(i => i.category);
+
+    // Deduplicate
+    const uniqueUnmatched = Array.from(new Set(unmatched));
+
+    if (uniqueUnmatched.length > 0) {
+      setUnmatchedCategories(uniqueUnmatched);
+      setShowMapper(true);
+    }
+  };
+
+  // Handle clearing all mappings
+  const handleClearMappings = () => {
+    if (confirm('Reset all custom mappings? This will also clear any "False Positive" associations you may have dragging items.')) {
+      const emptyMappings = {};
+      setCategoryMappings(emptyMappings);
+      localStorage.removeItem(MAPPINGS_KEY);
+
+      // Recalculate unmatched categories with empty mappings
+      const storeCats = getStoreCategories();
+
+
+      const unmatched = rangeData.filter(item => {
+        // Shared Logic check only (since mappings cleared)
+        return !storeCats.some(sectionCat => matchesRangeCategory(sectionCat, item.category).matched);
+      }).map(i => i.category);
+
+      const uniqueUnmatched = Array.from(new Set(unmatched));
+      setUnmatchedCategories(uniqueUnmatched);
+      if (uniqueUnmatched.length > 0) setShowMapper(true);
+    }
+  };
 
   // Manual save handler
   const handleSave = useCallback(async () => {
@@ -341,9 +473,25 @@ function App() {
     setEditorSettings((prev) => ({ ...prev, snapEnabled: !prev.snapEnabled }));
   }, []);
 
+  // Handle single drag-and-drop mapping assignment
+  const handleAssignMapping = (rangeCat: string, storeSectionCat: string) => {
+    const newMapping = { [rangeCat]: storeSectionCat };
+    handleSaveMappings(newMapping);
+
+    // Remove from unmatched list
+    setUnmatchedCategories(prev => prev.filter(c => c !== rangeCat));
+
+    // If list empty, close mapper
+    if (unmatchedCategories.length <= 1) { // 1 because state update is pending
+      setShowMapper(false);
+    }
+  };
+
   const handleSetGridSize = useCallback((size: number) => {
     setEditorSettings((prev) => ({ ...prev, gridSize: size }));
   }, []);
+
+
 
   return (
     <div className={`app ${theme === 'light' ? 'light-theme' : ''}`}>
@@ -414,8 +562,20 @@ function App() {
             activeTab={activeTab}
             printMode={printMode}
             theme={theme}
+            customMappings={categoryMappings}
+            onAssignMapping={handleAssignMapping}
           />
         </main>
+
+        {/* Unmatched Category Mapper Modal */}
+        {showMapper && (
+          <RangeMapper
+            unmatchedCategories={unmatchedCategories}
+            onAssignMapping={handleAssignMapping}
+            onClearMappings={handleClearMappings}
+            onClose={() => setShowMapper(false)}
+          />
+        )}
 
         <aside className={`sidebar right-sidebar ${rightSidebarCollapsed ? 'collapsed' : ''}`}>
           <button
@@ -491,21 +651,63 @@ function App() {
 
               {appMode === 'view' ? (
                 /* View Mode: Clean Range panel only */
-                <>
+                <div style={{ display: 'flex', flexDirection: 'column', height: '100%', overflow: 'auto' }}>
                   <RangePanel
                     rangeData={rangeData}
-                    onImport={setRangeData}
+                    onImport={handleRangeImport}
                     onClear={() => { setRangeData([]); setSelectedRangeCategory(null); }}
                     selectedCategory={selectedRangeCategory}
                     onSelectCategory={setSelectedRangeCategory}
+                    categoryMappings={categoryMappings}
+                    onImportMappings={(imported) => {
+                      const merged = { ...categoryMappings, ...imported };
+                      setCategoryMappings(merged);
+                      localStorage.setItem(MAPPINGS_KEY, JSON.stringify(merged));
+                    }}
                   />
-                  {selectedRangeActivity && (
-                    <RangeDetails
-                      activity={selectedRangeActivity}
-                      onClose={() => setSelectedRangeCategory(null)}
-                    />
-                  )}
-                </>
+                  {selectedRangeActivity && (() => {
+                    const mappingStr = categoryMappings[selectedRangeActivity.category] || '';
+                    const isIgnored = mappingStr === 'IGNORE_ITEM';
+                    const currentMappings = isIgnored ? [] : (mappingStr ? mappingStr.split('|') : []);
+
+                    return (
+                      <RangeDetails
+                        activity={selectedRangeActivity}
+                        onClose={() => setSelectedRangeCategory(null)}
+                        reason={matchReason}
+                        storeSections={getStoreCategories()}
+                        currentMappings={currentMappings}
+                        isIgnored={isIgnored}
+                        onLinkSection={(section) => {
+                          const existing = categoryMappings[selectedRangeActivity.category] || '';
+                          const newVal = existing && existing !== 'IGNORE_ITEM'
+                            ? `${existing}|${section}`
+                            : section;
+                          handleAssignMapping(selectedRangeActivity.category, newVal);
+                        }}
+                        onIgnore={() => handleAssignMapping(selectedRangeActivity.category, 'IGNORE_ITEM')}
+                        onRemoveMapping={(section) => {
+                          const existing = categoryMappings[selectedRangeActivity.category] || '';
+                          const sections = existing.split('|').filter(s => s !== section);
+                          if (sections.length === 0) {
+                            const updated = { ...categoryMappings };
+                            delete updated[selectedRangeActivity.category];
+                            setCategoryMappings(updated);
+                            localStorage.setItem(MAPPINGS_KEY, JSON.stringify(updated));
+                          } else {
+                            handleAssignMapping(selectedRangeActivity.category, sections.join('|'));
+                          }
+                        }}
+                        onClearAllMappings={() => {
+                          const updated = { ...categoryMappings };
+                          delete updated[selectedRangeActivity.category];
+                          setCategoryMappings(updated);
+                          localStorage.setItem(MAPPINGS_KEY, JSON.stringify(updated));
+                        }}
+                      />
+                    );
+                  })()}
+                </div>
               ) : (
                 /* Edit Mode: Tabs for Range/Aisle editing */
                 <>
@@ -525,21 +727,63 @@ function App() {
                   </div>
 
                   {activeTab === 'range' ? (
-                    <>
+                    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', overflow: 'auto' }}>
                       <RangePanel
                         rangeData={rangeData}
                         onImport={setRangeData}
                         onClear={() => { setRangeData([]); setSelectedRangeCategory(null); }}
                         selectedCategory={selectedRangeCategory}
                         onSelectCategory={setSelectedRangeCategory}
+                        categoryMappings={categoryMappings}
+                        onImportMappings={(imported) => {
+                          const merged = { ...categoryMappings, ...imported };
+                          setCategoryMappings(merged);
+                          localStorage.setItem(MAPPINGS_KEY, JSON.stringify(merged));
+                        }}
                       />
-                      {selectedRangeActivity && (
-                        <RangeDetails
-                          activity={selectedRangeActivity}
-                          onClose={() => setSelectedRangeCategory(null)}
-                        />
-                      )}
-                    </>
+                      {selectedRangeActivity && (() => {
+                        const mappingStr = categoryMappings[selectedRangeActivity.category] || '';
+                        const isIgnored = mappingStr === 'IGNORE_ITEM';
+                        const currentMappings = isIgnored ? [] : (mappingStr ? mappingStr.split('|') : []);
+
+                        return (
+                          <RangeDetails
+                            activity={selectedRangeActivity}
+                            onClose={() => setSelectedRangeCategory(null)}
+                            reason={matchReason}
+                            storeSections={getStoreCategories()}
+                            currentMappings={currentMappings}
+                            isIgnored={isIgnored}
+                            onLinkSection={(section) => {
+                              const existing = categoryMappings[selectedRangeActivity.category] || '';
+                              const newVal = existing && existing !== 'IGNORE_ITEM'
+                                ? `${existing}|${section}`
+                                : section;
+                              handleAssignMapping(selectedRangeActivity.category, newVal);
+                            }}
+                            onIgnore={() => handleAssignMapping(selectedRangeActivity.category, 'IGNORE_ITEM')}
+                            onRemoveMapping={(section) => {
+                              const existing = categoryMappings[selectedRangeActivity.category] || '';
+                              const sections = existing.split('|').filter(s => s !== section);
+                              if (sections.length === 0) {
+                                const updated = { ...categoryMappings };
+                                delete updated[selectedRangeActivity.category];
+                                setCategoryMappings(updated);
+                                localStorage.setItem(MAPPINGS_KEY, JSON.stringify(updated));
+                              } else {
+                                handleAssignMapping(selectedRangeActivity.category, sections.join('|'));
+                              }
+                            }}
+                            onClearAllMappings={() => {
+                              const updated = { ...categoryMappings };
+                              delete updated[selectedRangeActivity.category];
+                              setCategoryMappings(updated);
+                              localStorage.setItem(MAPPINGS_KEY, JSON.stringify(updated));
+                            }}
+                          />
+                        );
+                      })()}
+                    </div>
                   ) : (
                     <AisleEditor
                       aisle={primarySelectedAisle}

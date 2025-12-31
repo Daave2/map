@@ -7,6 +7,9 @@ interface RangePanelProps {
     onClear: () => void;
     selectedCategory: string | null;
     onSelectCategory: (category: string | null) => void;
+    // Category mappings for export/import
+    categoryMappings?: Record<string, string>;
+    onImportMappings?: (mappings: Record<string, string>) => void;
 }
 
 // Parse TSV data into RangeActivity array
@@ -14,14 +17,36 @@ function parseTSV(text: string): RangeActivity[] {
     const lines = text.split('\n').filter(line => line.trim());
     const results: RangeActivity[] = [];
 
-    // Skip header rows (first 2-3 lines usually)
-    let dataStartIndex = 0;
+    // Headers to ignore if they appear as categories
+    const IGNORE_CATEGORIES = [
+        'Category', 'Brief', 'New Lines', 'Delist Lines', 'Reason for Change',
+        'Implementation Guidance', 'Kit Requirements', 'WGLL', 'Buyer',
+        'Merchandising', 'Supply Chain', 'Capacity Required', 'Most Common Bays',
+        'Issues With Planogram'
+    ];
+
+    // Skip header rows - Look for strict Date format (Mon/Wed + Number)
+    let dataStartIndex = -1;
     for (let i = 0; i < lines.length; i++) {
-        if (lines[i].includes('Mon') || lines[i].includes('Wed')) {
+        const line = lines[i].trim();
+        // Match "Mon 5th" or "Wed 12" etc.
+        if (/^(Mon|Wed)\s+\d/.test(line)) {
             dataStartIndex = i;
             break;
         }
     }
+
+    if (dataStartIndex === -1) {
+        // Fallback: simple check if strict failed
+        for (let i = 0; i < lines.length; i++) {
+            if ((lines[i].includes('Mon') || lines[i].includes('Wed')) && !lines[i].includes('Date')) {
+                dataStartIndex = i;
+                break;
+            }
+        }
+    }
+
+    if (dataStartIndex === -1) dataStartIndex = 0; // Absolute fallback
 
     for (let i = dataStartIndex; i < lines.length; i++) {
         const cols = lines[i].split('\t');
@@ -31,6 +56,16 @@ function parseTSV(text: string): RangeActivity[] {
 
         const date = cols[0]?.trim() || '';
         const category = cols[2]?.trim() || '';
+
+        // Skip header words identified as categories
+        if (IGNORE_CATEGORIES.some(fw => category.includes(fw) || fw.includes(category))) {
+            // Only skip if date row doesn't look valid either, essentially confirming it's a shifted header row
+            if (!/^(Mon|Wed)\s+\d/.test(date)) continue;
+        }
+
+        // Also strictly skip if category IS exactly one of the headers
+        if (IGNORE_CATEGORIES.includes(category)) continue;
+
         const brief = cols[3]?.trim() || '';
         const capacityStr = cols[4]?.replace(/[^0-9.]/g, '') || '0';
         const capacityHours = parseFloat(capacityStr) || 0;
@@ -54,6 +89,8 @@ function parseTSV(text: string): RangeActivity[] {
                 buyer: buyer && buyer !== '#N/A' ? buyer : undefined,
                 merchandiser: merchandiser && merchandiser !== '#N/A' ? merchandiser : undefined,
                 supplyChain: supplyChain && supplyChain !== '#N/A' ? supplyChain : undefined,
+                implementationGuidance: cols[11]?.trim() || undefined,
+                kitRequirements: cols[12]?.trim() || undefined,
             });
         }
     }
@@ -75,10 +112,49 @@ export const RangePanel: React.FC<RangePanelProps> = ({
     onClear,
     selectedCategory,
     onSelectCategory,
+    categoryMappings = {},
+    onImportMappings,
 }) => {
     const [pasteMode, setPasteMode] = useState(false);
     const [pasteText, setPasteText] = useState('');
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const mappingsInputRef = useRef<HTMLInputElement>(null);
+
+    // Export mappings to JSON file
+    const handleExportMappings = () => {
+        const dataStr = JSON.stringify(categoryMappings, null, 2);
+        const blob = new Blob([dataStr], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `category-mappings-${new Date().toISOString().slice(0, 10)}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+    };
+
+    // Import mappings from JSON file
+    const handleMappingsFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file || !onImportMappings) return;
+
+        const reader = new FileReader();
+        reader.onload = (event) => {
+            try {
+                const imported = JSON.parse(event.target?.result as string);
+                if (typeof imported === 'object' && imported !== null) {
+                    onImportMappings(imported);
+                    alert(`Imported ${Object.keys(imported).length} category mappings!`);
+                } else {
+                    alert('Invalid mappings file format');
+                }
+            } catch (err) {
+                alert('Failed to parse mappings file');
+            }
+        };
+        reader.readAsText(file);
+        // Reset input so same file can be re-selected
+        e.target.value = '';
+    };
 
     const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -218,6 +294,31 @@ export const RangePanel: React.FC<RangePanelProps> = ({
                     >
                         Clear Import
                     </button>
+
+                    {/* Category Mappings Export/Import */}
+                    <div className="mappings-controls">
+                        <button
+                            className="btn btn-secondary btn-sm"
+                            onClick={handleExportMappings}
+                            disabled={Object.keys(categoryMappings).length === 0}
+                            title={Object.keys(categoryMappings).length === 0 ? 'No mappings to export' : `Export ${Object.keys(categoryMappings).length} mappings`}
+                        >
+                            📥 Export Mappings
+                        </button>
+                        <button
+                            className="btn btn-secondary btn-sm"
+                            onClick={() => mappingsInputRef.current?.click()}
+                        >
+                            📤 Import Mappings
+                        </button>
+                        <input
+                            ref={mappingsInputRef}
+                            type="file"
+                            accept=".json"
+                            onChange={handleMappingsFileUpload}
+                            style={{ display: 'none' }}
+                        />
+                    </div>
                 </>
             )}
         </div>

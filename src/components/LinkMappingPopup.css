@@ -1,0 +1,92 @@
+/* ============================================
+   Link Mapping Popup
+   ============================================ */
+
+.link-mapping-popup {
+    background: var(--bg-secondary);
+    border: 1px solid var(--accent-primary);
+    border-radius: var(--border-radius-lg);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    padding: 16px;
+    min-width: 280px;
+    animation: popup-appear 0.15s ease-out;
+}
+
+@keyframes popup-appear {
+    from {
+        opacity: 0;
+        transform: translateY(-10px) scale(0.95);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.popup-header {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 12px;
+    text-align: center;
+}
+
+.popup-content {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 16px;
+}
+
+.popup-from,
+.popup-to {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    padding: 8px 12px;
+    background: var(--bg-tertiary);
+    border-radius: var(--border-radius);
+}
+
+.popup-from .label,
+.popup-to .label {
+    font-size: 11px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    min-width: 60px;
+}
+
+.popup-from .value,
+.popup-to .value {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-primary);
+    word-break: break-word;
+}
+
+.popup-arrow {
+    text-align: center;
+    color: var(--accent-primary);
+    font-size: 18px;
+}
+
+.popup-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.popup-actions .btn {
+    width: 100%;
+    justify-content: center;
+}
+
+.btn-warning {
+    background: var(--warning);
+    color: #000;
+}
+
+.btn-warning:hover {
+    background: #d97706;
+}
