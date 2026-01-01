@@ -1338,6 +1338,7 @@ body {
   font-size: 12px;
   font-weight: 500;
 }
+
 /* ============================================
    Category Mapping Controls
    ============================================ */
@@ -1434,7 +1435,8 @@ body {
   background: var(--accent-primary);
 }
 
-.no-options, .more-options {
+.no-options,
+.more-options {
   padding: 8px 12px;
   font-size: 11px;
   color: var(--text-muted);
@@ -1523,4 +1525,53 @@ body {
 .mappings-controls .btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+}
+
+/* ============================================
+   Print Styles - Simple A4 Landscape
+   ============================================ */
+@media print {
+  @page {
+    size: A4 landscape;
+    margin: 8mm;
+  }
+
+  /* Hide only UI chrome, NOT canvas */
+  .toolbar,
+  .sidebar,
+  .mode-toggle,
+  .help-toggle,
+  .sidebar-toggle,
+  .print-summary-tables {
+    display: none !important;
+  }
+
+  /* Full width layout */
+  .app {
+    display: block !important;
+    background: white !important;
+  }
+
+  .main-content {
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+  }
+
+  /* Canvas displays full */
+  .canvas-container {
+    width: 100% !important;
+    height: auto !important;
+    overflow: visible !important;
+  }
+
+  .canvas-container canvas {
+    max-width: 100% !important;
+    height: auto !important;
+  }
+}
+
+/* Hide print tables in normal view */
+.print-summary-tables {
+  display: none;
 }

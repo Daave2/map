@@ -570,6 +570,67 @@ function App() {
           />
         </main>
 
+        {/* Print Summary Tables - Page 2 (hidden in normal view, shown when printing) */}
+        {printMode && activeTab === 'range' && rangeData.length > 0 && (() => {
+          // Calculate unmapped categories
+          const allCategories = [...new Set(rangeData.map(r => r.category))];
+          const unmappedCategories = allCategories.filter(category => {
+            const mapping = categoryMappings[category];
+            if (mapping && mapping !== 'IGNORE_ITEM') return false;
+            if (mapping === 'IGNORE_ITEM') return false;
+            // Simple check - if category name appears in any section
+            const hasMatch = layout.aisles.some(aisle =>
+              aisle.sections?.some(section => {
+                const sectionCat = (section.category || '').toLowerCase();
+                const rangeCat = category.toLowerCase();
+                return sectionCat.includes(rangeCat) || rangeCat.includes(sectionCat);
+              })
+            );
+            return !hasMatch;
+          });
+          const mappedActivities = rangeData.filter(r => !unmappedCategories.includes(r.category));
+
+          return (
+            <div className="print-summary-tables">
+              <h2>Areas Changing ({mappedActivities.length})</h2>
+              <table>
+                <thead>
+                  <tr>
+                    <th style={{ width: '80px' }}>Date</th>
+                    <th style={{ width: '180px' }}>Category</th>
+                    <th className="center" style={{ width: '50px' }}>Hrs</th>
+                    <th className="center" style={{ width: '40px' }}>New</th>
+                    <th className="center" style={{ width: '40px' }}>Del</th>
+                    <th>Reason</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {mappedActivities.map((activity, i) => (
+                    <tr key={i}>
+                      <td>{activity.date}</td>
+                      <td>{activity.category}</td>
+                      <td className="center">{activity.capacityHours}</td>
+                      <td className="center">{activity.newLines}</td>
+                      <td className="center">{activity.delistLines}</td>
+                      <td>{(activity.reason || '').substring(0, 80)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+
+              {unmappedCategories.length > 0 && (
+                <>
+                  <h2>Unmapped Categories ({unmappedCategories.length})</h2>
+                  <ul className="unmapped-list">
+                    {unmappedCategories.sort().map((cat, i) => (
+                      <li key={i}>{cat}</li>
+                    ))}
+                  </ul>
+                </>
+              )}
+            </div>
+          );
+        })()}
         {/* Unmatched Category Mapper Modal */}
         {showMapper && (
           <RangeMapper
@@ -648,6 +709,155 @@ function App() {
                       <path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2" />
                       <rect x="6" y="14" width="12" height="8" />
                     </svg>
+                  </button>
+                )}
+
+                {/* Actual Print button - opens print dialog */}
+                {appMode === 'view' && printMode && (
+                  <button
+                    className="theme-toggle-btn"
+                    onClick={() => {
+                      // Get current canvas
+                      const canvas = document.querySelector('.map-canvas-container canvas') as HTMLCanvasElement;
+                      if (!canvas) {
+                        alert('Canvas not found');
+                        return;
+                      }
+
+                      // Save current viewState and canvas size
+                      const savedViewState = { ...viewState };
+                      const savedWidth = canvas.width;
+                      const savedHeight = canvas.height;
+
+                      // Set canvas to large size for crisp print
+                      canvas.width = 2000;
+                      canvas.height = 1400;
+
+                      // Use the DEFAULT view which shows the full map correctly
+                      // (same as handleResetView: offsetX: 100, offsetY: 50, scale: 0.5)
+                      setViewState({
+                        scale: 0.5,
+                        offsetX: 100,
+                        offsetY: 50
+                      });
+
+                      // Wait for canvas to re-render using requestAnimationFrame
+                      // Triple RAF ensures we're past React commit + browser paint
+                      requestAnimationFrame(() => {
+                        requestAnimationFrame(() => {
+                          requestAnimationFrame(() => {
+                            const mapImage = canvas.toDataURL('image/png');
+
+                            // Restore original canvas size and view
+                            canvas.width = savedWidth;
+                            canvas.height = savedHeight;
+                            setViewState(savedViewState);
+
+                            // Calculate unmapped categories
+                            const allCategories = [...new Set(rangeData.map(r => r.category))];
+                            const unmappedCategories = allCategories.filter(category => {
+                              const mapping = categoryMappings[category];
+                              if (mapping && mapping !== 'IGNORE_ITEM') return false;
+                              if (mapping === 'IGNORE_ITEM') return false;
+                              return true;
+                            });
+                            const mappedActivities = rangeData.filter(r => !unmappedCategories.includes(r.category));
+
+                            // Create hidden iframe for printing
+                            const printFrame = document.createElement('iframe');
+                            printFrame.style.position = 'fixed';
+                            printFrame.style.right = '0';
+                            printFrame.style.bottom = '0';
+                            printFrame.style.width = '0';
+                            printFrame.style.height = '0';
+                            printFrame.style.border = 'none';
+                            document.body.appendChild(printFrame);
+
+                            const printDoc = printFrame.contentWindow?.document;
+                            if (!printDoc) {
+                              alert('Could not create print frame');
+                              return;
+                            }
+
+                            printDoc.open();
+                            printDoc.write(`
+                              <!DOCTYPE html>
+                              <html>
+                              <head>
+                                <title>Store Map - Print</title>
+                                <style>
+                                  * { margin: 0; padding: 0; box-sizing: border-box; }
+                                  @page { size: A4 landscape; margin: 8mm; }
+                                  @page :first { margin: 5mm; }
+                                  body { font-family: Inter, system-ui, sans-serif; }
+                                  .page1 { 
+                                    page-break-after: always; 
+                                    width: 100%;
+                                    display: flex;
+                                    justify-content: center;
+                                    align-items: flex-start;
+                                  }
+                                  .page1 img { 
+                                    max-width: 100%; 
+                                    max-height: 180mm;
+                                    width: auto;
+                                    height: auto;
+                                  }
+                                  .page2 { padding: 10px; }
+                                  h2 { font-size: 14px; margin: 0 0 10px; }
+                                  table { width: 100%; border-collapse: collapse; font-size: 10px; margin-bottom: 20px; }
+                                  th { background: #e0e0e0; padding: 5px; text-align: left; border: 1px solid #000; }
+                                  td { padding: 4px 5px; border: 1px solid #ccc; }
+                                  tr:nth-child(even) { background: #f5f5f5; }
+                                  .unmapped { column-count: 3; font-size: 10px; list-style: none; padding: 0; margin: 0; }
+                                  .unmapped li { margin: 3px 0; }
+                                </style>
+                              </head>
+                              <body>
+                                <div class="page1">
+                                  <img src="${mapImage}" alt="Store Map" />
+                                </div>
+                                <div class="page2">
+                                  <h2>Areas Changing (${mappedActivities.length})</h2>
+                                  <table>
+                                    <tr><th>Date</th><th>Category</th><th>Hrs</th><th>New</th><th>Del</th><th>Reason</th></tr>
+                                    ${mappedActivities.map(a => `
+                                      <tr>
+                                        <td>${a.date}</td>
+                                        <td>${a.category}</td>
+                                        <td>${a.capacityHours}</td>
+                                        <td>${a.newLines}</td>
+                                        <td>${a.delistLines}</td>
+                                        <td>${(a.reason || '').substring(0, 60)}</td>
+                                      </tr>
+                                    `).join('')}
+                                  </table>
+                                  ${unmappedCategories.length > 0 ? `
+                                    <h2>Unmapped (${unmappedCategories.length})</h2>
+                                    <ul class="unmapped">
+                                      ${unmappedCategories.sort().map(c => `<li>• ${c}</li>`).join('')}
+                                    </ul>
+                                  ` : ''}
+                                </div>
+                              </body>
+                              </html>
+                            `);
+                            printDoc.close();
+
+                            // Wait for image to load, then print
+                            setTimeout(() => {
+                              printFrame.contentWindow?.print();
+                              setTimeout(() => {
+                                document.body.removeChild(printFrame);
+                              }, 1000);
+                            }, 500);
+                          });
+                        });
+                      });
+                    }}
+                    title="Print to PDF"
+                  >
+                    🖨️
                   </button>
                 )}
               </div>
@@ -817,7 +1027,7 @@ function App() {
         style={{ display: 'none' }}
         onChange={handleFileChange}
       />
-    </div>
+    </div >
   );
 }
 

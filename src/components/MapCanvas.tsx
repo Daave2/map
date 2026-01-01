@@ -1253,7 +1253,73 @@ export const MapCanvas: React.FC<MapCanvasProps> = ({
                 });
             });
 
-            deduplicatedLabels.forEach(label => {
+            // Collision resolution: spread overlapping labels apart (gently)
+            // Calculate label sizes for collision detection
+            interface LabelWithSize extends PrintLabel {
+                width: number;
+                height: number;
+                origX: number;  // Store original position
+                origY: number;
+            }
+
+            const MAX_DISPLACEMENT = 50; // Max pixels a label can move from original
+
+            const labelsWithSize: LabelWithSize[] = deduplicatedLabels.map(label => {
+                const textWidth = ctx.measureText(label.text).width;
+                const padding = 3;
+                // Diagonal rotation makes effective collision box larger
+                const w = (textWidth + padding * 2) * 0.7; // Tighter approximation
+                const h = (fontSize + padding * 2) * 1.2;
+                return { ...label, width: w, height: h, origX: label.x, origY: label.y };
+            });
+
+            // Iteratively resolve collisions (up to 5 iterations, gentler)
+            for (let iter = 0; iter < 5; iter++) {
+                let hasCollision = false;
+
+                for (let i = 0; i < labelsWithSize.length; i++) {
+                    for (let j = i + 1; j < labelsWithSize.length; j++) {
+                        const a = labelsWithSize[i];
+                        const b = labelsWithSize[j];
+
+                        // Check if labels overlap
+                        const dx = b.x - a.x;
+                        const dy = b.y - a.y;
+                        const dist = Math.sqrt(dx * dx + dy * dy);
+                        const minDist = (a.width + b.width) / 2 + 5; // 5px gap
+
+                        if (dist < minDist && dist > 0) {
+                            hasCollision = true;
+                            // Push labels apart gently (only 30% of overlap)
+                            const overlap = minDist - dist;
+                            const pushX = (dx / dist) * overlap * 0.3;
+                            const pushY = (dy / dist) * overlap * 0.3;
+
+                            a.x -= pushX;
+                            a.y -= pushY;
+                            b.x += pushX;
+                            b.y += pushY;
+
+                            // Clamp to max displacement from original
+                            const clamp = (val: number, orig: number) =>
+                                Math.max(orig - MAX_DISPLACEMENT, Math.min(orig + MAX_DISPLACEMENT, val));
+                            a.x = clamp(a.x, a.origX);
+                            a.y = clamp(a.y, a.origY);
+                            b.x = clamp(b.x, b.origX);
+                            b.y = clamp(b.y, b.origY);
+                        } else if (dist === 0) {
+                            // Labels at exact same position - nudge slightly
+                            hasCollision = true;
+                            a.x += 10;
+                            b.x -= 10;
+                        }
+                    }
+                }
+
+                if (!hasCollision) break;
+            }
+
+            labelsWithSize.forEach(label => {
                 ctx.save();
                 ctx.translate(label.x, label.y);
                 ctx.rotate(-Math.PI / 4); // 45 degree angle for all labels
@@ -1281,7 +1347,7 @@ export const MapCanvas: React.FC<MapCanvasProps> = ({
         }
 
         ctx.restore();
-    }, [aisles, selectedAisleIds, viewState, getAisleBounds, editorSettings, searchTerm, rangeData, activeTab, printMode, theme, dragHoverTarget]);
+    }, [aisles, selectedAisleIds, viewState, getAisleBounds, editorSettings, searchTerm, rangeData, activeTab, printMode, theme, dragHoverTarget, customMappings]);
 
     // Handle resize
     useEffect(() => {

@@ -16,7 +16,7 @@ export const DEFAULT_CATEGORY_MAPPINGS: Record<string, string> = {
     "Frozen Fish": "processed meat, fish & poultry",
     "Frozen Prep Poultry": "breaded poultry",
     "Frozen Meat, Burgers, Sausage": "processed meat, fish & poultry",
-    "Prepacked Cooked Meats & Sandwich Fillings": "cooked meat inc pate|sandwich & meal accomps exc rolls",
+    "Prepacked Cooked Meats & Sandwich Fillings": "cooked meat inc pate",
 
     // Bakery & Cakes
     "Bought in Cake": "cake inc. party cakes",
@@ -26,7 +26,7 @@ export const DEFAULT_CATEGORY_MAPPINGS: Record<string, string> = {
     "Freshly Baked Pies": "pie shop",
     "Pies & Pastries": "pies",
     "Frozen Pies": "pies",
-    "Bought In Bread": "bread rolls|soft rolls & baps",
+    "Bought In Bread": "bread rolls|soft rolls & baps|morning goods",
     "Oven Fresh": "oven fresh counter",
 
     // Pizza & Ready Meals
@@ -46,7 +46,7 @@ export const DEFAULT_CATEGORY_MAPPINGS: Record<string, string> = {
     "Salad Bar": "salad bar",
     "Fresh Produce Prep Veg": "bagged salad",
     "Fresh Produce Prep Salad": "bagged salad",
-    "Sandwiches": "sandwich & meal accomps exc rolls",
+    // "Sandwiches" - unmapped (no corresponding section)
     "Speciality Cheeses": "speciality cheese",
     "Chilled Fruit Juices": "fruit juice",
     "Flavoured Milk and Coffee Drinks": "milk drinks|coffee & protein drinks",
