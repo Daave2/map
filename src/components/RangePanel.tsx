@@ -10,6 +10,7 @@ interface RangePanelProps {
     // Category mappings for export/import
     categoryMappings?: Record<string, string>;
     onImportMappings?: (mappings: Record<string, string>) => void;
+    onClearMappings?: () => void;
 }
 
 // Parse TSV data into RangeActivity array
@@ -114,6 +115,7 @@ export const RangePanel: React.FC<RangePanelProps> = ({
     onSelectCategory,
     categoryMappings = {},
     onImportMappings,
+    onClearMappings,
 }) => {
     const [pasteMode, setPasteMode] = useState(false);
     const [pasteText, setPasteText] = useState('');
@@ -311,6 +313,19 @@ export const RangePanel: React.FC<RangePanelProps> = ({
                         >
                             📤 Import Mappings
                         </button>
+                        {onClearMappings && Object.keys(categoryMappings).length > 0 && (
+                            <button
+                                className="btn btn-danger btn-sm"
+                                onClick={() => {
+                                    if (confirm(`Clear all ${Object.keys(categoryMappings).length} custom mappings? This cannot be undone.`)) {
+                                        onClearMappings();
+                                    }
+                                }}
+                                title={`Clear ${Object.keys(categoryMappings).length} mappings`}
+                            >
+                                🗑️ Clear Mappings
+                            </button>
+                        )}
                         <input
                             ref={mappingsInputRef}
                             type="file"

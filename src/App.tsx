@@ -11,6 +11,7 @@ import { RangeMapper } from './components/RangeMapper';
 import { useHistory } from './hooks/useHistory';
 import { useClipboard } from './hooks/useClipboard';
 import { matchesRangeCategory } from './utils/categoryMatching';
+import { DEFAULT_CATEGORY_MAPPINGS } from './constants/defaultCategoryMappings';
 import './App.css';
 
 const STORAGE_KEY = 'store_map_editor_layout';
@@ -30,13 +31,15 @@ function App() {
     return PDF_ACCURATE_LAYOUT;
   };
 
-  // Load saved mappings
+  // Load saved mappings - merge with defaults so bundled mappings always work
   const getInitialMappings = (): Record<string, string> => {
     try {
       const saved = localStorage.getItem(MAPPINGS_KEY);
-      return saved ? JSON.parse(saved) : {};
+      const userMappings = saved ? JSON.parse(saved) : {};
+      // Merge: defaults first, user overrides take priority
+      return { ...DEFAULT_CATEGORY_MAPPINGS, ...userMappings };
     } catch {
-      return {};
+      return { ...DEFAULT_CATEGORY_MAPPINGS };
     }
   };
 
@@ -664,6 +667,10 @@ function App() {
                       setCategoryMappings(merged);
                       localStorage.setItem(MAPPINGS_KEY, JSON.stringify(merged));
                     }}
+                    onClearMappings={() => {
+                      setCategoryMappings({});
+                      localStorage.removeItem(MAPPINGS_KEY);
+                    }}
                   />
                   {selectedRangeActivity && (() => {
                     const mappingStr = categoryMappings[selectedRangeActivity.category] || '';
@@ -739,6 +746,10 @@ function App() {
                           const merged = { ...categoryMappings, ...imported };
                           setCategoryMappings(merged);
                           localStorage.setItem(MAPPINGS_KEY, JSON.stringify(merged));
+                        }}
+                        onClearMappings={() => {
+                          setCategoryMappings({});
+                          localStorage.removeItem(MAPPINGS_KEY);
                         }}
                       />
                       {selectedRangeActivity && (() => {

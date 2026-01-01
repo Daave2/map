@@ -1213,7 +1213,47 @@ export const MapCanvas: React.FC<MapCanvasProps> = ({
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
 
-            printLabels.forEach(label => {
+            // De-duplicate labels: group labels with the same text that are close together
+            const PROXIMITY_THRESHOLD = 150; // pixels - labels within this distance get grouped
+            const deduplicatedLabels: PrintLabel[] = [];
+            const processedIndices = new Set<number>();
+
+            printLabels.forEach((label, i) => {
+                if (processedIndices.has(i)) return;
+
+                // Find all labels with the same text within proximity
+                const cluster: PrintLabel[] = [label];
+                processedIndices.add(i);
+
+                printLabels.forEach((other, j) => {
+                    if (i === j || processedIndices.has(j)) return;
+                    if (label.text !== other.text) return;
+
+                    // Check if within proximity of any label in the cluster
+                    const isNearCluster = cluster.some(c => {
+                        const dx = c.x - other.x;
+                        const dy = c.y - other.y;
+                        return Math.sqrt(dx * dx + dy * dy) < PROXIMITY_THRESHOLD;
+                    });
+
+                    if (isNearCluster) {
+                        cluster.push(other);
+                        processedIndices.add(j);
+                    }
+                });
+
+                // Use the centroid of the cluster as the label position
+                const avgX = cluster.reduce((sum, l) => sum + l.x, 0) / cluster.length;
+                const avgY = cluster.reduce((sum, l) => sum + l.y, 0) / cluster.length;
+                deduplicatedLabels.push({
+                    x: avgX,
+                    y: avgY,
+                    text: label.text,
+                    isRangeAffected: label.isRangeAffected
+                });
+            });
+
+            deduplicatedLabels.forEach(label => {
                 ctx.save();
                 ctx.translate(label.x, label.y);
                 ctx.rotate(-Math.PI / 4); // 45 degree angle for all labels
