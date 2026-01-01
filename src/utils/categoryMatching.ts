@@ -42,14 +42,19 @@ export function matchesRangeCategory(sectionCategory: string, rangeCategory: str
         if (sectionNorm === rangeNorm) return { matched: true, reason: 'Exact match' };
     }
 
-    // 2. Dictionary lookup
+    // 2. Dictionary lookup - STRICT: only match if range category EXACTLY matches a dictionary key
     for (const [key, aliases] of Object.entries(CATEGORY_MAPPINGS)) {
         const keyNorm = normalize(key);
-        if (rangeNorm === keyNorm || rangeNorm.includes(keyNorm) || keyNorm.includes(rangeNorm)) {
+        // Only match if the range category exactly equals the dictionary key
+        if (rangeNorm === keyNorm) {
             for (const alias of aliases) {
                 const aliasNorm = normalize(alias);
-                const aliasRegex = new RegExp(`\\b${escapeRegExp(aliasNorm)}\\b`);
-                if (aliasRegex.test(sectionNorm)) return { matched: true, reason: `Dictionary key: "${key}" (alias "${alias}")` };
+                try {
+                    const aliasRegex = new RegExp(`\\b${escapeRegExp(aliasNorm)}\\b`);
+                    if (aliasRegex.test(sectionNorm)) return { matched: true, reason: `Dictionary key: "${key}" (alias "${alias}")` };
+                } catch {
+                    if (sectionNorm === aliasNorm) return { matched: true, reason: `Dictionary key: "${key}" (alias "${alias}")` };
+                }
             }
         }
     }
