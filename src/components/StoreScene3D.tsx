@@ -1,6 +1,7 @@
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { PointerLockControls, Text, Grid } from '@react-three/drei';
-import { useRef, useMemo, useEffect, useCallback, useLayoutEffect, useState } from 'react';
+import { XR, createXRStore } from '@react-three/xr';
+import { useRef, useMemo, useEffect, useCallback, useState, useLayoutEffect } from 'react';
 import * as THREE from 'three';
 import type { Aisle } from '../types';
 
@@ -12,6 +13,12 @@ interface StoreScene3DProps {
     categoryMappings?: any;
     onExit: () => void;
 }
+
+// Create XR store for AR sessions
+const xrStore = createXRStore({ depthSensing: true });
+
+// AR Scale - the store is ~100 units wide in 2D, we scale it down to fit in a room
+const AR_SCALE = 0.02; // 1 unit = 2cm, so 100 units = 2 meters
 
 export interface MoveState {
     forward: boolean;
@@ -760,10 +767,71 @@ function Scene({ aisles, rangeData, categoryMappings, onSelect, selectedCategory
     );
 }
 
+// AR Scene - Simplified version for augmented reality viewing
+function ARScene({ aisles, rangeData, categoryMappings }: {
+    aisles: Aisle[],
+    rangeData: any[],
+    categoryMappings?: any
+}) {
+    // Filter visible aisles (same logic as Scene)
+    const visibleAisles = useMemo(() =>
+        aisles.filter(a => a.type !== 'door'),
+        [aisles]
+    );
+
+    // Calculate bounds for centering
+    const { center } = useMemo(() => {
+        let minX = Infinity, maxX = -Infinity, minZ = Infinity, maxZ = -Infinity;
+        aisles.forEach(a => {
+            const x1 = a.p1[0] * SCALE;
+            const z1 = a.p1[1] * SCALE;
+            const x2 = a.p2[0] * SCALE;
+            const z2 = a.p2[1] * SCALE;
+            minX = Math.min(minX, x1, x2);
+            maxX = Math.max(maxX, x1, x2);
+            minZ = Math.min(minZ, z1, z2);
+            maxZ = Math.max(maxZ, z1, z2);
+        });
+        return {
+            center: { x: (minX + maxX) / 2, z: (minZ + maxZ) / 2 }
+        };
+    }, [aisles]);
+
+    return (
+        <group scale={[AR_SCALE, AR_SCALE, AR_SCALE]} position={[0, 0, -1]}>
+            {/* Offset to center the model */}
+            <group position={[-center.x, 0, -center.z]}>
+                {/* Lighting for AR */}
+                <ambientLight intensity={0.8} />
+                <directionalLight position={[5, 10, 5]} intensity={0.6} />
+
+                {/* Floor indicator */}
+                <mesh rotation={[-Math.PI / 2, 0, 0]} position={[center.x, 0, center.z]}>
+                    <circleGeometry args={[50, 32]} />
+                    <meshBasicMaterial color="#3b82f6" opacity={0.2} transparent />
+                </mesh>
+
+                {/* Render all shelves */}
+                {visibleAisles.map((aisle) => (
+                    <ShelfMesh
+                        key={aisle.id}
+                        aisle={aisle}
+                        rangeData={rangeData}
+                        categoryMappings={categoryMappings}
+                        onSelect={() => { }}
+                        selectedCategory={undefined}
+                    />
+                ))}
+            </group>
+        </group>
+    );
+}
+
 // Main exported component
 export function StoreScene3D({ aisles, rangeData = [], categoryMappings = {}, onExit }: StoreScene3DProps) {
     const [selectedCategory, setSelectedCategory] = useState<string | undefined>(undefined);
     const [selectedStats, setSelectedStats] = useState<any>(null);
+    const [arMode, setArMode] = useState(false);
 
     // Shared state for movement (Keyboard + Mobile)
     const moveState = useRef<MoveState>({
@@ -771,6 +839,16 @@ export function StoreScene3D({ aisles, rangeData = [], categoryMappings = {}, on
         joystickMove: { x: 0, y: 0 },
         joystickLook: { x: 0, y: 0 }
     });
+
+    const handleEnterAR = async () => {
+        try {
+            await xrStore.enterAR();
+            setArMode(true);
+        } catch (e) {
+            console.error('Failed to enter AR:', e);
+            alert('AR not supported on this device. Requires ARCore (Android) or Safari on iOS.');
+        }
+    };
 
     const handleSelect = useCallback((category: string, stats?: any) => {
         setSelectedCategory(category);
@@ -799,15 +877,24 @@ export function StoreScene3D({ aisles, rangeData = [], categoryMappings = {}, on
                 camera={{ position: [0, 5, 10], fov: 50 }}
                 onCreated={({ gl }) => { gl.domElement.id = 'store-3d-canvas'; }}
             >
-                {/* <fog attach="fog" args={['#f1f5f9', 5, 100]} /> */}
-                <Scene
-                    aisles={aisles}
-                    rangeData={rangeData}
-                    categoryMappings={categoryMappings}
-                    onSelect={handleSelect}
-                    selectedCategory={selectedCategory}
-                    moveState={moveState}
-                />
+                <XR store={xrStore}>
+                    {arMode ? (
+                        <ARScene
+                            aisles={aisles}
+                            rangeData={rangeData}
+                            categoryMappings={categoryMappings}
+                        />
+                    ) : (
+                        <Scene
+                            aisles={aisles}
+                            rangeData={rangeData}
+                            categoryMappings={categoryMappings}
+                            onSelect={handleSelect}
+                            selectedCategory={selectedCategory}
+                            moveState={moveState}
+                        />
+                    )}
+                </XR>
             </Canvas>
 
             {/* Selection Detail Panel */}
@@ -899,6 +986,28 @@ export function StoreScene3D({ aisles, rangeData = [], categoryMappings = {}, on
             >
                 Exit 3D View
             </button>
+
+            {/* AR Button */}
+            {!arMode && (
+                <button
+                    onClick={handleEnterAR}
+                    style={{
+                        position: 'absolute',
+                        top: 16,
+                        right: 140,
+                        padding: '10px 20px',
+                        backgroundColor: '#8b5cf6',
+                        color: '#fff',
+                        border: 'none',
+                        borderRadius: 8,
+                        cursor: 'pointer',
+                        fontWeight: 'bold',
+                        fontSize: 14,
+                    }}
+                >
+                    📱 Enter AR
+                </button>
+            )}
 
             {/* Crosshair */}
             <div style={{
