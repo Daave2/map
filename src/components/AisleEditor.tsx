@@ -315,13 +315,28 @@ export const AisleEditor: React.FC<AisleEditorProps> = ({
                     {(aisle.sections || []).map((section, index) => (
                         <div key={index} className="section-item" style={{
                             display: 'grid',
-                            gridTemplateColumns: '40px 1fr auto',
-                            gap: '8px',
+                            gridTemplateColumns: '36px 40px 1fr auto',
+                            gap: '6px',
                             alignItems: 'center',
                             background: 'rgba(255,255,255,0.05)',
                             padding: '6px',
                             borderRadius: '4px'
                         }}>
+                            <button
+                                className="btn btn-ghost btn-xs"
+                                onClick={() => handleUpdateSection(index, { side: section.side === 'L' ? 'R' : section.side === 'R' ? undefined : 'L' })}
+                                title={`Side: ${section.side || 'Both'} (click to change)`}
+                                style={{
+                                    padding: '2px 6px',
+                                    fontWeight: 'bold',
+                                    fontSize: '11px',
+                                    background: section.side === 'L' ? 'rgba(100, 180, 255, 0.3)' : section.side === 'R' ? 'rgba(255, 180, 100, 0.3)' : 'rgba(128, 128, 128, 0.2)',
+                                    border: section.side ? '1px solid currentColor' : '1px dashed #666',
+                                    borderRadius: '3px'
+                                }}
+                            >
+                                {section.side || '–'}
+                            </button>
                             <input
                                 type="text"
                                 className="editor-input"

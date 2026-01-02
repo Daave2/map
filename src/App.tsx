@@ -369,6 +369,13 @@ function App() {
   }, [resetHistory]);
 
   const handleUpdateAisle = useCallback((id: string, updates: Partial<Aisle>) => {
+    // If the ID is being changed, update the selection to use the new ID
+    if (updates.id && updates.id !== id) {
+      setSelectedAisleIds((prev) =>
+        prev.map((selectedId) => (selectedId === id ? updates.id! : selectedId))
+      );
+    }
+
     setLayout((prev) => ({
       ...prev,
       aisles: prev.aisles.map((aisle) =>

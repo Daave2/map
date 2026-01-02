@@ -759,7 +759,7 @@ export const MapCanvas: React.FC<MapCanvasProps> = ({
 
 
                         ctx.fillStyle = isSelected ? 'rgba(99, 102, 241, 0.6)' : catColor;
-                        ctx.strokeStyle = isSelected ? '#818cf8' : '#3b82f6';
+                        ctx.strokeStyle = isSelected ? '#818cf8' : (theme === 'light' ? '#94a3b8' : '#64748b');
                         ctx.lineWidth = isSelected ? 2 : 0.5;
 
                         const isDragHover = dragHoverTarget?.aisleId === aisle.id && dragHoverTarget?.sectionIndex === index;
@@ -853,7 +853,11 @@ export const MapCanvas: React.FC<MapCanvasProps> = ({
                             } else {
                                 // Normal mode drawing
                                 if (!isSearchMatch) {
-                                    ctx.fillStyle = isSelected ? '#fff' : 'rgba(255,255,255,0.9)';
+                                    // Theme-aware label colors (same as dual-sided)
+                                    const labelColor = theme === 'light'
+                                        ? (isSelected ? '#1e293b' : 'rgba(15, 23, 42, 0.85)')
+                                        : (isSelected ? '#fff' : 'rgba(255,255,255,0.9)');
+                                    ctx.fillStyle = labelColor;
                                 }
                                 const fontSize = Math.max(6, 12 / viewState.scale);
                                 ctx.font = `bold ${fontSize}px Inter, system-ui, sans-serif`;
@@ -893,40 +897,52 @@ export const MapCanvas: React.FC<MapCanvasProps> = ({
 
             } else {
                 // Draw as single rectangle (no sections or just one)
+                // Use the same type-based coloring as multi-section units
+                let catColor = 'rgba(100, 116, 139, 0.25)'; // Default neutral gray
+                const aisleType = aisle.type?.toLowerCase() || 'gondola';
+                if (aisleType === 'chilled' || aisleType === 'frozen') {
+                    catColor = 'rgba(59, 130, 246, 0.25)'; // Light blue for chilled/frozen
+                } else if (aisleType === 'bakery') {
+                    catColor = 'rgba(234, 179, 8, 0.25)'; // Light warm/amber for bakery
+                } else if (aisleType === 'counter') {
+                    catColor = 'rgba(239, 68, 68, 0.2)'; // Light red for fresh counters
+                }
+
                 if (printMode && activeTab === 'range') {
                     // Print mode: B&W skeleton
                     ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
                     ctx.strokeStyle = '#333';
                     ctx.lineWidth = 0.75;
                 } else {
-                    ctx.fillStyle = isSelected ? 'rgba(99, 102, 241, 0.5)' : 'rgba(59, 130, 246, 0.3)';
-                    ctx.strokeStyle = isSelected ? '#818cf8' : '#3b82f6';
-                    ctx.lineWidth = isSelected ? 3 : 1.5;
+                    ctx.fillStyle = isSelected ? 'rgba(99, 102, 241, 0.6)' : catColor;
+                    ctx.strokeStyle = isSelected ? '#818cf8' : (theme === 'light' ? '#94a3b8' : '#64748b');
+                    ctx.lineWidth = isSelected ? 2 : 0.5;
                 }
 
                 ctx.beginPath();
-                ctx.roundRect(bounds.minX, bounds.minY, width, height, 4);
+                ctx.roundRect(bounds.minX, bounds.minY, width, height, 2);
                 ctx.fill();
                 ctx.stroke();
 
-                // Draw aisle label
-                if (printMode && activeTab === 'range') {
-                    ctx.fillStyle = '#000'; // Black text for print mode
-                } else {
-                    ctx.fillStyle = isSelected ? '#fff' : '#e2e8f0';
+                // Draw section label (same rules as multi-section)
+                const sections = aisle.sections || [];
+                const section = sections[0];
+                const displayCategory = section?.category || aisle.label;
+
+                // Only show label at certain zoom levels (same as multi-section)
+                let labelText = "";
+                if (viewState.scale >= 1.5) {
+                    labelText = section ? `${section.bay} ${displayCategory}` : displayCategory;
+                } else if (viewState.scale >= 0.7) {
+                    labelText = displayCategory;
+                    if (labelText.length > 15) labelText = labelText.substring(0, 13) + '..';
                 }
-                const fontSize = Math.max(10, 12 / viewState.scale);
-                ctx.font = `bold ${fontSize}px Inter, system-ui, sans-serif`;
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'middle';
 
                 // In print mode, check if this unit should show a label (range-affected check)
                 if (printMode && activeTab === 'range') {
-                    // Check if any of the single sections match range data
-                    const sections = aisle.sections || [];
                     let rangeMatch = null;
-                    if (sections.length >= 1) {
-                        const matchResult = findRangeActivity(sections[0].category);
+                    if (section) {
+                        const matchResult = findRangeActivity(section.category);
                         rangeMatch = matchResult?.activity;
                     }
 
@@ -935,32 +951,38 @@ export const MapCanvas: React.FC<MapCanvasProps> = ({
                         printLabels.push({
                             x: centerX,
                             y: centerY,
-                            text: aisle.label,
+                            text: displayCategory,
                             isRangeAffected: true
                         });
                     }
-                    // SKIP all inline label drawing in print mode
-                } else {
-                    // Normal mode: draw label inline
-                    const availableSpace = isVertical ? height : width;
-                    const charWidth = fontSize * 0.6;
-                    const maxChars = Math.floor(availableSpace / charWidth);
+                } else if (labelText) {
+                    // Normal mode: draw label with zoom-dependent visibility and theme-aware colors
+                    const labelColor = theme === 'light'
+                        ? (isSelected ? '#1e293b' : 'rgba(15, 23, 42, 0.85)')
+                        : (isSelected ? '#fff' : 'rgba(255,255,255,0.9)');
+                    ctx.fillStyle = labelColor;
 
-                    const displayLabel = aisle.label.length > maxChars && maxChars > 3
-                        ? aisle.label.substring(0, maxChars - 2) + '…'
-                        : aisle.label.length > maxChars ? aisle.label.substring(0, maxChars) : aisle.label;
+                    const fontSize = Math.max(6, 12 / viewState.scale);
+                    ctx.font = `bold ${fontSize}px Inter, system-ui, sans-serif`;
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
 
-                    const labelX = aisle.labelPosition?.x ?? centerX;
-                    const labelY = aisle.labelPosition?.y ?? centerY;
+                    const textWidth = ctx.measureText(labelText).width;
+                    const availableWidth = isVertical ? height : width;
 
-                    if (isVertical) {
-                        ctx.save();
-                        ctx.translate(labelX, labelY);
-                        ctx.rotate(-Math.PI / 2);
-                        ctx.fillText(displayLabel, 0, 0);
-                        ctx.restore();
-                    } else {
-                        ctx.fillText(displayLabel, labelX, labelY);
+                    if (textWidth < availableWidth * 1.2) {
+                        const labelX = aisle.labelPosition?.x ?? centerX;
+                        const labelY = aisle.labelPosition?.y ?? centerY;
+
+                        if (isVertical) {
+                            ctx.save();
+                            ctx.translate(labelX, labelY);
+                            ctx.rotate(-Math.PI / 2);
+                            ctx.fillText(labelText, 0, 0);
+                            ctx.restore();
+                        } else {
+                            ctx.fillText(labelText, labelX, labelY);
+                        }
                     }
                 }
             }

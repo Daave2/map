@@ -426,7 +426,6 @@ export const REFERENCE_STORE_LAYOUT: MapLayout = {
 // Accurate layout extracted from store PDF - selling space only
 // Gondolas = shelving units (by category), Aisles = walking voids (numbered)
 export const PDF_ACCURATE_LAYOUT: MapLayout = {
-    "__documentation": "MAP RENDERING GUIDE FOR AI AGENTS:\n1. COORDINATES: Origin (0,0) top-left. Positive X right, Positive Y down.\n2. TYPES:\n   - 'gondola': A physical shelf. Render as a rectangle defined by 'p1', 'p2' (center line) and 'aisleWidth'.\n   - 'aisle': A floating label. DO NOT render a rectangle. Only render text at 'labelPosition' (or center).\n3. ROTATION: Applied in degrees (0-360) around the center of the bounding box.\n4. LABELS:\n   - Use 'labelPosition' {x,y} if present.\n   - Fallback to calculated center (min+max)/2.\n   - Text usually rotated -90 deg for vertical items.\n5. SECTIONS (Gondolas):\n   - Vertical (H > 1.5*W): 'L' side = Left half, 'R' side = Right half. Stack Top-to-Bottom.\n   - Horizontal: 'L' side = Top half, 'R' side = Bottom half. Stack Left-to-Right.",
     "meta": {
         "storeId": 218,
         "name": "218 Thornton Cleveleys - PDF Accurate",
@@ -1381,7 +1380,7 @@ export const PDF_ACCURATE_LAYOUT: MapLayout = {
                 },
                 {
                     "bay": "2368",
-                    "category": "kids zone mags",
+                    "category": "kids zone mugs",
                     "side": "L"
                 },
                 {
@@ -1801,7 +1800,7 @@ export const PDF_ACCURATE_LAYOUT: MapLayout = {
         {
             "id": "Wall-3",
             "label": "Wall 3 - Butchery",
-            "type": "chilled",
+            "type": "counter",
             "p1": [
                 320.7501253928203,
                 46.25
@@ -1826,7 +1825,7 @@ export const PDF_ACCURATE_LAYOUT: MapLayout = {
         {
             "id": "Wall-4",
             "label": "Wall 4 - Bakery",
-            "type": "chilled",
+            "type": "bakery",
             "p1": [
                 450,
                 45
@@ -1961,7 +1960,7 @@ export const PDF_ACCURATE_LAYOUT: MapLayout = {
         {
             "id": "Wall-9",
             "label": "Wall 9 - Hot Food",
-            "type": "chilled",
+            "type": "counter",
             "p1": [
                 943.84709564282,
                 103.47521972405046
@@ -1990,7 +1989,7 @@ export const PDF_ACCURATE_LAYOUT: MapLayout = {
         {
             "id": "Wall-10",
             "label": "Wall 10 - Fish",
-            "type": "chilled",
+            "type": "counter",
             "p1": [
                 1326.5459391387499,
                 50.31270346055027
@@ -2088,16 +2087,12 @@ export const PDF_ACCURATE_LAYOUT: MapLayout = {
                     "category": "pizza"
                 },
                 {
-                    "bay": "1126",
-                    "category": "cheer"
+                    "bay": "570",
+                    "category": "pasta & garlic bread"
                 },
                 {
-                    "bay": "4066",
-                    "category": "takeaway"
-                },
-                {
-                    "bay": "526",
-                    "category": "dips"
+                    "bay": "910",
+                    "category": "pies"
                 }
             ]
         },
@@ -2111,25 +2106,25 @@ export const PDF_ACCURATE_LAYOUT: MapLayout = {
             ],
             "p2": [
                 1500,
-                750
+                868.5996065918209
             ],
             "aisleWidth": 25,
             "locked": false,
             "sections": [
                 {
-                    "bay": "2411",
-                    "category": "ITO mushrooms"
+                    "bay": "1153",
+                    "category": "mushrooms"
                 },
                 {
-                    "bay": "3864",
+                    "bay": "1134",
                     "category": "misc salad inc avocados"
                 },
                 {
-                    "bay": "3667",
-                    "category": "exotic lettuce"
+                    "bay": "1138",
+                    "category": "lettuce"
                 },
                 {
-                    "bay": "3855",
+                    "bay": "171",
                     "category": "bagged salad"
                 }
             ]
@@ -2890,6 +2885,11 @@ export const PDF_ACCURATE_LAYOUT: MapLayout = {
                     "side": "L"
                 },
                 {
+                    "bay": "3002",
+                    "category": "eve",
+                    "side": "L"
+                },
+                {
                     "bay": "810",
                     "category": "multipack confec",
                     "side": "R"
@@ -3313,8 +3313,13 @@ export const PDF_ACCURATE_LAYOUT: MapLayout = {
             "locked": false,
             "sections": [
                 {
+                    "bay": "1188",
+                    "category": "wine promo",
+                    "side": "L"
+                },
+                {
                     "bay": "959",
-                    "category": "rose wine",
+                    "category": "red wine",
                     "side": "L"
                 },
                 {
@@ -3323,18 +3328,28 @@ export const PDF_ACCURATE_LAYOUT: MapLayout = {
                     "side": "L"
                 },
                 {
-                    "bay": "1125",
-                    "category": "chilled wine",
+                    "bay": "4976",
+                    "category": "chilled bws meals",
                     "side": "R"
                 },
                 {
-                    "bay": "4065",
-                    "category": "premium accomps",
+                    "bay": "526",
+                    "category": "dips",
                     "side": "R"
                 },
                 {
-                    "bay": "4067",
-                    "category": "complete meals",
+                    "bay": "2424",
+                    "category": "speciality cheese",
+                    "side": "R"
+                },
+                {
+                    "bay": "2425",
+                    "category": "grated, sliced & block cheese",
+                    "side": "R"
+                },
+                {
+                    "bay": "1638",
+                    "category": "snacking cheese",
                     "side": "R"
                 }
             ],
@@ -3897,6 +3912,364 @@ export const PDF_ACCURATE_LAYOUT: MapLayout = {
                 }
             ],
             "rotation": 45
+        },
+        {
+            "id": "Herbs-Table",
+            "label": "Herbs Table",
+            "type": "fixture",
+            "p1": [
+                1638.861136133008,
+                466.63784797281426
+            ],
+            "p2": [
+                1638.861136133008,
+                419.49224984660316
+            ],
+            "aisleWidth": 37.8544018737889,
+            "locked": false,
+            "sections": [
+                {
+                    "bay": "1131",
+                    "category": "herbs & ingredients"
+                }
+            ]
+        },
+        {
+            "id": "Pr1",
+            "label": "Produce 1",
+            "p1": [
+                1820,
+                442
+            ],
+            "p2": [
+                1680,
+                442
+            ],
+            "aisleWidth": 43,
+            "locked": false,
+            "sections": [
+                {
+                    "bay": "2413",
+                    "category": "RTC",
+                    "side": "L"
+                },
+                {
+                    "bay": "1151",
+                    "category": "onions",
+                    "side": "L"
+                },
+                {
+                    "bay": "1326",
+                    "category": "potatoes",
+                    "side": "R"
+                }
+            ]
+        },
+        {
+            "id": "Nuts-Stand",
+            "label": "Nuts Stand",
+            "type": "fixture",
+            "p1": [
+                1861.8136193184482,
+                465
+            ],
+            "p2": [
+                1861.8136193184482,
+                420
+            ],
+            "aisleWidth": 40,
+            "locked": false,
+            "sections": [
+                {
+                    "bay": "933",
+                    "category": "produce nuts"
+                }
+            ]
+        },
+        {
+            "id": "Pr2",
+            "label": "Produce 2 (D)",
+            "p1": [
+                1820,
+                545
+            ],
+            "p2": [
+                1657,
+                545
+            ],
+            "aisleWidth": 43,
+            "locked": false,
+            "sections": [
+                {
+                    "bay": "1139",
+                    "category": "tomatoes",
+                    "side": "L"
+                },
+                {
+                    "bay": "1137",
+                    "category": "peppers",
+                    "side": "R"
+                },
+                {
+                    "bay": "1139",
+                    "category": "tomatoes",
+                    "side": "R"
+                }
+            ]
+        },
+        {
+            "id": "Pr3",
+            "label": "Produce 3 (C)",
+            "p1": [
+                1820,
+                650
+            ],
+            "p2": [
+                1657,
+                650
+            ],
+            "aisleWidth": 43,
+            "locked": false,
+            "sections": [
+                {
+                    "bay": "3338",
+                    "category": "tropical fruit",
+                    "side": "L"
+                },
+                {
+                    "bay": "1324",
+                    "category": "loose & pre-pack bananas",
+                    "side": "R"
+                }
+            ]
+        },
+        {
+            "id": "Pr4",
+            "label": "Produce 4 (B)",
+            "p1": [
+                1820,
+                750
+            ],
+            "p2": [
+                1657,
+                750
+            ],
+            "aisleWidth": 43,
+            "locked": false,
+            "sections": [
+                {
+                    "bay": "1140",
+                    "category": "loose & pre-pack citrus",
+                    "side": "L"
+                },
+                {
+                    "bay": "1140",
+                    "category": "loose & pre-pack citrus",
+                    "side": "R"
+                },
+                {
+                    "bay": "1824",
+                    "category": "combined apples & pears",
+                    "side": "R"
+                }
+            ]
+        },
+        {
+            "id": "Produce-Bin-1",
+            "label": "Produce Bin 1",
+            "type": "fixture",
+            "p1": [
+                1645,
+                880
+            ],
+            "p2": [
+                1645,
+                880
+            ],
+            "aisleWidth": 40,
+            "locked": false,
+            "sections": [
+                {
+                    "bay": "3618",
+                    "category": "produce bin 1"
+                }
+            ]
+        },
+        {
+            "id": "Pr5",
+            "label": "combined apples & pears",
+            "p1": [
+                1828.364018115346,
+                848.3640181153459
+            ],
+            "p2": [
+                1645.988534402703,
+                848.3640181153459
+            ],
+            "aisleWidth": 23.271963769308286,
+            "locked": false,
+            "sections": [
+                {
+                    "bay": "1826",
+                    "category": "combined apples & pears",
+                    "side": "L"
+                }
+            ]
+        },
+        {
+            "id": "Produce-Bin-2",
+            "label": "Produce Bin 2",
+            "type": "fixture",
+            "p1": [
+                1820,
+                880
+            ],
+            "p2": [
+                1820,
+                880
+            ],
+            "aisleWidth": 40,
+            "locked": false,
+            "sections": [
+                {
+                    "bay": "3636",
+                    "category": "produce bin 2"
+                }
+            ]
+        },
+        {
+            "id": "Pr5-copy-1767355006304",
+            "label": "Produce 5 (A) (copy)",
+            "p1": [
+                1787.2026797978897,
+                872.7973202021103
+            ],
+            "p2": [
+                1678.3599718363012,
+                872.7973202021103
+            ],
+            "aisleWidth": 25.594640404220627,
+            "locked": false,
+            "sections": [
+                {
+                    "bay": "2665",
+                    "category": "produce FOS 1",
+                    "side": "R"
+                },
+                {
+                    "bay": "3686",
+                    "category": "produce FOS 2",
+                    "side": "R"
+                },
+                {
+                    "bay": "2657",
+                    "category": "produce FOS 3",
+                    "side": "R"
+                }
+            ]
+        },
+        {
+            "id": "Wall-16",
+            "label": "Wall 16",
+            "type": "chilled",
+            "p1": [
+                1927.3697650948957,
+                498.04316573853987
+            ],
+            "p2": [
+                1927.3697650948957,
+                867.6302349051043
+            ],
+            "aisleWidth": 24.739530189791367,
+            "locked": false,
+            "sections": [
+                {
+                    "bay": "1145",
+                    "category": "green veg"
+                },
+                {
+                    "bay": "924",
+                    "category": "prep veg"
+                },
+                {
+                    "bay": "1152",
+                    "category": "exotic veg"
+                },
+                {
+                    "bay": "923",
+                    "category": "prep fruit & melon"
+                },
+                {
+                    "bay": "3353",
+                    "category": "soft fruit exc tropical"
+                }
+            ]
+        },
+        {
+            "id": "MVG",
+            "label": "MVG",
+            "type": "gondola",
+            "p1": [
+                1203.996186347423,
+                1213.3079040201842
+            ],
+            "p2": [
+                1203.996186347423,
+                757.4215531732992
+            ],
+            "aisleWidth": 20,
+            "locked": false,
+            "sections": [
+                {
+                    "bay": "1534",
+                    "category": "cards"
+                },
+                {
+                    "bay": "845",
+                    "category": "chart books"
+                },
+                {
+                    "bay": "2372",
+                    "category": "combined mvg"
+                },
+                {
+                    "bay": "1536",
+                    "category": "stationery"
+                }
+            ],
+            "promoEnds": {},
+            "rotation": 90
+        },
+        {
+            "id": "FTG",
+            "label": "FTG",
+            "type": "chilled",
+            "p1": [
+                1325.48888868251,
+                1112.6933722734934
+            ],
+            "p2": [
+                1325.48888868251,
+                901.2187587901658
+            ],
+            "aisleWidth": 20,
+            "locked": false,
+            "sections": [
+                {
+                    "bay": "3",
+                    "category": "Hot food to go"
+                },
+                {
+                    "bay": "",
+                    "category": "FTG Drinks"
+                },
+                {
+                    "bay": "",
+                    "category": "FTG Sandwiches"
+                }
+            ],
+            "promoEnds": {},
+            "rotation": 90
         }
     ],
     "points": [],
