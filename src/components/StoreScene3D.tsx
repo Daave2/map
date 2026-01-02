@@ -108,16 +108,50 @@ function ShelfMesh({ aisle, rangeData = [], categoryMappings = {}, onSelect, sel
         // Calculate rotation from p1 to p2
         const angle = Math.atan2(z2 - z1, x2 - x1);
 
-        // Separate sections by side
+        // --- SCANLINE MATCHING LOGIC ---
+        // 2D Map renders Top-to-Bottom / Left-to-Right regardless of P1->P2.
+        const dx = aisle.p2[0] - aisle.p1[0];
+        const dy = aisle.p2[1] - aisle.p1[1];
+        const adx = Math.abs(dx);
+        const ady = Math.abs(dy);
+
+        const isVertical = ady > adx;
+        const isPointingDown = isVertical && dy > 0; // P1 Top -> P2 Bottom
+        const isPointingUp = isVertical && dy < 0;   // P1 Bottom -> P2 Top
+        const isPointingRight = !isVertical && dx > 0;
+        const isPointingLeft = !isVertical && dx < 0;
+
+        // Force Visual Top->Bottom / Left->Right order
+        const shouldReverseOrder = isPointingUp || isPointingLeft;
+        // Force "Left" side to appear on Visual Left
+        const shouldSwapSides = isPointingDown || isPointingLeft;
+
+        // Separate and Swap Sections
         const allSections = aisle.sections || [];
-        const left = allSections.filter(s => s.side === 'L');
-        const right = allSections.filter(s => s.side === 'R');
+        const rawLeft = allSections.filter(s => s.side === 'L');
+        const rawRight = allSections.filter(s => s.side === 'R');
         const noSide = allSections.filter(s => !s.side);
 
-        // If no sides specified, show all on both faces
-        // L goes on BACK (negative Z), R goes on FRONT (positive Z) to match 2D view
-        const leftList = left.length > 0 ? left : noSide.length > 0 ? noSide : [{ bay: '', category: aisle.label }];
-        const rightList = right.length > 0 ? right : noSide.length > 0 ? noSide : [{ bay: '', category: aisle.label }];
+        const left = shouldSwapSides ? rawRight : rawLeft;
+        const right = shouldSwapSides ? rawLeft : rawRight;
+
+        let finalLeft = left.length > 0 ? left : [];
+        let finalRight = right.length > 0 ? right : [];
+
+        if (noSide.length > 0) {
+            // Standard noSide case (Wall with no side props)
+            if (finalLeft.length === 0) finalLeft = noSide;
+            if (finalRight.length === 0) finalRight = noSide;
+        } else {
+            // Explicit sides exist (or empty)
+            // Mirror if one side is completely empty (Single Sided Unit)
+            if (finalLeft.length === 0 && finalRight.length > 0) finalLeft = finalRight;
+            if (finalRight.length === 0 && finalLeft.length > 0) finalRight = finalLeft;
+        }
+
+        // Fallback to label if still empty
+        const leftList = finalLeft.length > 0 ? finalLeft : [{ bay: '', category: aisle.label }];
+        const rightList = finalRight.length > 0 ? finalRight : [{ bay: '', category: aisle.label }];
 
         // Helper to map sections to display data including range stats
         const mapSectionData = (list: any[], reverseOrder: boolean) => {
@@ -135,29 +169,16 @@ function ShelfMesh({ aisle, rangeData = [], categoryMappings = {}, onSelect, sel
             });
         };
 
-        // For gondolas, sections are stored in order from p1 to p2
-        // The group is rotated by -angle, so we need to consider how local X maps to world coords:
-        // - angle ~0 (horizontal, pointing right): -rotation = 0, local +X = world +X
-        // - angle ~π/2 (vertical, pointing down): -rotation = -π/2, local +X = world -Z
-        // 
-        // With reverseOrder=true, first section goes to +X local
-        // With reverseOrder=false, first section goes to -X local
-        //
-        // For vertical gondolas pointing "down" (p2.Y > p1.Y), after -π/2 rotation:
-        // - local +X → world -Z (towards camera/near)
-        // - local -X → world +Z (away from camera/far)
-        // We want first section at the FAR end (p1), so use reverseOrder=false for these
 
-        const isPointingDown = (aisle.p2[1] - aisle.p1[1]) > Math.abs(aisle.p2[0] - aisle.p1[0]);  // More Y change than X change
-        const isPointingUp = (aisle.p1[1] - aisle.p2[1]) > Math.abs(aisle.p2[0] - aisle.p1[0]);
-        const isVertical = isPointingDown || isPointingUp;
 
-        // For vertical gondolas, don't reverse so first section is at p1 end
-        // Both faces should use same logic so sections are in same physical positions
-        const shouldReverse = isVertical ? false : true;
 
-        const leftData = mapSectionData(leftList, shouldReverse);   // Back face: same as front
-        const rightData = mapSectionData(rightList, shouldReverse); // Front face
+
+
+
+
+
+        const leftData = mapSectionData(leftList, shouldReverseOrder);   // Back face
+        const rightData = mapSectionData(rightList, shouldReverseOrder); // Front face
 
         // Promo ends data - including side units
         const promoEndData: {
@@ -595,7 +616,8 @@ function Scene({ aisles, rangeData, categoryMappings, onSelect, selectedCategory
             ))}
 
             {/* First-person controls */}
-            <PointerLockControls ref={controlsRef} />
+            {/* First-person controls - only lock when clicking canvas, not UI */}
+            <PointerLockControls ref={controlsRef} selector="#store-3d-canvas" />
             <WalkControls speed={5} />
         </>
     );
@@ -631,6 +653,7 @@ export function StoreScene3D({ aisles, rangeData = [], categoryMappings = {}, on
                 frameloop="always"
                 shadows
                 camera={{ position: [0, 5, 10], fov: 50 }}
+                onCreated={({ gl }) => { gl.domElement.id = 'store-3d-canvas'; }}
             >
                 {/* <fog attach="fog" args={['#f1f5f9', 5, 100]} /> */}
                 <Scene

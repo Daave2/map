@@ -2026,36 +2026,6 @@ export const PDF_ACCURATE_LAYOUT: MapLayout = {
             ]
         },
         {
-            "id": "Wall-12",
-            "label": "Wall 12 - Addition Pallets",
-            "type": "promo",
-            "p1": [
-                1684.0216488304711,
-                194.33398867741187
-            ],
-            "p2": [
-                1684.0216488304711,
-                150.8529754115639
-            ],
-            "aisleWidth": 140.18434509563713,
-            "locked": false,
-            "sections": [
-                {
-                    "bay": "3166",
-                    "category": "BWS Pallet"
-                },
-                {
-                    "bay": "3165",
-                    "category": "FOS white pallet 1"
-                },
-                {
-                    "bay": "3167",
-                    "category": "FOS white pallet 2"
-                }
-            ],
-            "rotation": 359.9410879230263
-        },
-        {
             "id": "Wall-13",
             "label": "salad bar",
             "type": "counter",
@@ -4385,16 +4355,16 @@ export const PDF_ACCURATE_LAYOUT: MapLayout = {
             "locked": false,
             "sections": [
                 {
-                    "bay": "10",
-                    "category": "Checkouts - Kiosk"
+                    "bay": "4",
+                    "category": "Checkouts - Crisps"
                 },
                 {
                     "bay": "2",
                     "category": "Checkouts - Vape"
                 },
                 {
-                    "bay": "4",
-                    "category": "Checkouts - Crisps"
+                    "bay": "10",
+                    "category": "Checkouts - Kiosk"
                 }
             ],
             "promoEnds": {},
@@ -4418,27 +4388,27 @@ export const PDF_ACCURATE_LAYOUT: MapLayout = {
                 {
                     "bay": "4976",
                     "category": "chilled bws meals",
-                    "side": "R"
+                    "side": "L"
                 },
                 {
                     "bay": "526",
                     "category": "dips",
-                    "side": "R"
+                    "side": "L"
                 },
                 {
                     "bay": "2424",
                     "category": "speciality cheese",
-                    "side": "R"
+                    "side": "L"
                 },
                 {
                     "bay": "2425",
                     "category": "grated, sliced & block cheese",
-                    "side": "R"
+                    "side": "L"
                 },
                 {
                     "bay": "1638",
                     "category": "snacking cheese",
-                    "side": "R"
+                    "side": "L"
                 }
             ],
             "promoEnds": {
@@ -4540,70 +4510,96 @@ export const PDF_ACCURATE_LAYOUT: MapLayout = {
             "label": "Mobile Bread",
             "type": "fixture",
             "p1": [
-                1625.887554151554,
-                879.7019192501091
+                1614.6281921688335,
+                878.9385330114287
             ],
             "p2": [
-                1640.5610090011448,
-                879.7019192501091
+                1650.191725713892,
+                878.9385330114287
             ],
-            "aisleWidth": 34.131731932743605,
+            "aisleWidth": 18.079785047825908,
             "locked": false,
             "sections": [
                 {
                     "bay": "3443",
                     "category": "mobile bread unit"
                 }
-            ]
+            ],
+            "rotation": 90.22925745488914
         },
         {
-            "id": "WIGIG",
-            "label": "wigig pallets",
-            "type": "front",
+            "id": "Wigig",
+            "label": "Wigig",
             "p1": [
-                1738.2324970294085,
-                350.9694127469185
+                1788.8228829996117,
+                336.26327165538817
             ],
             "p2": [
-                1738.2324970294085,
-                287.2960183312708
+                1648.8228829996117,
+                336.26327165538817
             ],
-            "aisleWidth": 176.3264259016587,
+            "aisleWidth": 43,
             "locked": false,
             "sections": [
                 {
-                    "bay": "1",
+                    "bay": "",
                     "category": "Wigig 1",
                     "side": "R"
                 },
                 {
-                    "bay": "2",
+                    "bay": "",
                     "category": "Wigig 2",
                     "side": "R"
                 },
                 {
-                    "bay": "3",
+                    "bay": "",
                     "category": "Wigig 3",
                     "side": "R"
                 },
                 {
-                    "bay": "4",
+                    "bay": "",
                     "category": "Wigig 4",
                     "side": "L"
                 },
                 {
-                    "bay": "5",
+                    "bay": "",
                     "category": "Wigig 5",
                     "side": "L"
                 },
                 {
-                    "bay": "6",
+                    "bay": "",
                     "category": "Wigig 6",
                     "side": "L"
                 }
+            ]
+        },
+        {
+            "id": "Pallets",
+            "label": "Pallets",
+            "p1": [
+                1767.1556205150146,
+                222.08983314728874
             ],
-            "rotation": 0,
-            "promoEnds": {}
+            "p2": [
+                1649.5833710411,
+                222.08983314728874
+            ],
+            "aisleWidth": 45.37914107687817,
+            "locked": false,
+            "sections": [
+                {
+                    "bay": "",
+                    "category": "BWS pallet"
+                },
+                {
+                    "bay": "",
+                    "category": "FOS white pallet 1"
+                },
+                {
+                    "bay": "",
+                    "category": "FOS white pallet 12"
+                }
+            ]
         }
     ],
     "points": [],
