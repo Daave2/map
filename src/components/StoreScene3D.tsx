@@ -128,7 +128,7 @@ function ShelfMesh({ aisle, rangeData = [], categoryMappings = {}, onSelect, sel
         const isVertical = ady > adx;
         const isPointingDown = isVertical && dy > 0; // P1 Top -> P2 Bottom
         const isPointingUp = isVertical && dy < 0;   // P1 Bottom -> P2 Top
-        const _isPointingRight = !isVertical && dx > 0;
+
         const isPointingLeft = !isVertical && dx < 0;
 
         // Force Visual Top->Bottom / Left->Right order
