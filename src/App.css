@@ -1575,3 +1575,100 @@ body {
 .print-summary-tables {
   display: none;
 }
+/* ============================================
+   Mobile Controls & Improvements
+   ============================================ */
+
+/* Hide mobile controls on desktop */
+.mobile-controls {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  /* Show mobile controls on mobile */
+  .mobile-controls {
+    display: block;
+  }
+  
+  /* Hide keyboard hints in 3D view (users have joysticks) */
+  .three-controls-hint {
+    display: none !important;
+  }
+  
+  /* Larger touch targets for buttons */
+  .btn {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  /* Right sidebar adjustments */
+  .right-sidebar {
+    position: absolute;
+    top: 56px;
+    right: 0;
+    left: auto;
+    bottom: 0;
+    z-index: 50;
+    width: 85%;
+    max-width: 320px;
+    transform: translateX(100%);
+    box-shadow: var(--shadow-lg);
+  }
+  
+  .right-sidebar:not(.collapsed) {
+    transform: translateX(0);
+  }
+  
+  .right-sidebar .sidebar-toggle {
+    left: -36px !important;
+    right: auto;
+  }
+  
+  /* Range panel adjustments for mobile */
+  .range-panel {
+    max-height: 50vh;
+  }
+  
+  /* Zoom info smaller on mobile */
+  .map-canvas-info {
+    font-size: 11px;
+    padding: 4px 8px;
+  }
+  
+  /* Aisle editor more compact */
+  .aisle-editor {
+    padding: 12px;
+  }
+  
+  .editor-section {
+    margin-bottom: 12px;
+  }
+}
+
+/* Very small screens (phones in portrait) */
+@media (max-width: 480px) {
+  .toolbar {
+    padding: 4px;
+  }
+  
+  .layout-selector {
+    min-width: 100px;
+    font-size: 11px;
+  }
+  
+  .toolbar-brand svg {
+    width: 20px;
+    height: 20px;
+  }
+  
+  /* Stack some toolbar elements */
+  .toolbar-section {
+    flex-wrap: wrap;
+  }
+  
+  /* Mobile controls larger on small phones */
+  .mobile-controls > div {
+    width: 100px !important;
+    height: 100px !important;
+  }
+}

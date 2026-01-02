@@ -1424,17 +1424,23 @@ export const MapCanvas: React.FC<MapCanvasProps> = ({
         draw();
     }, [draw]);
 
-    // Handle mouse down
-    const handleMouseDown = (e: React.MouseEvent) => {
+    // Handle pointer down (replaces mouse down for touch support)
+    const handleMouseDown = (e: React.PointerEvent) => {
         const rect = canvasRef.current?.getBoundingClientRect();
         if (!rect) return;
+
+        // Capture pointer for smooth dragging even if moving outside canvas
+        // (Optional: e.currentTarget.setPointerCapture(e.pointerId)) 
+        // Note: Automatic capture usually works for mouse/touch down
 
         const screenX = e.clientX - rect.left;
         const screenY = e.clientY - rect.top;
         const worldPoint = screenToWorld(screenX, screenY);
 
-        if (e.button === 1 || (e.button === 0 && e.altKey)) {
-            // Middle click or Alt+click: pan
+        const isTouch = e.pointerType === 'touch';
+
+        if (e.button === 1 || (e.button === 0 && e.altKey) || (isTouch && e.button === 0)) {
+            // Middle click, Alt+click, or Touch drag: pan
             setIsPanning(true);
             setDragStart({ x: e.clientX, y: e.clientY });
             setDragOffset({ x: viewState.offsetX, y: viewState.offsetY });
@@ -1630,8 +1636,8 @@ export const MapCanvas: React.FC<MapCanvasProps> = ({
         setDragHoverTarget(null);
     };
 
-    // Handle mouse move
-    const handleMouseMove = (e: React.MouseEvent) => {
+    // Handle pointer move
+    const handleMouseMove = (e: React.PointerEvent) => {
         if (isPanning && dragStart) {
             const dx = e.clientX - dragStart.x;
             const dy = e.clientY - dragStart.y;
@@ -1807,10 +1813,11 @@ export const MapCanvas: React.FC<MapCanvasProps> = ({
         >
             <canvas
                 ref={canvasRef}
-                onMouseDown={handleMouseDown}
-                onMouseMove={handleMouseMove}
-                onMouseUp={handleMouseUp}
-                onMouseLeave={handleMouseUp}
+                onPointerDown={handleMouseDown}
+                onPointerMove={handleMouseMove}
+                onPointerUp={handleMouseUp}
+                onPointerLeave={handleMouseUp}
+                style={{ touchAction: 'none' }}
                 onWheel={handleWheel}
                 onContextMenu={(e) => e.preventDefault()}
                 onDrop={handleCanvasDrop}

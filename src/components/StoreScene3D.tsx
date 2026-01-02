@@ -13,6 +13,16 @@ interface StoreScene3DProps {
     onExit: () => void;
 }
 
+export interface MoveState {
+    forward: boolean;
+    backward: boolean;
+    left: boolean;
+    right: boolean;
+    sprint: boolean;
+    joystickMove: { x: number, y: number };
+    joystickLook: { x: number, y: number };
+}
+
 // Convert 2D layout coordinates to 3D world coordinates
 // 2D uses top-left origin, 3D uses center origin
 const SCALE = 0.05; // Scale down the 2D coordinates
@@ -118,7 +128,7 @@ function ShelfMesh({ aisle, rangeData = [], categoryMappings = {}, onSelect, sel
         const isVertical = ady > adx;
         const isPointingDown = isVertical && dy > 0; // P1 Top -> P2 Bottom
         const isPointingUp = isVertical && dy < 0;   // P1 Bottom -> P2 Top
-        const isPointingRight = !isVertical && dx > 0;
+        const _isPointingRight = !isVertical && dx > 0;
         const isPointingLeft = !isVertical && dx < 0;
 
         // Force Visual Top->Bottom / Left->Right order
@@ -416,9 +426,8 @@ function ShelfMesh({ aisle, rangeData = [], categoryMappings = {}, onSelect, sel
 }
 
 // First-person movement controls
-function WalkControls({ speed = 5 }: { speed?: number }) {
+function WalkControls({ speed = 5, moveState }: { speed?: number, moveState: React.MutableRefObject<MoveState> }) {
     const { camera } = useThree();
-    const moveState = useRef({ forward: false, backward: false, left: false, right: false, sprint: false });
 
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
@@ -450,8 +459,28 @@ function WalkControls({ speed = 5 }: { speed?: number }) {
     }, []);
 
     useFrame((_, delta) => {
-        const { forward, backward, left, right, sprint } = moveState.current;
-        if (!forward && !backward && !left && !right) return;
+        const { forward, backward, left, right, sprint, joystickMove, joystickLook } = moveState.current;
+
+        // 1. Rotation (Mobile Look)
+        if (joystickLook.x !== 0 || joystickLook.y !== 0) {
+            // Adjust sensitivity as needed
+            const lookSpeed = 1.5;
+            // Yaw (Y-axis)
+            camera.rotation.y -= joystickLook.x * lookSpeed * delta;
+            // Pitch (X-axis) - clamped
+            // Note: camera.rotation is Euler. 
+            // We need to be careful not to introduce Gimbal lock, but usually simple pitch clamp is fine for FPS.
+            // Using a temporary Euler to clamp
+            const newPitch = camera.rotation.x - (joystickLook.y * lookSpeed * delta);
+            camera.rotation.x = Math.max(-Math.PI / 2.2, Math.min(Math.PI / 2.2, newPitch));
+            // Reset Z to prevent rolling
+            camera.rotation.z = 0;
+            // Rotation order usually YXZ for FPS
+            camera.rotation.order = 'YXZ';
+        }
+
+        // 2. Movement
+        if (!forward && !backward && !left && !right && joystickMove.y === 0 && joystickMove.x === 0) return;
 
         // Get camera's forward direction (where it's looking)
         const forwardVec = new THREE.Vector3();
@@ -471,9 +500,18 @@ function WalkControls({ speed = 5 }: { speed?: number }) {
         if (right) movement.add(rightVec);
         if (left) movement.sub(rightVec);
 
+        // Add Joystick input (Analog)
+        // joystickMove.y is -1 (fwd) to 1 (back) or inverse? Usually joystick up is -1.
+        // Let's assume joystickMove.y < 0 is Forward.
+        if (joystickMove.y !== 0) movement.addScaledVector(forwardVec, -joystickMove.y);
+        if (joystickMove.x !== 0) movement.addScaledVector(rightVec, joystickMove.x);
+
         const currentSpeed = sprint ? speed * 2.5 : speed;
-        movement.normalize().multiplyScalar(currentSpeed * delta);
-        camera.position.add(movement);
+        const len = movement.length();
+        if (len > 0) {
+            movement.normalize().multiplyScalar(currentSpeed * delta);
+            camera.position.add(movement);
+        }
 
         // Keep camera at eye level
         camera.position.y = 1.6;
@@ -482,13 +520,112 @@ function WalkControls({ speed = 5 }: { speed?: number }) {
     return null;
 }
 
+// Mobile Controls Component
+const MobileControls = ({ moveState }: { moveState: React.MutableRefObject<MoveState> }) => {
+    const moveOrigin = useRef<{ x: number, y: number } | null>(null);
+    const lookOrigin = useRef<{ x: number, y: number } | null>(null);
+
+    const handleTouchStart = (e: React.TouchEvent, type: 'move' | 'look') => {
+        const touch = e.changedTouches[0];
+        if (type === 'move') {
+            moveOrigin.current = { x: touch.clientX, y: touch.clientY };
+        } else {
+            lookOrigin.current = { x: touch.clientX, y: touch.clientY };
+        }
+    };
+
+    const handleTouchMove = (e: React.TouchEvent, type: 'move' | 'look') => {
+        const touch = e.changedTouches[0];
+        const origin = type === 'move' ? moveOrigin.current : lookOrigin.current;
+        if (!origin) return;
+
+        const dx = touch.clientX - origin.x;
+        const dy = touch.clientY - origin.y;
+
+        // Max distance for full speed
+        const maxDist = 50;
+        const x = Math.max(-1, Math.min(1, dx / maxDist));
+        const y = Math.max(-1, Math.min(1, dy / maxDist));
+
+        if (type === 'move') {
+            // Invert Y for movement (Up is negative screen diff but positive forward)
+            // WalkControls expects -y to be forward? Let's check:
+            // if (joystickMove.y !== 0) movement.addScaledVector(forwardVec, -joystickMove.y);
+            // If I drag UP (dy < 0), I want to move forward.
+            // If dy < 0, y is neg. -y is pos. addScaled(vec, pos) -> forward. Correct.
+            moveState.current.joystickMove = { x, y };
+        } else {
+            // Look
+            // Drag Right (dx > 0) -> Yaw Right (neg rotation?).
+            // WalkControls: camera.rotation.y -= joystickLook.x
+            // If dx > 0, x > 0. Rotation -= pos -> rotate right (clockwise from top). Correct.
+            // Drag Up (dy < 0) -> Pitch Up (look up).
+            // WalkControls: newPitch = rot.x - (joystickLook.y)
+            // If dy < 0, y < 0. - (neg) = + pos. Pitch increases. Look down?
+            // Usually Pitch Up is positive to look up? No, usually X rotation positive is Look Down?
+            moveState.current.joystickLook = { x, y };
+        }
+    };
+
+    const handleTouchEnd = (_e: React.TouchEvent, type: 'move' | 'look') => {
+        if (type === 'move') {
+            moveOrigin.current = null;
+            moveState.current.joystickMove = { x: 0, y: 0 };
+        } else {
+            lookOrigin.current = null;
+            moveState.current.joystickLook = { x: 0, y: 0 };
+        }
+    };
+
+    // Styles for touch zones
+    const zoneStyle: React.CSSProperties = {
+        position: 'absolute',
+        bottom: 20,
+        width: 120,
+        height: 120,
+        background: 'rgba(255, 255, 255, 0.1)',
+        border: '2px solid rgba(255, 255, 255, 0.3)',
+        borderRadius: '50%',
+        touchAction: 'none',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        pointerEvents: 'auto'
+    };
+
+    return (
+        <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 100 }} className="mobile-controls">
+            {/* Move Zone (Left) */}
+            <div
+                style={{ ...zoneStyle, left: 20 }}
+                onTouchStart={(e) => handleTouchStart(e, 'move')}
+                onTouchMove={(e) => handleTouchMove(e, 'move')}
+                onTouchEnd={(e) => handleTouchEnd(e, 'move')}
+            >
+                <span style={{ fontSize: 24, opacity: 0.5 }}>🏃</span>
+            </div>
+
+            {/* Look Zone (Right) */}
+            <div
+                style={{ ...zoneStyle, right: 20 }}
+                onTouchStart={(e) => handleTouchStart(e, 'look')}
+                onTouchMove={(e) => handleTouchMove(e, 'look')}
+                onTouchEnd={(e) => handleTouchEnd(e, 'look')}
+            >
+                <span style={{ fontSize: 24, opacity: 0.5 }}>👀</span>
+            </div>
+        </div>
+    );
+};
+
 // Main 3D scene
-function Scene({ aisles, rangeData, categoryMappings, onSelect, selectedCategory }: {
+function Scene({ aisles, rangeData, categoryMappings, onSelect, selectedCategory, moveState }: {
     aisles: Aisle[],
     rangeData: any[],
     categoryMappings?: any,
     onSelect: (cat: string, stats?: any) => void,
-    selectedCategory?: string
+    selectedCategory?: string,
+    moveState: React.MutableRefObject<MoveState>
 }) {
     const controlsRef = useRef<any>(null);
     const { camera } = useThree();
@@ -618,7 +755,7 @@ function Scene({ aisles, rangeData, categoryMappings, onSelect, selectedCategory
             {/* First-person controls */}
             {/* First-person controls - only lock when clicking canvas, not UI */}
             <PointerLockControls ref={controlsRef} selector="#store-3d-canvas" />
-            <WalkControls speed={5} />
+            <WalkControls speed={5} moveState={moveState} />
         </>
     );
 }
@@ -627,6 +764,13 @@ function Scene({ aisles, rangeData, categoryMappings, onSelect, selectedCategory
 export function StoreScene3D({ aisles, rangeData = [], categoryMappings = {}, onExit }: StoreScene3DProps) {
     const [selectedCategory, setSelectedCategory] = useState<string | undefined>(undefined);
     const [selectedStats, setSelectedStats] = useState<any>(null);
+
+    // Shared state for movement (Keyboard + Mobile)
+    const moveState = useRef<MoveState>({
+        forward: false, backward: false, left: false, right: false, sprint: false,
+        joystickMove: { x: 0, y: 0 },
+        joystickLook: { x: 0, y: 0 }
+    });
 
     const handleSelect = useCallback((category: string, stats?: any) => {
         setSelectedCategory(category);
@@ -662,6 +806,7 @@ export function StoreScene3D({ aisles, rangeData = [], categoryMappings = {}, on
                     categoryMappings={categoryMappings}
                     onSelect={handleSelect}
                     selectedCategory={selectedCategory}
+                    moveState={moveState}
                 />
             </Canvas>
 
@@ -784,6 +929,9 @@ export function StoreScene3D({ aisles, rangeData = [], categoryMappings = {}, on
                     transform: 'translateX(-50%)',
                 }} />
             </div>
+
+            {/* Mobile Controls Overlay */}
+            <MobileControls moveState={moveState} />
         </div>
     );
 }
