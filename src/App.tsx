@@ -8,6 +8,7 @@ import { Toolbar } from './components/Toolbar';
 import { RangePanel } from './components/RangePanel';
 import { RangeDetails } from './components/RangeDetails';
 import { RangeMapper } from './components/RangeMapper';
+import { StoreScene3D } from './components/StoreScene3D';
 import { useHistory } from './hooks/useHistory';
 import { useClipboard } from './hooks/useClipboard';
 import { matchesRangeCategory } from './utils/categoryMatching';
@@ -100,6 +101,9 @@ function App() {
 
   // Print mode: B&W friendly rendering for Range view
   const [printMode, setPrintMode] = useState(false);
+
+  // 3D View mode
+  const [viewMode, setViewMode] = useState<'2d' | '3d'>('2d');
 
   // Get selected range activity for details panel
   // Get selected range activity for details panel
@@ -559,22 +563,29 @@ function App() {
         )}
 
         <main className="canvas-area">
-          <MapCanvas
-            aisles={layout.aisles}
-            selectedAisleIds={selectedAisleIds}
-            onSelectAisle={handleSelectionChange}
-            onUpdateAisle={handleUpdateAisle}
-            viewState={viewState}
-            onViewChange={setViewState}
-            editorSettings={editorSettings}
-            searchTerm={searchTerm}
-            rangeData={rangeData}
-            activeTab={activeTab}
-            printMode={printMode}
-            theme={theme}
-            customMappings={categoryMappings}
-            onAssignMapping={handleAssignMapping}
-          />
+          {viewMode === '3d' ? (
+            <StoreScene3D
+              aisles={layout.aisles}
+              onExit={() => setViewMode('2d')}
+            />
+          ) : (
+            <MapCanvas
+              aisles={layout.aisles}
+              selectedAisleIds={selectedAisleIds}
+              onSelectAisle={handleSelectionChange}
+              onUpdateAisle={handleUpdateAisle}
+              viewState={viewState}
+              onViewChange={setViewState}
+              editorSettings={editorSettings}
+              searchTerm={searchTerm}
+              rangeData={rangeData}
+              activeTab={activeTab}
+              printMode={printMode}
+              theme={theme}
+              customMappings={categoryMappings}
+              onAssignMapping={handleAssignMapping}
+            />
+          )}
         </main>
 
         {/* Print Summary Tables - Page 2 (hidden in normal view, shown when printing) */}
@@ -677,6 +688,13 @@ function App() {
                   onClick={() => setAppMode('edit')}
                 >
                   Edit
+                </button>
+                <button
+                  className={`mode-btn ${viewMode === '3d' ? 'active' : ''}`}
+                  onClick={() => setViewMode(viewMode === '3d' ? '2d' : '3d')}
+                  title="Toggle 3D Walkthrough (WASD to move, mouse to look)"
+                >
+                  🎮 3D
                 </button>
 
                 {/* Theme toggle */}
