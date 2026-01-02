@@ -17,6 +17,9 @@ export const DEFAULT_CATEGORY_MAPPINGS: Record<string, string> = {
     "Frozen Prep Poultry": "breaded poultry",
     "Frozen Meat, Burgers, Sausage": "processed meat, fish & poultry",
     "Prepacked Cooked Meats & Sandwich Fillings": "cooked meat inc pate",
+    "Prepacked Cooked Meats": "cooked meat inc pate",
+    "Canned Meat": "canned meats",
+    "Canned Meats & Spreads": "canned meats",
 
     // Bakery & Cakes
     "Bought in Cake": "cake inc. party cakes",
@@ -27,7 +30,9 @@ export const DEFAULT_CATEGORY_MAPPINGS: Record<string, string> = {
     "Pies & Pastries": "pies",
     "Frozen Pies": "pies",
     "Bought In Bread": "bread rolls|soft rolls & baps|morning goods",
+    "Bought in Morning Goods": "morning goods|croissants",
     "Oven Fresh": "oven fresh counter",
+    "Bakery World Foods": "speciality bread",
 
     // Pizza & Ready Meals
     "Freshly Made Pizza (in Store)": "pizza display",
@@ -38,23 +43,40 @@ export const DEFAULT_CATEGORY_MAPPINGS: Record<string, string> = {
     "Frozen Ready Meals": "ready meals",
     "Convenience Meals": "complete meals|con meals",
     "Prepared Foods - Pasta": "pasta & ambient chilled",
+    "Prepared Foods - Garlic Bread": "pizza & party food",
+    "Prepared Foods - Soup": "combined soup",
+    "Prep Food & Pasta": "pasta & ambient chilled",
+    "Ready to Cook (Sous Vide)": "ready to cook",
+    "Ready To Cook (Sous Vide)": "ready to cook",
 
     // Dairy & Chilled
     "Chilled Desserts": "desserts",
     "Dairy Yogurts": "natural, health yogs & func drinks|snacking, indulgent & kids yogs",
     "Deli Counter Inc Express": "express",
     "Salad Bar": "salad bar",
+    "Salad bar": "salad bar",
     "Fresh Produce Prep Veg": "bagged salad",
     "Fresh Produce Prep Salad": "bagged salad",
-    // "Sandwiches" - unmapped (no corresponding section)
+    "Sandwiches": "sandwich & meal accomps exc rolls",
+    "Sandwiches - Drinks": "food to go",
     "Speciality Cheeses": "speciality cheese",
     "Chilled Fruit Juices": "fruit juice",
     "Flavoured Milk and Coffee Drinks": "milk drinks|coffee & protein drinks",
+    "Fresh Milk, Daily Dairy & Cream": "milk",
+    "Milk Daily Dairy & Cream": "milk",
+    "Longlife Milks": "long life milk",
+    "Butter,Margarine & Fats": "fats",
+    "Grated & Sliced Cheese": "cheese",
+    "Pre-Packed Cheese": "cheese",
+    "Processed & Soft Cheese": "cheese",
+    "Eggs": "eggs",
 
     // Frozen
     "Frozen Ice Cream & Desserts": "ice cream & desserts inc bakery",
+    "Desserts, Puddings, Canned Milk, Ice Cream Accs": "ice cream & desserts inc bakery",
     "Frozen Vegetables": "vegetables",
     "Frozen Chips / Potatoes": "chips & potato products",
+    "Frozen Yorkshire Puddings": "vegetables",
 
     // Groceries
     "Sweet & Semi-Sweet Biscuits": "biscuit barrel & treats",
@@ -64,30 +86,51 @@ export const DEFAULT_CATEGORY_MAPPINGS: Record<string, string> = {
     "Soups": "combined soup",
     "Pickles": "pickles",
     "Cooking Oils and Vinegars": "oils inc. vinegar",
+    "Cooking Oils & Vinegars": "oils inc. vinegar",
     "Cooking Aids (Herbs & Spices)": "salt & herbs",
     "Packet Sauce": "sauce mix",
+    "Sauces, Mustards & Dressings": "sauces|mustards|dressings|condiments",
     "Home Baking": "dried fruit & nuts & flour",
     "Sugar And Sweeteners": "sugar",
     "Coffee & Beverages": "coffee & bevs",
+    "Tea": "tea",
+    "Hot Beverages (Hot Chocolate)": "coffee & bevs",
+    "Napolina Bay": "pasta",
+    "Whole Foods/Gravy/Stuffing": "gravy|stuffing",
+    "Beans And Pasta": "canned veg ingredients|pasta",
+    "Canned Fish": "canned fish",
 
     // Snacks & Confectionery
-    "Adult Snacks": "dried fruit & nuts & flour",
-    "Nuts & Snacks": "dried fruit & nuts & flour",
+    "Adult Snacks": "nuts",
+    "Nuts & Snacks": "dried fruit & nuts & flour|nuts|snacks",
     "Crisps & Snacks": "large multi crisps & snacks|small multi crisps & snacks|sharing exc. grocery nuts",
+    "Crisps In Baskets (Food To Go)": "food to go",
+    "Crispbreads / Crackers": "crackers|crispbread",
     "Chocolate Confectionery": "boxed & block chocolate|multipack confec|single confec",
     "Everyday Confectionery": "bagged sweets inc. gum & mint|lollies|multipack confec",
+    "Seasonal Confectionary": "seasonal",
 
     // Free From
     "Free From": "free from|free from combined",
     "Free From Frozen": "free from|free from combined",
     "Fresh Free From": "free from|free from combined",
+    "Free From Chilled": "free from",
+    "Dairy Free From": "free from",
 
-    // Alcohol - include variations for different naming formats
+    // Alcohol
     "All WINE (Wine 4 Week)": "red wine|white wine|rose wine",
     "All Wine (4 weekly)": "red wine|white wine|rose wine",
     "All Wine": "red wine|white wine|rose wine",
     "Beers": "bitter, ales & craft stout|bottled & canned lager|world lager",
+    "Lager": "bottled & canned lager|world lager",
     "Cider": "cider",
+    "No & Low Alcohol": "low alc & stubb|low alc|no alcohol|non alcoholic",
+    "Carbonates & Mixers": "carbonates|mixers|mixer",
+    "Spirits/Liqueurs/Cocktails": "spirits|liqueurs|cocktails|gin|vodka|whisky|rum",
+    "Party Drinks & Perry": "party drinks|perry",
+    "Fruit Juice & Drinks": "fruit juice|juice",
+    "Squash & Other Soft Drinks": "squash|cordial",
+    "Fortified Wines/Miscellaneous": "fortified wine",
 
     // Jams & Spreads
     "Jam,Marmalades & Sweet Spread": "preserves",
@@ -96,27 +139,38 @@ export const DEFAULT_CATEGORY_MAPPINGS: Record<string, string> = {
     // Household & Cleaning
     "Air Care": "air fresheners",
     "Cleaners": "cleaners",
+    "Cleaning": "cleaners",
     "Bleach Disinfecting Toiletcare": "bleach & wc products",
     "Washing Powders & Conditioners": "laundry liquids|laundry powder|fabric conditioners",
+    "Laundry": "laundry liquids|laundry powder|fabric conditioners",
     "Washing Up Aids": "washing up liquids",
     "Kitchen Towels": "kitchen towels",
     "Plastics & Foils, Refuse & Vac Bags": "foils, matches & insec",
     "Plastics & Foils": "foils, matches & insec",
+    "Refuse & Vac Bags": "bin bags",
     "Disposable Tableware": "disp. t/ware",
+    "Kitchen Plastics": "food prep",
+    "Food Storage": "food prep",
+    "Toilet Tissues": "toilet rolls",
 
     // Health & Beauty
     "Bathroom": "bathroom & room accs",
+    "Bathroom Accessories": "bathroom & room accs",
     "Bathcare": "bath inc sponges & accs",
     "Deodorants": "deod orants",
     "Haircare": "shampoo & conditioners|styling",
     "Skincare Core": "skincare",
+    "Suncare": "suncare",
     "Mens Toiletries": "mens shave & toiletries",
     "Sanitary Protection": "feminine hygiene",
     "Dental": "dentalcare",
+    "Medicinal": "healthcare",
+    "Health & Wellbeing": "healthcare",
 
     // Baby
     "Baby Foods": "baby food",
     "Baby Care": "baby milk|baby wipes & c/wool|feed & soothers",
+    "BabyCare": "baby milk|baby wipes & c/wool|feed & soothers",
 
     // Pets
     "Pet Care": "treats & pet food|dry dog food|dry cat food|wet cat food|wet dog small dog",
@@ -129,15 +183,40 @@ export const DEFAULT_CATEGORY_MAPPINGS: Record<string, string> = {
     "International Foods Oriental": "mexican, rice, indian, oriental",
     "International Foods Rice": "mexican, rice, indian, oriental",
     "Ambient World Foods": "mexican, rice, indian, oriental",
+    "World Foods - Ambient": "mexican, rice, indian, oriental",
+    "World Foods - Ambient ": "mexican, rice, indian, oriental",
 
     // Home & General
     "All Year Toys": "kids toys",
     "Bedding & Decor": "bed linen & home decor|pillows & quilts",
+    "Filled Bedding": "pillows & quilts",
     "Dine": "ceramic/dinnerware/tableware",
     "Glassware": "glassware",
     "Mugs": "ceramic/dinnerware/tableware",
+    "Bakeware": "cookware",
+    "Ovenware": "cookware",
+    "Panware": "cookware",
+    "Kitchen Tools": "utensils",
+    "Bulbs & Electrical Accessories": "electrical",
+    "Small Domestic Appliances": "electrical",
+    "Candles": "home accessories",
+    "Stationery": "stationery",
+    "Motoring": "car care",
+    "Party Zone": "party",
+    "Reusable Bags": "carrier bags",
+    "Storage": "storage",
 
-    // Ignored Categories (not on map yet)
+    // Fresh Produce
+    "Fresh Produce Fruit": "fruit",
+    "Fresh Produce Prep Fruit": "fruit",
+    // Duplicates removed (Prep Salad/Veg matched in lines 58-59)
+    "Fresh Produce Total Veg": "vegetables",
+    "Salads & Sundry Fresh Foods": "salad",
+
+    // Tobacco / Kiosk
+    "Tobacco Products (Splits)": "kiosk",
+
+    // Ignored Categories / Checkouts
     "3 for £10": "IGNORE_ITEM",
     "Checkouts - Confec": "IGNORE_ITEM",
     "Checkouts - Crisps": "IGNORE_ITEM",
@@ -151,13 +230,15 @@ export const DEFAULT_CATEGORY_MAPPINGS: Record<string, string> = {
     "Checkouts - Seasonal Confec": "IGNORE_ITEM",
     "Checkouts - Soft Drinks": "IGNORE_ITEM",
     "Checkouts - Vape": "IGNORE_ITEM",
+    "Clipstrips": "IGNORE_ITEM",
     "Frozen Applied Nutrition": "IGNORE_ITEM",
     "Frozen Meat Free": "IGNORE_ITEM",
     "Frozen World Foods": "IGNORE_ITEM",
-    "Frozen Yorkshire Puddings": "IGNORE_ITEM",
-    "World Foods - Ambient": "IGNORE_ITEM",
-    "World Foods - Ambient ": "IGNORE_ITEM",
     "World Foods - Fresh": "IGNORE_ITEM",
     "Fresh World Foods": "IGNORE_ITEM",
     "JML": "IGNORE_ITEM",
+    "Branded Bay": "IGNORE_ITEM",
+    "Branded Bay - Meal Sols": "IGNORE_ITEM",
+    "Speciality / PBA": "IGNORE_ITEM", // Or map to speciality?
+    "Foil Trays Meat & Fish": "IGNORE_ITEM"
 };

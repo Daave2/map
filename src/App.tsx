@@ -85,9 +85,12 @@ function App() {
     layout.aisles.forEach(a => {
       if (a.sections) {
         a.sections.forEach(s => categories.add(s.category));
-      } else {
-        // Add fixed labels if appropriate (usually aisle labels are generic, but sometimes useful)
-        // categories.add(a.label); 
+      }
+      // Also check promo ends
+      if (a.promoEnds) {
+        Object.values(a.promoEnds).forEach(pe => {
+          if (pe && pe.label) categories.add(pe.label); // Promo ends use 'label' as their category equivalent
+        });
       }
     });
     return Array.from(categories);
@@ -106,14 +109,11 @@ function App() {
   const [viewMode, setViewMode] = useState<'2d' | '3d'>('2d');
 
   // Get selected range activity for details panel
-  // Get selected range activity for details panel
   const selectedRangeActivity = rangeData.find(r => r.category === selectedRangeCategory) || null;
   // Compute match reason if a section is selected
 
   // Wait, selectedAisleIds refers to AISLES. RangeDetails usually shows simply the selected RANGE item.
   // But if I clicked a SECTION, I want to know why THAT section matched.
-  // MapCanvas handles visuals. App handles logic.
-  // I need to know the SECTION associated with the selection.
   // Actually, MapCanvas onSelectAisle passes aisle ID.
   // If I click a section, MapCanvas passes `aisleId`. The `sectionIndex` is local to MapCanvas?
   // No, `onSelectAisle(id)` selects the whole aisle usually.
@@ -566,6 +566,8 @@ function App() {
           {viewMode === '3d' ? (
             <StoreScene3D
               aisles={layout.aisles}
+              rangeData={rangeData}
+              categoryMappings={categoryMappings}
               onExit={() => setViewMode('2d')}
             />
           ) : (
@@ -596,15 +598,24 @@ function App() {
             const mapping = categoryMappings[category];
             if (mapping && mapping !== 'IGNORE_ITEM') return false;
             if (mapping === 'IGNORE_ITEM') return false;
-            // Simple check - if category name appears in any section
-            const hasMatch = layout.aisles.some(aisle =>
+
+            // Check matches in AISLE SECTIONS
+            const hasSectionMatch = layout.aisles.some(aisle =>
               aisle.sections?.some(section => {
-                const sectionCat = (section.category || '').toLowerCase();
-                const rangeCat = category.toLowerCase();
-                return sectionCat.includes(rangeCat) || rangeCat.includes(sectionCat);
+                const match = matchesRangeCategory(section.category, category);
+                return match.matched;
               })
             );
-            return !hasMatch;
+            if (hasSectionMatch) return false;
+
+            // Check matches in PROMO ENDS
+            const hasPromoMatch = layout.aisles.some(aisle =>
+              aisle.promoEnds && Object.values(aisle.promoEnds).some(pe => {
+                const match = matchesRangeCategory(pe?.label || '', category);
+                return match.matched;
+              })
+            );
+            return !hasPromoMatch;
           });
           const mappedActivities = rangeData.filter(r => !unmappedCategories.includes(r.category));
 

@@ -495,39 +495,29 @@ export const PDF_ACCURATE_LAYOUT: MapLayout = {
             "label": "17|16",
             "type": "gondola",
             "p1": [
-                180,
+                160,
                 880
             ],
             "p2": [
-                180,
+                160,
                 580
             ],
             "aisleWidth": 30,
             "locked": false,
             "sections": [
                 {
-                    "bay": "627",
-                    "category": "fan & party",
-                    "side": "L"
-                },
-                {
-                    "bay": "2007",
-                    "category": "roll & frozen bakery",
+                    "bay": "4229",
+                    "category": "natural meat, fish & poultry",
                     "side": "L"
                 },
                 {
                     "bay": "631",
-                    "category": "ready meals",
+                    "category": "meat free",
                     "side": "L"
                 },
                 {
                     "bay": "647",
                     "category": "ready meals",
-                    "side": "L"
-                },
-                {
-                    "bay": "2343",
-                    "category": "lollies",
                     "side": "L"
                 },
                 {
@@ -543,9 +533,19 @@ export const PDF_ACCURATE_LAYOUT: MapLayout = {
             ],
             "promoEnds": {
                 "front": {
-                    "code": "1166",
+                    "code": "1186",
                     "label": "frozen promo 2",
                     "name": "Frozen Promo 2"
+                },
+                "frontLeft": {
+                    "code": "2343",
+                    "label": "ice lollies",
+                    "name": "Ice Lollies"
+                },
+                "frontRight": {
+                    "code": "2343",
+                    "label": "ice lollies",
+                    "name": "Ice Lollies"
                 },
                 "back": {
                     "code": "1157",
@@ -569,11 +569,11 @@ export const PDF_ACCURATE_LAYOUT: MapLayout = {
             "label": "16|15",
             "type": "gondola",
             "p1": [
-                260,
+                255,
                 880
             ],
             "p2": [
-                260,
+                255,
                 580
             ],
             "aisleWidth": 30,
@@ -585,7 +585,17 @@ export const PDF_ACCURATE_LAYOUT: MapLayout = {
                     "side": "L"
                 },
                 {
-                    "bay": "1070",
+                    "bay": "660",
+                    "category": "york. pudd",
+                    "side": "L"
+                },
+                {
+                    "bay": "4500",
+                    "category": "clearance stock",
+                    "side": "R"
+                },
+                {
+                    "bay": "1079",
                     "category": "toilet rolls",
                     "side": "R"
                 }
@@ -597,19 +607,24 @@ export const PDF_ACCURATE_LAYOUT: MapLayout = {
                     "name": "Frozen Promo 3"
                 },
                 "frontLeft": {
-                    "code": "3689",
-                    "label": "htc 3",
-                    "name": "HTC 3"
+                    "code": "4631",
+                    "label": "I.A paper promo",
+                    "name": "IA Paper Promo"
                 },
                 "frontRight": {
                     "code": "767",
-                    "label": "mat",
-                    "name": "Mat"
+                    "label": "mat stand",
+                    "name": "Mat Stand"
                 },
                 "back": {
                     "code": "938",
                     "label": "fresh promo end 2",
                     "name": "Fresh Promo 2"
+                },
+                "backLeft": {
+                    "code": "4141",
+                    "label": "coke stand",
+                    "name": "Coke Stand"
                 },
                 "backRight": {
                     "code": "3713",
@@ -645,55 +660,40 @@ export const PDF_ACCURATE_LAYOUT: MapLayout = {
                 },
                 {
                     "bay": "4209",
-                    "category": "foils, matches & insec",
+                    "category": "foils, bin liners matches & insec",
                     "side": "L"
                 },
                 {
-                    "bay": "842",
-                    "category": "pet & DIY",
+                    "bay": "534",
+                    "category": "DIY & motor",
                     "side": "L"
                 },
                 {
-                    "bay": "554",
-                    "category": "fabric conditioners",
-                    "side": "R"
-                },
-                {
-                    "bay": "753",
-                    "category": "unit dose",
-                    "side": "R"
-                },
-                {
-                    "bay": "750",
-                    "category": "laundry powder",
-                    "side": "R"
-                },
-                {
-                    "bay": "752",
-                    "category": "pre-treat",
+                    "bay": "4329",
+                    "category": "all laundry",
                     "side": "R"
                 }
             ],
             "promoEnds": {
                 "front": {
-                    "code": "805",
-                    "label": "motoring",
-                    "name": "Motoring"
+                    "code": "2864",
+                    "label": "household 3 promo",
+                    "name": "Household 3 Promo"
                 },
                 "frontLeft": {
-                    "code": "4346",
-                    "label": "house ship",
-                    "name": "House Ship"
-                },
-                "frontRight": {
-                    "code": "3739",
+                    "code": "3729",
                     "label": "ship 27",
                     "name": "Ship 27"
                 },
+                "frontRight": {
+                    "code": "3720",
+                    "label": "ship 26",
+                    "name": "Ship 26"
+                },
                 "back": {
-                    "code": "2863",
-                    "label": "household 2 promo",
-                    "name": "Household 2 Promo"
+                    "code": "4240",
+                    "label": "branded promo",
+                    "name": "Branded Promo"
                 },
                 "backLeft": {
                     "code": "2961",
@@ -702,8 +702,8 @@ export const PDF_ACCURATE_LAYOUT: MapLayout = {
                 },
                 "backRight": {
                     "code": "2918",
-                    "label": "h 21",
-                    "name": "H 21"
+                    "label": "hh 2l",
+                    "name": "HH 2L"
                 }
             }
         },
@@ -723,8 +723,8 @@ export const PDF_ACCURATE_LAYOUT: MapLayout = {
             "locked": false,
             "sections": [
                 {
-                    "bay": "747",
-                    "category": "laundry liquids",
+                    "bay": "4329",
+                    "category": "all laundry",
                     "side": "L"
                 },
                 {
@@ -738,13 +738,18 @@ export const PDF_ACCURATE_LAYOUT: MapLayout = {
                     "side": "L"
                 },
                 {
+                    "bay": "4563",
+                    "category": "JML",
+                    "side": "L"
+                },
+                {
                     "bay": "4182",
                     "category": "bleach & wc products",
                     "side": "R"
                 },
                 {
                     "bay": "4208",
-                    "category": "cleaners/disinfectant & polish",
+                    "category": "cleaners, disinfectant & polish",
                     "side": "R"
                 },
                 {
@@ -760,14 +765,9 @@ export const PDF_ACCURATE_LAYOUT: MapLayout = {
             ],
             "promoEnds": {
                 "front": {
-                    "code": "4240",
-                    "label": "branded promo",
-                    "name": "Branded Promo"
-                },
-                "frontLeft": {
-                    "code": "3720",
-                    "label": "ship 26",
-                    "name": "Ship 26"
+                    "code": "4648",
+                    "label": "gum end",
+                    "name": "Gum End"
                 },
                 "frontRight": {
                     "code": "22",
@@ -786,8 +786,8 @@ export const PDF_ACCURATE_LAYOUT: MapLayout = {
                 },
                 "backRight": {
                     "code": "2917",
-                    "label": "h 11",
-                    "name": "H 11"
+                    "label": "hh 1l",
+                    "name": "HH 1L"
                 }
             }
         },
@@ -827,8 +827,8 @@ export const PDF_ACCURATE_LAYOUT: MapLayout = {
                     "side": "L"
                 },
                 {
-                    "bay": "3763",
-                    "category": "treats & pet food",
+                    "bay": "3263",
+                    "category": "fresh & frozen pet food",
                     "side": "R"
                 },
                 {
@@ -849,7 +849,7 @@ export const PDF_ACCURATE_LAYOUT: MapLayout = {
                     "name": "Batteries"
                 },
                 "frontLeft": {
-                    "code": "239",
+                    "code": "235",
                     "label": "battery stand",
                     "name": "Battery Stand"
                 },
@@ -864,9 +864,9 @@ export const PDF_ACCURATE_LAYOUT: MapLayout = {
                     "name": "Household Ship"
                 },
                 "backRight": {
-                    "code": "4340",
-                    "label": "pet",
-                    "name": "Pet"
+                    "code": "2922",
+                    "label": "pet 2l",
+                    "name": "Pet 2L"
                 }
             }
         },
@@ -896,7 +896,7 @@ export const PDF_ACCURATE_LAYOUT: MapLayout = {
                     "side": "L"
                 },
                 {
-                    "bay": "638",
+                    "bay": "538",
                     "category": "dry cat food",
                     "side": "L"
                 },
@@ -911,21 +911,26 @@ export const PDF_ACCURATE_LAYOUT: MapLayout = {
                     "side": "R"
                 },
                 {
-                    "bay": "3826",
-                    "category": "cosmetics",
+                    "bay": "3828",
+                    "category": "Combined cosmetics",
                     "side": "R"
                 }
             ],
             "promoEnds": {
                 "front": {
-                    "code": "4049",
-                    "label": "vape",
-                    "name": "Vape"
+                    "code": "4940",
+                    "label": "bws 7 promo",
+                    "name": "BWS 7 Promo"
+                },
+                "frontLeft": {
+                    "code": "3921",
+                    "label": "3921",
+                    "name": "3921"
                 },
                 "frontRight": {
-                    "code": "22",
-                    "label": "ship",
-                    "name": "Ship"
+                    "code": "3921",
+                    "label": "3921",
+                    "name": "3921"
                 },
                 "back": {
                     "code": "2866",
@@ -1138,13 +1143,13 @@ export const PDF_ACCURATE_LAYOUT: MapLayout = {
                     "side": "L"
                 },
                 {
-                    "bay": "64",
+                    "bay": "164",
                     "category": "baby wipes & c/wool",
                     "side": "L"
                 },
                 {
                     "bay": "157",
-                    "category": "toiletries",
+                    "category": "baby toiletries",
                     "side": "L"
                 },
                 {
@@ -1155,14 +1160,19 @@ export const PDF_ACCURATE_LAYOUT: MapLayout = {
             ],
             "promoEnds": {
                 "front": {
+                    "code": "2240",
+                    "label": "bags for life",
+                    "name": "Bags For Life"
+                },
+                "frontLeft": {
                     "code": "3945",
                     "label": "meds promo",
                     "name": "Meds Promo"
                 },
-                "frontLeft": {
-                    "code": "22",
-                    "label": "ship",
-                    "name": "Ship"
+                "frontRight": {
+                    "code": "1088",
+                    "label": "lunch",
+                    "name": "Lunch"
                 },
                 "back": {
                     "code": "3024",
@@ -1171,13 +1181,13 @@ export const PDF_ACCURATE_LAYOUT: MapLayout = {
                 },
                 "backLeft": {
                     "code": "3026",
-                    "label": "bab 1r",
-                    "name": "Baby 1R"
+                    "label": "bob 1r",
+                    "name": "Bob 1R"
                 },
                 "backRight": {
                     "code": "3025",
-                    "label": "b 11",
-                    "name": "Baby 11"
+                    "label": "bob 11",
+                    "name": "Bob 11"
                 }
             }
         },
@@ -1739,28 +1749,28 @@ export const PDF_ACCURATE_LAYOUT: MapLayout = {
             "locked": false,
             "sections": [
                 {
+                    "bay": "916",
+                    "category": "pork"
+                },
+                {
+                    "bay": "3885",
+                    "category": "slow cooked"
+                },
+                {
+                    "bay": "989",
+                    "category": "seasonal"
+                },
+                {
+                    "bay": "506",
+                    "category": "breaded poultry"
+                },
+                {
                     "bay": "3274",
                     "category": "poultry portions & whole birds inc turkey"
                 },
                 {
-                    "bay": "167",
-                    "category": "bacon joints"
-                },
-                {
-                    "bay": "165",
-                    "category": "bacon"
-                },
-                {
-                    "bay": "975",
-                    "category": "sausages"
-                },
-                {
-                    "bay": "566",
-                    "category": "breaded poultry"
-                },
-                {
-                    "bay": "989",
-                    "category": "seas"
+                    "bay": "169",
+                    "category": "bacon, gammon & sausages"
                 }
             ]
         },
@@ -1780,20 +1790,20 @@ export const PDF_ACCURATE_LAYOUT: MapLayout = {
             "locked": false,
             "sections": [
                 {
-                    "bay": "3885",
-                    "category": "slow cooked"
-                },
-                {
-                    "bay": "1370",
-                    "category": "pork & lamb"
-                },
-                {
                     "bay": "797",
                     "category": "mince"
                 },
                 {
-                    "bay": "1718",
-                    "category": "beef inc. steak bar"
+                    "bay": "4975",
+                    "category": "beef inc lamb"
+                },
+                {
+                    "bay": "4899",
+                    "category": "meat & fish foil trays"
+                },
+                {
+                    "bay": "4897",
+                    "category": "isp primal meats"
                 }
             ]
         },
@@ -1802,12 +1812,12 @@ export const PDF_ACCURATE_LAYOUT: MapLayout = {
             "label": "Wall 3 - Butchery",
             "type": "counter",
             "p1": [
-                320.7501253928203,
-                46.25
+                293.3896726006604,
+                44.18506016662945
             ],
             "p2": [
-                407.1491068343398,
-                46.25
+                379.7886540421799,
+                44.18506016662945
             ],
             "aisleWidth": 27.5,
             "locked": false,
@@ -1817,8 +1827,8 @@ export const PDF_ACCURATE_LAYOUT: MapLayout = {
                     "category": "butchery counter"
                 },
                 {
-                    "bay": "CUTTING",
-                    "category": "cutting table"
+                    "bay": "1531",
+                    "category": "butchery counter"
                 }
             ]
         },
@@ -1962,14 +1972,14 @@ export const PDF_ACCURATE_LAYOUT: MapLayout = {
             "label": "Wall 9 - Hot Food",
             "type": "counter",
             "p1": [
-                943.84709564282,
-                103.47521972405046
+                977.9118628017893,
+                130.55672792831533
             ],
             "p2": [
-                1093.84709564282,
-                103.47521972405046
+                1075.2341781686598,
+                130.55672792831533
             ],
-            "aisleWidth": 25,
+            "aisleWidth": 24.024780275949524,
             "locked": false,
             "sections": [
                 {
@@ -2020,30 +2030,30 @@ export const PDF_ACCURATE_LAYOUT: MapLayout = {
             "label": "Wall 12 - Addition Pallets",
             "type": "promo",
             "p1": [
-                1700.4269104034906,
-                204.72685032172416
+                1684.0216488304711,
+                194.33398867741187
             ],
             "p2": [
-                1700.4269104034906,
-                385.73911907223686
+                1684.0216488304711,
+                150.8529754115639
             ],
-            "aisleWidth": 43.9877312494873,
+            "aisleWidth": 140.18434509563713,
             "locked": false,
             "sections": [
                 {
                     "bay": "3166",
-                    "category": "addition pallet 2"
+                    "category": "BWS Pallet"
                 },
                 {
                     "bay": "3165",
-                    "category": "addition pallet 1"
+                    "category": "FOS white pallet 1"
                 },
                 {
                     "bay": "3167",
-                    "category": "addition BWS pallet"
+                    "category": "FOS white pallet 2"
                 }
             ],
-            "rotation": 90
+            "rotation": 359.9410879230263
         },
         {
             "id": "Wall-13",
@@ -2134,11 +2144,11 @@ export const PDF_ACCURATE_LAYOUT: MapLayout = {
             "label": "34|33",
             "type": "chilled",
             "p1": [
-                220,
+                165,
                 500
             ],
             "p2": [
-                220,
+                165,
                 200
             ],
             "aisleWidth": 30,
@@ -2150,8 +2160,8 @@ export const PDF_ACCURATE_LAYOUT: MapLayout = {
                     "side": "L"
                 },
                 {
-                    "bay": "3198",
-                    "category": "coffee & protein drinks",
+                    "bay": "1162",
+                    "category": "quick sale",
                     "side": "L"
                 },
                 {
@@ -2160,18 +2170,13 @@ export const PDF_ACCURATE_LAYOUT: MapLayout = {
                     "side": "L"
                 },
                 {
-                    "bay": "2424",
-                    "category": "speciality cheese",
+                    "bay": "4961",
+                    "category": "ready meals & soup excludes meat free",
                     "side": "R"
                 },
                 {
-                    "bay": "2425",
-                    "category": "grated, sliced & block cheese",
-                    "side": "R"
-                },
-                {
-                    "bay": "1638",
-                    "category": "snacking cheese",
+                    "bay": "3887",
+                    "category": "meat free alternatives",
                     "side": "R"
                 }
             ],
@@ -2180,6 +2185,11 @@ export const PDF_ACCURATE_LAYOUT: MapLayout = {
                     "code": "1149",
                     "label": "fresh promo end 4",
                     "name": "Fresh Promo End 4"
+                },
+                "frontLeft": {
+                    "code": "970",
+                    "label": "salami stand",
+                    "name": "Salami Stand"
                 },
                 "frontRight": {
                     "code": "3677",
@@ -2208,34 +2218,34 @@ export const PDF_ACCURATE_LAYOUT: MapLayout = {
             "label": "33|32",
             "type": "chilled",
             "p1": [
-                300,
+                260,
                 500
             ],
             "p2": [
-                300,
+                260,
                 200
             ],
             "aisleWidth": 30,
             "locked": false,
             "sections": [
                 {
-                    "bay": "570",
-                    "category": "pasta & ambient chilled",
+                    "bay": "4902",
+                    "category": "egg ship",
                     "side": "L"
                 },
                 {
-                    "bay": "3151",
-                    "category": "fresh 6 g.m.",
+                    "bay": "605",
+                    "category": "desserts",
                     "side": "L"
                 },
                 {
-                    "bay": "910",
-                    "category": "pies",
+                    "bay": "4961",
+                    "category": "ready meals & soup excludes meat free",
                     "side": "L"
                 },
                 {
-                    "bay": "1162",
-                    "category": "quick sale",
+                    "bay": "4950",
+                    "category": "licensed meal deals",
                     "side": "L"
                 },
                 {
@@ -2249,8 +2259,8 @@ export const PDF_ACCURATE_LAYOUT: MapLayout = {
                     "side": "R"
                 },
                 {
-                    "bay": "3488",
-                    "category": "natural, health yogs & func drinks",
+                    "bay": "1635",
+                    "category": "combined yoghurts",
                     "side": "R"
                 }
             ],
@@ -2277,12 +2287,12 @@ export const PDF_ACCURATE_LAYOUT: MapLayout = {
             "label": "32|31",
             "type": "chilled",
             "p1": [
-                380,
+                350,
                 500
             ],
             "p2": [
-                380,
-                200
+                350,
+                205
             ],
             "aisleWidth": 30,
             "locked": false,
@@ -2293,23 +2303,23 @@ export const PDF_ACCURATE_LAYOUT: MapLayout = {
                     "side": "L"
                 },
                 {
-                    "bay": "605",
-                    "category": "desserts",
+                    "bay": "4965",
+                    "category": "coffee drinks",
                     "side": "L"
                 },
                 {
-                    "bay": "3492",
-                    "category": "snacking, indulgent & kids yogs",
-                    "side": "L"
-                },
-                {
-                    "bay": "3488",
-                    "category": "natural, health yogs & func drinks",
+                    "bay": "1635",
+                    "category": "combined yoghurts",
                     "side": "L"
                 },
                 {
                     "bay": "3467",
                     "category": "free from combined",
+                    "side": "R"
+                },
+                {
+                    "bay": "2474",
+                    "category": "free from",
                     "side": "R"
                 },
                 {
@@ -2351,19 +2361,24 @@ export const PDF_ACCURATE_LAYOUT: MapLayout = {
             "label": "31|30",
             "type": "gondola",
             "p1": [
-                460,
+                440,
                 500
             ],
             "p2": [
-                460,
-                200
+                440,
+                190
             ],
             "aisleWidth": 30,
             "locked": false,
             "sections": [
                 {
-                    "bay": "369",
-                    "category": "cake inc. party cakes",
+                    "bay": "368",
+                    "category": "party cakes",
+                    "side": "L"
+                },
+                {
+                    "bay": "917",
+                    "category": "cakes",
                     "side": "L"
                 },
                 {
@@ -2372,8 +2387,13 @@ export const PDF_ACCURATE_LAYOUT: MapLayout = {
                     "side": "L"
                 },
                 {
-                    "bay": "3538",
-                    "category": "sandwich & meal accomps exc rolls",
+                    "bay": "2373",
+                    "category": "free",
+                    "side": "L"
+                },
+                {
+                    "bay": "3267",
+                    "category": "salad & meal accomps",
                     "side": "R"
                 },
                 {
@@ -2388,15 +2408,15 @@ export const PDF_ACCURATE_LAYOUT: MapLayout = {
                 },
                 {
                     "bay": "4006",
-                    "category": "cake promo",
+                    "category": "promo",
                     "side": "R"
                 }
             ],
             "promoEnds": {
                 "front": {
-                    "code": "2841",
-                    "label": "grocery & impulse 6B promo",
-                    "name": "G&I 6B Promo"
+                    "code": "2863",
+                    "label": "household 2 promo",
+                    "name": "Household 2 Promo"
                 },
                 "frontLeft": {
                     "code": "3736",
@@ -2404,9 +2424,9 @@ export const PDF_ACCURATE_LAYOUT: MapLayout = {
                     "name": "SM"
                 },
                 "frontRight": {
-                    "code": "2933",
-                    "label": "g&i6B right",
-                    "name": "G&I 6B Right"
+                    "code": "9488",
+                    "label": "g&i right",
+                    "name": "G&I Right"
                 },
                 "back": {
                     "code": "4007",
@@ -2415,13 +2435,13 @@ export const PDF_ACCURATE_LAYOUT: MapLayout = {
                 },
                 "backLeft": {
                     "code": "1161",
-                    "label": "bread clear",
-                    "name": "Bread Clear"
+                    "label": "clear",
+                    "name": "Clear"
                 },
                 "backRight": {
                     "code": "3722",
-                    "label": "ship 25",
-                    "name": "Ship 25"
+                    "label": "ship 29",
+                    "name": "Ship 29"
                 }
             }
         },
@@ -2430,19 +2450,19 @@ export const PDF_ACCURATE_LAYOUT: MapLayout = {
             "label": "30|29",
             "type": "gondola",
             "p1": [
-                535.4868239561207,
-                502.25658802193965
+                515.4868239561207,
+                485
             ],
             "p2": [
-                535.4868239561207,
+                515.4868239561207,
                 202.25658802193965
             ],
             "aisleWidth": 30,
             "locked": false,
             "sections": [
                 {
-                    "bay": "3379",
-                    "category": "bread rolls",
+                    "bay": "3267",
+                    "category": "sandwich & meal accomps",
                     "side": "L"
                 },
                 {
@@ -2461,7 +2481,7 @@ export const PDF_ACCURATE_LAYOUT: MapLayout = {
                     "side": "L"
                 },
                 {
-                    "bay": "3352",
+                    "bay": "3362",
                     "category": "family & kids cereal",
                     "side": "R"
                 },
@@ -2484,13 +2504,13 @@ export const PDF_ACCURATE_LAYOUT: MapLayout = {
                 },
                 "backLeft": {
                     "code": "3708",
-                    "label": "ship 15",
-                    "name": "Ship 15"
+                    "label": "ship",
+                    "name": "Ship"
                 },
                 "backRight": {
                     "code": "3707",
-                    "label": "ship 13",
-                    "name": "Ship 13"
+                    "label": "ship 15",
+                    "name": "Ship 15"
                 }
             }
         },
@@ -2499,11 +2519,11 @@ export const PDF_ACCURATE_LAYOUT: MapLayout = {
             "label": "29|28",
             "type": "gondola",
             "p1": [
-                620,
+                600,
                 500
             ],
             "p2": [
-                620,
+                600,
                 200
             ],
             "aisleWidth": 30,
@@ -2573,11 +2593,11 @@ export const PDF_ACCURATE_LAYOUT: MapLayout = {
             "label": "28|27",
             "type": "gondola",
             "p1": [
-                700,
+                690,
                 500
             ],
             "p2": [
-                700,
+                690,
                 200
             ],
             "aisleWidth": 30,
@@ -2647,16 +2667,21 @@ export const PDF_ACCURATE_LAYOUT: MapLayout = {
             "label": "27|26",
             "type": "gondola",
             "p1": [
-                780,
+                765,
                 500
             ],
             "p2": [
-                780,
+                765,
                 200
             ],
             "aisleWidth": 30,
             "locked": false,
             "sections": [
+                {
+                    "bay": "2119",
+                    "category": "ethnic combined",
+                    "side": "L"
+                },
                 {
                     "bay": "492",
                     "category": "oils inc. vinegar",
@@ -2664,12 +2689,12 @@ export const PDF_ACCURATE_LAYOUT: MapLayout = {
                 },
                 {
                     "bay": "681",
-                    "category": "gravy, stuffing whole foods",
+                    "category": "gravy, stuffing meat free & whole foods",
                     "side": "L"
                 },
                 {
-                    "bay": "972",
-                    "category": "sauce mix",
+                    "bay": "1161",
+                    "category": "groc clear",
                     "side": "L"
                 },
                 {
@@ -2726,24 +2751,24 @@ export const PDF_ACCURATE_LAYOUT: MapLayout = {
             "label": "26|25",
             "type": "gondola",
             "p1": [
-                860,
+                835,
                 500
             ],
             "p2": [
-                860,
+                835,
                 200
             ],
             "aisleWidth": 30,
             "locked": false,
             "sections": [
                 {
-                    "bay": "485",
-                    "category": "con meals",
+                    "bay": "181",
+                    "category": "beans & pasta",
                     "side": "L"
                 },
                 {
                     "bay": "342",
-                    "category": "canned meats & spreads",
+                    "category": "canned veg & spreads",
                     "side": "L"
                 },
                 {
@@ -2752,21 +2777,21 @@ export const PDF_ACCURATE_LAYOUT: MapLayout = {
                     "side": "L"
                 },
                 {
-                    "bay": "3423",
-                    "category": "canned veg ingredients",
+                    "bay": "4682",
+                    "category": "con meals inc. ambient meals",
                     "side": "R"
                 },
                 {
-                    "bay": "181",
-                    "category": "beans & pasta",
+                    "bay": "349",
+                    "category": "combined soup",
                     "side": "R"
                 }
             ],
             "promoEnds": {
                 "front": {
-                    "code": "SVB",
-                    "label": "SHELVED VOLUME BAY promo",
-                    "name": "SVB Promo"
+                    "code": "SH2605",
+                    "label": "V events Bay promo",
+                    "name": "V Events Bay Promo"
                 },
                 "frontLeft": {
                     "code": "3731",
@@ -2774,14 +2799,14 @@ export const PDF_ACCURATE_LAYOUT: MapLayout = {
                     "name": "SM"
                 },
                 "frontRight": {
-                    "code": "3711",
-                    "label": "ship",
-                    "name": "Ship"
+                    "code": "3710",
+                    "label": "ship 18",
+                    "name": "Ship 18"
                 },
                 "back": {
-                    "code": "4013",
-                    "label": "MS end 1",
-                    "name": "MS End 1"
+                    "code": "4838",
+                    "label": "the best end",
+                    "name": "The Best End"
                 },
                 "backLeft": {
                     "code": "3702",
@@ -2789,9 +2814,9 @@ export const PDF_ACCURATE_LAYOUT: MapLayout = {
                     "name": "Ship 19"
                 },
                 "backRight": {
-                    "code": "4341",
-                    "label": "fam pack",
-                    "name": "Fam Pack"
+                    "code": "3724",
+                    "label": "ship 5",
+                    "name": "Ship 5"
                 }
             }
         },
@@ -2800,34 +2825,39 @@ export const PDF_ACCURATE_LAYOUT: MapLayout = {
             "label": "25|24",
             "type": "gondola",
             "p1": [
-                940,
+                910,
                 500
             ],
             "p2": [
-                940,
+                910,
                 200
             ],
             "aisleWidth": 30,
             "locked": false,
             "sections": [
                 {
-                    "bay": "3424",
-                    "category": "canned veg meal accomp",
+                    "bay": "710",
+                    "category": "indian",
                     "side": "L"
                 },
                 {
-                    "bay": "1161",
-                    "category": "groc. clear",
+                    "bay": "3186",
+                    "category": "dried pasta inc pasta sauce & trad sauce",
                     "side": "L"
                 },
                 {
-                    "bay": "349",
-                    "category": "combined soup",
+                    "bay": "972",
+                    "category": "sauce mix",
                     "side": "L"
                 },
                 {
-                    "bay": "3926",
-                    "category": "mexican, rice, indian, oriental",
+                    "bay": "958",
+                    "category": "rice",
+                    "side": "R"
+                },
+                {
+                    "bay": "789",
+                    "category": "mexican",
                     "side": "R"
                 }
             ],
@@ -2838,14 +2868,14 @@ export const PDF_ACCURATE_LAYOUT: MapLayout = {
                     "name": "G&I 9B Promo"
                 },
                 "frontLeft": {
-                    "code": "3676",
-                    "label": "sm",
-                    "name": "SM"
+                    "code": "3687",
+                    "label": "eye 2",
+                    "name": "Eye 2"
                 },
                 "frontRight": {
-                    "code": "2796",
-                    "label": "ba",
-                    "name": "BA"
+                    "code": "3008",
+                    "label": "2r",
+                    "name": "2R"
                 },
                 "back": {
                     "code": "2858",
@@ -2854,11 +2884,11 @@ export const PDF_ACCURATE_LAYOUT: MapLayout = {
                 },
                 "backLeft": {
                     "code": "3701",
-                    "label": "ship 91",
-                    "name": "Ship 91"
+                    "label": "ship 9",
+                    "name": "Ship 9"
                 },
                 "backRight": {
-                    "code": "3723",
+                    "code": "3721",
                     "label": "ship 30",
                     "name": "Ship 30"
                 }
@@ -2869,24 +2899,24 @@ export const PDF_ACCURATE_LAYOUT: MapLayout = {
             "label": "24|23",
             "type": "gondola",
             "p1": [
-                1020,
-                500
+                980,
+                485
             ],
             "p2": [
-                1020,
-                200
+                980,
+                223.47757593255014
             ],
             "aisleWidth": 30,
             "locked": false,
             "sections": [
                 {
-                    "bay": "3186",
-                    "category": "dried pasta inc pasta sauce & trad sauce",
+                    "bay": "285",
+                    "category": "canned veg combined",
                     "side": "L"
                 },
                 {
-                    "bay": "3002",
-                    "category": "eve",
+                    "bay": "828",
+                    "category": "oriental",
                     "side": "L"
                 },
                 {
@@ -2938,34 +2968,29 @@ export const PDF_ACCURATE_LAYOUT: MapLayout = {
             "label": "23|22",
             "type": "gondola",
             "p1": [
-                1100,
-                500
+                1060.375592487056,
+                485
             ],
             "p2": [
-                1100,
-                200
+                1060.375592487056,
+                225
             ],
             "aisleWidth": 30,
             "locked": false,
             "sections": [
                 {
-                    "bay": "893",
+                    "bay": "89",
                     "category": "pick n mix",
-                    "side": "L"
-                },
-                {
-                    "bay": "3602",
-                    "category": "bagged sweets gum & mint",
-                    "side": "L"
-                },
-                {
-                    "bay": "3605",
-                    "category": "sugar",
                     "side": "L"
                 },
                 {
                     "bay": "3802",
                     "category": "bagged sweets inc. gum & mint",
+                    "side": "L"
+                },
+                {
+                    "bay": "3803",
+                    "category": "low sugar",
                     "side": "L"
                 },
                 {
@@ -2984,8 +3009,8 @@ export const PDF_ACCURATE_LAYOUT: MapLayout = {
                     "side": "R"
                 },
                 {
-                    "bay": "829",
-                    "category": "out of home",
+                    "bay": "2121",
+                    "category": "usd",
                     "side": "R"
                 },
                 {
@@ -3002,18 +3027,18 @@ export const PDF_ACCURATE_LAYOUT: MapLayout = {
                 },
                 "frontLeft": {
                     "code": "3674",
-                    "label": "sm",
-                    "name": "SM"
+                    "label": "sm 3",
+                    "name": "SM 3"
                 },
                 "frontRight": {
-                    "code": "3725",
-                    "label": "ship 32",
-                    "name": "Ship 32"
+                    "code": "4181",
+                    "label": "drinks 1",
+                    "name": "Drinks 1"
                 },
                 "back": {
-                    "code": "2240",
-                    "label": "bags for life",
-                    "name": "Bags For Life"
+                    "code": "2841",
+                    "label": "grocery & impulse 6B promo",
+                    "name": "G&I 6B Promo"
                 },
                 "backLeft": {
                     "code": "3698",
@@ -3021,7 +3046,7 @@ export const PDF_ACCURATE_LAYOUT: MapLayout = {
                     "name": "Ship 6"
                 },
                 "backRight": {
-                    "code": "3602",
+                    "code": "3697",
                     "label": "ship 5",
                     "name": "Ship 5"
                 }
@@ -3032,19 +3057,19 @@ export const PDF_ACCURATE_LAYOUT: MapLayout = {
             "label": "22|21",
             "type": "gondola",
             "p1": [
-                1180,
-                500
+                1138.2956944618384,
+                499.5353885374916
             ],
             "p2": [
-                1180,
-                200
+                1138.2956944618384,
+                200.88870984732003
             ],
             "aisleWidth": 30,
             "locked": false,
             "sections": [
                 {
-                    "bay": "248",
-                    "category": "biscuit barrel & treats",
+                    "bay": "829",
+                    "category": "out of home",
                     "side": "L"
                 },
                 {
@@ -3063,8 +3088,8 @@ export const PDF_ACCURATE_LAYOUT: MapLayout = {
                     "side": "R"
                 },
                 {
-                    "bay": "3634",
-                    "category": "large multi crisps & snacks",
+                    "bay": "4359",
+                    "category": "combined crisps & snacks",
                     "side": "R"
                 }
             ],
@@ -3075,14 +3100,14 @@ export const PDF_ACCURATE_LAYOUT: MapLayout = {
                     "name": "G&I 2B Promo"
                 },
                 "frontLeft": {
-                    "code": "2691",
-                    "label": "g&i2f",
-                    "name": "G&I 2F"
+                    "code": "2891",
+                    "label": "g&i2b left",
+                    "name": "G&I 2B Left"
                 },
                 "frontRight": {
-                    "code": "2798",
-                    "label": "bws",
-                    "name": "BWS"
+                    "code": "2839",
+                    "label": "g&i2b right",
+                    "name": "G&I 2B Right"
                 },
                 "back": {
                     "code": "4068",
@@ -3091,8 +3116,8 @@ export const PDF_ACCURATE_LAYOUT: MapLayout = {
                 },
                 "backLeft": {
                     "code": "3696",
-                    "label": "ship 2",
-                    "name": "Ship 2"
+                    "label": "ship 4",
+                    "name": "Ship 4"
                 },
                 "backRight": {
                     "code": "3694",
@@ -3106,19 +3131,24 @@ export const PDF_ACCURATE_LAYOUT: MapLayout = {
             "label": "21|20",
             "type": "gondola",
             "p1": [
-                1260,
+                1221.4372486118048,
                 500
             ],
             "p2": [
-                1260,
+                1221.4372486118048,
                 200
             ],
             "aisleWidth": 30,
             "locked": false,
             "sections": [
                 {
-                    "bay": "3633",
-                    "category": "small multi crisps & snacks",
+                    "bay": "4359",
+                    "category": "combined crisps & snacks",
+                    "side": "L"
+                },
+                {
+                    "bay": "4359",
+                    "category": "combined crisps & snacks",
                     "side": "L"
                 },
                 {
@@ -3144,19 +3174,19 @@ export const PDF_ACCURATE_LAYOUT: MapLayout = {
             ],
             "promoEnds": {
                 "front": {
-                    "code": "2796",
-                    "label": "DOUBLE BAY grocery & impulse 2g",
-                    "name": "G&I 2G Double Bay"
+                    "code": "SH2835B",
+                    "label": "double bay impulse 2a promo",
+                    "name": "Double Bay Impulse 2A Promo"
                 },
                 "frontLeft": {
                     "code": "2890",
-                    "label": "g&i2",
-                    "name": "G&I 2"
+                    "label": "g&i2a",
+                    "name": "G&I 2A"
                 },
                 "frontRight": {
                     "code": "625",
-                    "label": "accs",
-                    "name": "Accs"
+                    "label": "bar accs",
+                    "name": "Bar Accs"
                 },
                 "back": {
                     "code": "2855",
@@ -3170,8 +3200,8 @@ export const PDF_ACCURATE_LAYOUT: MapLayout = {
                 },
                 "backRight": {
                     "code": "3694",
-                    "label": "ship 21",
-                    "name": "Ship 21"
+                    "label": "ship 2",
+                    "name": "Ship 2"
                 }
             }
         },
@@ -3180,12 +3210,12 @@ export const PDF_ACCURATE_LAYOUT: MapLayout = {
             "label": "20|19",
             "type": "gondola",
             "p1": [
-                1340,
-                500
+                1301.4372486118048,
+                499.5353885374916
             ],
             "p2": [
-                1340,
-                200
+                1301.4372486118048,
+                199.5353885374916
             ],
             "aisleWidth": 30,
             "locked": false,
@@ -3217,20 +3247,30 @@ export const PDF_ACCURATE_LAYOUT: MapLayout = {
                     "label": "BWS pallet promo 2",
                     "name": "BWS Pallet Promo 2"
                 },
+                "frontLeft": {
+                    "code": "2509",
+                    "label": "bws",
+                    "name": "BWS"
+                },
                 "frontRight": {
-                    "code": "2903",
+                    "code": "2503",
                     "label": "bws",
                     "name": "BWS"
                 },
                 "back": {
-                    "code": "2521",
-                    "label": "bws promo 5",
-                    "name": "BWS Promo 5"
+                    "code": "2517",
+                    "label": "bws 1 promo",
+                    "name": "BWS 1 Promo"
+                },
+                "backLeft": {
+                    "code": "2798",
+                    "label": "local spirits",
+                    "name": "Local Spirits"
                 },
                 "backRight": {
-                    "code": "2796",
-                    "label": "ba stream gwent",
-                    "name": "BA Stream Gwent"
+                    "code": "2634",
+                    "label": "bws 2",
+                    "name": "BWS 2"
                 }
             }
         },
@@ -3239,12 +3279,12 @@ export const PDF_ACCURATE_LAYOUT: MapLayout = {
             "label": "19|18",
             "type": "gondola",
             "p1": [
-                1420,
+                1381.4372486118048,
                 500
             ],
             "p2": [
-                1420,
-                200
+                1381.4372486118048,
+                215
             ],
             "aisleWidth": 30,
             "locked": false,
@@ -3281,6 +3321,11 @@ export const PDF_ACCURATE_LAYOUT: MapLayout = {
                     "label": "BWS pallet promo 1",
                     "name": "BWS Pallet Promo 1"
                 },
+                "frontRight": {
+                    "code": "2633",
+                    "label": "bws",
+                    "name": "BWS"
+                },
                 "backLeft": {
                     "code": "3166",
                     "label": "addition BWS pallet 2",
@@ -3293,7 +3338,7 @@ export const PDF_ACCURATE_LAYOUT: MapLayout = {
                 }
             },
             "labelPosition": {
-                "x": 7777,
+                "x": 7738.4372486118045,
                 "y": 350
             }
         },
@@ -3302,14 +3347,14 @@ export const PDF_ACCURATE_LAYOUT: MapLayout = {
             "label": "18|0",
             "type": "gondola",
             "p1": [
-                1500,
-                500
+                1459.156461767112,
+                503.52612433222555
             ],
             "p2": [
-                1500,
-                200
+                1459.156461767112,
+                206.3360400974069
             ],
-            "aisleWidth": 30,
+            "aisleWidth": 23.874549053746932,
             "locked": false,
             "sections": [
                 {
@@ -3326,31 +3371,6 @@ export const PDF_ACCURATE_LAYOUT: MapLayout = {
                     "bay": "1905",
                     "category": "red wine",
                     "side": "L"
-                },
-                {
-                    "bay": "4976",
-                    "category": "chilled bws meals",
-                    "side": "R"
-                },
-                {
-                    "bay": "526",
-                    "category": "dips",
-                    "side": "R"
-                },
-                {
-                    "bay": "2424",
-                    "category": "speciality cheese",
-                    "side": "R"
-                },
-                {
-                    "bay": "2425",
-                    "category": "grated, sliced & block cheese",
-                    "side": "R"
-                },
-                {
-                    "bay": "1638",
-                    "category": "snacking cheese",
-                    "side": "R"
                 }
             ],
             "promoEnds": {
@@ -3364,20 +3384,15 @@ export const PDF_ACCURATE_LAYOUT: MapLayout = {
                     "label": "bws",
                     "name": "BWS"
                 },
-                "frontRight": {
-                    "code": "2517",
-                    "label": "bws 1 promo",
-                    "name": "BWS 1 Promo"
-                },
                 "back": {
                     "code": "3167",
                     "label": "addition BWS pallet",
                     "name": "Addition BWS"
                 },
                 "backLeft": {
-                    "code": "2636",
-                    "label": "wine 1 LA promo",
-                    "name": "Wine 1 LA Promo"
+                    "code": "L",
+                    "label": "",
+                    "name": "Promo Left"
                 }
             }
         },
@@ -3918,19 +3933,20 @@ export const PDF_ACCURATE_LAYOUT: MapLayout = {
             "label": "Herbs Table",
             "type": "fixture",
             "p1": [
-                1638.861136133008,
-                466.63784797281426
+                1659.8914285898811,
+                465.7966362745393
             ],
             "p2": [
-                1638.861136133008,
-                419.49224984660316
+                1659.8914285898811,
+                418.6510381483282
             ],
             "aisleWidth": 37.8544018737889,
             "locked": false,
             "sections": [
                 {
                     "bay": "1131",
-                    "category": "herbs & ingredients"
+                    "category": "herbs & ingredients",
+                    "side": "L"
                 }
             ]
         },
@@ -3970,12 +3986,12 @@ export const PDF_ACCURATE_LAYOUT: MapLayout = {
             "label": "Nuts Stand",
             "type": "fixture",
             "p1": [
-                1861.8136193184482,
-                465
+                1841.62453855985,
+                464.1587883017251
             ],
             "p2": [
-                1861.8136193184482,
-                420
+                1841.62453855985,
+                419.1587883017251
             ],
             "aisleWidth": 40,
             "locked": false,
@@ -4079,14 +4095,14 @@ export const PDF_ACCURATE_LAYOUT: MapLayout = {
             "label": "Produce Bin 1",
             "type": "fixture",
             "p1": [
-                1645,
-                880
+                1675.6228622947979,
+                880.4573155761174
             ],
             "p2": [
-                1645,
-                880
+                1642.1559497456653,
+                880.4573155761174
             ],
-            "aisleWidth": 40,
+            "aisleWidth": 38.362725961001615,
             "locked": false,
             "sections": [
                 {
@@ -4121,18 +4137,18 @@ export const PDF_ACCURATE_LAYOUT: MapLayout = {
             "label": "Produce Bin 2",
             "type": "fixture",
             "p1": [
-                1820,
+                1827.4880642589744,
                 880
             ],
             "p2": [
-                1820,
+                1789.2094863904767,
                 880
             ],
             "aisleWidth": 40,
             "locked": false,
             "sections": [
                 {
-                    "bay": "3636",
+                    "bay": "3620",
                     "category": "produce bin 2"
                 }
             ]
@@ -4154,17 +4170,17 @@ export const PDF_ACCURATE_LAYOUT: MapLayout = {
                 {
                     "bay": "2665",
                     "category": "produce FOS 1",
-                    "side": "R"
+                    "side": "L"
                 },
                 {
-                    "bay": "3686",
+                    "bay": "2666",
                     "category": "produce FOS 2",
-                    "side": "R"
+                    "side": "L"
                 },
                 {
-                    "bay": "2657",
+                    "bay": "2667",
                     "category": "produce FOS 3",
-                    "side": "R"
+                    "side": "L"
                 }
             ]
         },
@@ -4261,15 +4277,333 @@ export const PDF_ACCURATE_LAYOUT: MapLayout = {
                 },
                 {
                     "bay": "",
-                    "category": "FTG Drinks"
+                    "category": "FTG Sandwiches"
                 },
                 {
                     "bay": "",
-                    "category": "FTG Sandwiches"
+                    "category": "FTG Drinks"
                 }
             ],
             "promoEnds": {},
             "rotation": 90
+        },
+        {
+            "id": "self scan",
+            "label": "self scan checkouts",
+            "type": "gondola",
+            "p1": [
+                736.0440610894532,
+                1174.3137495700619
+            ],
+            "p2": [
+                736.0440610894532,
+                797.4673906922644
+            ],
+            "aisleWidth": 20,
+            "locked": false,
+            "sections": [
+                {
+                    "bay": "",
+                    "category": "Checkouts - Confec"
+                },
+                {
+                    "bay": "2",
+                    "category": "Checkouts - Crisps"
+                },
+                {
+                    "bay": "3",
+                    "category": "Checkouts - H&B"
+                },
+                {
+                    "bay": "4",
+                    "category": "Checkouts - H&L"
+                },
+                {
+                    "bay": "5",
+                    "category": "Checkouts - Household"
+                },
+                {
+                    "bay": "6",
+                    "category": "Checkouts - Nutmeg"
+                },
+                {
+                    "bay": "7",
+                    "category": "Checkouts - Pet"
+                },
+                {
+                    "bay": "8",
+                    "category": "CategoryCheckouts - Reusable Bags"
+                },
+                {
+                    "bay": "9",
+                    "category": "Checkouts - Seasonal Confec"
+                },
+                {
+                    "bay": "10",
+                    "category": "Checkouts - Soft Drinks"
+                }
+            ],
+            "promoEnds": {},
+            "rotation": 90
+        },
+        {
+            "id": "checkouts",
+            "label": "checkouts",
+            "type": "gondola",
+            "p1": [
+                338.33865502179464,
+                1151.674240068571
+            ],
+            "p2": [
+                338.33865502179464,
+                831.5528370833991
+            ],
+            "aisleWidth": 30,
+            "locked": false,
+            "sections": [
+                {
+                    "bay": "",
+                    "category": "checkouts"
+                }
+            ],
+            "promoEnds": {},
+            "rotation": 90
+        },
+        {
+            "id": "Kiosk",
+            "label": "Kiosk",
+            "type": "gondola",
+            "p1": [
+                1083.378072231806,
+                1096.4046126159747
+            ],
+            "p2": [
+                1083.378072231806,
+                918.8539895583224
+            ],
+            "aisleWidth": 20,
+            "locked": false,
+            "sections": [
+                {
+                    "bay": "10",
+                    "category": "Checkouts - Kiosk"
+                },
+                {
+                    "bay": "2",
+                    "category": "Checkouts - Vape"
+                },
+                {
+                    "bay": "4",
+                    "category": "Checkouts - Crisps"
+                }
+            ],
+            "promoEnds": {},
+            "rotation": 90
+        },
+        {
+            "id": "G-18-0-copy-1767369433467",
+            "label": "18|0 (copy)",
+            "type": "gondola",
+            "p1": [
+                1496.2200548625278,
+                504.39647510165656
+            ],
+            "p2": [
+                1496.2200548625278,
+                204.39647510165656
+            ],
+            "aisleWidth": 20,
+            "locked": false,
+            "sections": [
+                {
+                    "bay": "4976",
+                    "category": "chilled bws meals",
+                    "side": "R"
+                },
+                {
+                    "bay": "526",
+                    "category": "dips",
+                    "side": "R"
+                },
+                {
+                    "bay": "2424",
+                    "category": "speciality cheese",
+                    "side": "R"
+                },
+                {
+                    "bay": "2425",
+                    "category": "grated, sliced & block cheese",
+                    "side": "R"
+                },
+                {
+                    "bay": "1638",
+                    "category": "snacking cheese",
+                    "side": "R"
+                }
+            ],
+            "promoEnds": {
+                "front": {
+                    "code": "2518",
+                    "label": "bws 2 promo",
+                    "name": "BWS 2 Promo"
+                },
+                "back": {
+                    "code": "3167",
+                    "label": "addition BWS pallet",
+                    "name": "Addition BWS"
+                },
+                "frontRight": {
+                    "code": "R",
+                    "label": "",
+                    "name": "Promo Right"
+                }
+            }
+        },
+        {
+            "id": "Flowers-BG",
+            "label": "Flowers BG",
+            "type": "gondola",
+            "p1": [
+                1793.4357623450132,
+                1033.7387408639865
+            ],
+            "p2": [
+                1713.4357623450132,
+                1033.7387408639865
+            ],
+            "aisleWidth": 40,
+            "locked": false,
+            "sections": [
+                {
+                    "bay": "1478",
+                    "category": "flowers"
+                },
+                {
+                    "bay": "1478",
+                    "category": "flowers"
+                },
+                {
+                    "bay": "1478",
+                    "category": "flowers"
+                },
+                {
+                    "bay": "1478",
+                    "category": "flowers"
+                }
+            ]
+        },
+        {
+            "id": "Plants-BF",
+            "label": "Plants BF",
+            "type": "fixture",
+            "p1": [
+                1831.9654937374967,
+                1129.0434353574285
+            ],
+            "p2": [
+                1695.9790079191612,
+                1129.0434353574285
+            ],
+            "aisleWidth": 23.0500409865067,
+            "locked": false,
+            "sections": [
+                {
+                    "bay": "913",
+                    "category": "plants"
+                }
+            ]
+        },
+        {
+            "id": "Plants-BE",
+            "label": "Plants BE",
+            "type": "fixture",
+            "p1": [
+                1849.9901502791095,
+                1094.9610298933933
+            ],
+            "p2": [
+                1947.2190192583967,
+                1094.9610298933933
+            ],
+            "aisleWidth": 17.27641377627606,
+            "locked": false,
+            "sections": [
+                {
+                    "bay": "913",
+                    "category": "plants"
+                }
+            ],
+            "rotation": 328.0290944394575
+        },
+        {
+            "id": "Mobile-Bread-Unit",
+            "label": "Mobile Bread",
+            "type": "fixture",
+            "p1": [
+                1625.887554151554,
+                879.7019192501091
+            ],
+            "p2": [
+                1640.5610090011448,
+                879.7019192501091
+            ],
+            "aisleWidth": 34.131731932743605,
+            "locked": false,
+            "sections": [
+                {
+                    "bay": "3443",
+                    "category": "mobile bread unit"
+                }
+            ]
+        },
+        {
+            "id": "WIGIG",
+            "label": "wigig pallets",
+            "type": "front",
+            "p1": [
+                1738.2324970294085,
+                350.9694127469185
+            ],
+            "p2": [
+                1738.2324970294085,
+                287.2960183312708
+            ],
+            "aisleWidth": 176.3264259016587,
+            "locked": false,
+            "sections": [
+                {
+                    "bay": "1",
+                    "category": "Wigig 1",
+                    "side": "R"
+                },
+                {
+                    "bay": "2",
+                    "category": "Wigig 2",
+                    "side": "R"
+                },
+                {
+                    "bay": "3",
+                    "category": "Wigig 3",
+                    "side": "R"
+                },
+                {
+                    "bay": "4",
+                    "category": "Wigig 4",
+                    "side": "L"
+                },
+                {
+                    "bay": "5",
+                    "category": "Wigig 5",
+                    "side": "L"
+                },
+                {
+                    "bay": "6",
+                    "category": "Wigig 6",
+                    "side": "L"
+                }
+            ],
+            "rotation": 0,
+            "promoEnds": {}
         }
     ],
     "points": [],

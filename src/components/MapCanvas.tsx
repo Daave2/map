@@ -128,12 +128,24 @@ export const MapCanvas: React.FC<MapCanvasProps> = ({
         };
     }, [viewState]);
 
-    // Calculate aisle bounding box
+    // Calculate aisle bounding box (Box logic: No padding on length axis)
     const getAisleBounds = useCallback((aisle: Aisle) => {
-        const minX = Math.min(aisle.p1[0], aisle.p2[0]) - aisle.aisleWidth / 2;
-        const maxX = Math.max(aisle.p1[0], aisle.p2[0]) + aisle.aisleWidth / 2;
-        const minY = Math.min(aisle.p1[1], aisle.p2[1]) - aisle.aisleWidth / 2;
-        const maxY = Math.max(aisle.p1[1], aisle.p2[1]) + aisle.aisleWidth / 2;
+        const isVertical = Math.abs(aisle.p1[1] - aisle.p2[1]) > Math.abs(aisle.p1[0] - aisle.p2[0]);
+
+        let paddingX = aisle.aisleWidth / 2;
+        let paddingY = aisle.aisleWidth / 2;
+
+        // Remove padding from major axis to match 3D "Box" geometry
+        if (isVertical) {
+            paddingY = 0;
+        } else {
+            paddingX = 0;
+        }
+
+        const minX = Math.min(aisle.p1[0], aisle.p2[0]) - paddingX;
+        const maxX = Math.max(aisle.p1[0], aisle.p2[0]) + paddingX;
+        const minY = Math.min(aisle.p1[1], aisle.p2[1]) - paddingY;
+        const maxY = Math.max(aisle.p1[1], aisle.p2[1]) + paddingY;
         return { minX, maxX, minY, maxY };
     }, []);
 
@@ -995,15 +1007,34 @@ export const MapCanvas: React.FC<MapCanvasProps> = ({
 
                 // Helper to draw promo box
                 const drawPromoBox = (x: number, y: number, w: number, h: number, label: string) => {
+                    let fillStyle = isSelected ? '#a855f7' : '#9333ea';
+                    let strokeStyle = '#e9d5ff';
+                    let lineWidth = 1;
+
                     if (printMode) {
-                        ctx.fillStyle = 'rgba(220, 220, 220, 0.5)';
-                        ctx.strokeStyle = '#333';
-                        ctx.lineWidth = 1.5;
-                    } else {
-                        ctx.fillStyle = isSelected ? '#a855f7' : '#9333ea'; // Purple for promos
-                        ctx.strokeStyle = '#e9d5ff';
-                        ctx.lineWidth = 1;
+                        fillStyle = 'rgba(220, 220, 220, 0.5)';
+                        strokeStyle = '#333';
+                        lineWidth = 1.5;
+                    } else if (activeTab === 'range') {
+                        // Check Range Status
+                        const matchResult = findRangeActivity(label);
+                        const rangeMatch = matchResult?.activity;
+
+                        if (rangeMatch) {
+                            fillStyle = getWorkloadColor(rangeMatch.capacityHours);
+                            strokeStyle = '#fff';
+                            lineWidth = 2;
+                        } else if (rangeData.length > 0 && !searchTerm) {
+                            // Dim if we have range data but this doesn't match
+                            fillStyle = 'rgba(147, 51, 234, 0.15)'; // Dimmed Purple
+                            strokeStyle = 'rgba(100, 116, 139, 0.2)';
+                            lineWidth = 0.5;
+                        }
                     }
+
+                    ctx.fillStyle = fillStyle;
+                    ctx.strokeStyle = strokeStyle;
+                    ctx.lineWidth = lineWidth;
 
                     ctx.beginPath();
                     ctx.roundRect(x, y, w, h, 2);
@@ -1698,16 +1729,28 @@ export const MapCanvas: React.FC<MapCanvasProps> = ({
                         newWidth = newBounds.maxX - newBounds.minX;
                         const centerX = newBounds.minX + newWidth / 2;
                         const p1IsTop = aisle.p1[1] < aisle.p2[1];
-                        const topY = newBounds.minY + newWidth / 2;
-                        const bottomY = newBounds.maxY - newWidth / 2;
+
+                        // Box logic: bounds match points directly
+                        const topY = newBounds.minY;
+                        let bottomY = newBounds.maxY;
+
+                        // Enforce minimum length (allow inversion)
+                        if (Math.abs(bottomY - topY) < 0.1) bottomY = topY + 0.1;
+
                         if (p1IsTop) { newP1 = [centerX, topY]; newP2 = [centerX, bottomY]; }
                         else { newP1 = [centerX, bottomY]; newP2 = [centerX, topY]; }
                     } else {
                         newWidth = newBounds.maxY - newBounds.minY;
                         const centerY = newBounds.minY + newWidth / 2;
                         const p1IsLeft = aisle.p1[0] < aisle.p2[0];
-                        const leftX = newBounds.minX + newWidth / 2;
-                        const rightX = newBounds.maxX - newWidth / 2;
+
+                        // Box logic: bounds match points directly
+                        const leftX = newBounds.minX;
+                        let rightX = newBounds.maxX;
+
+                        // Enforce minimum length (allow inversion)
+                        if (Math.abs(rightX - leftX) < 0.1) rightX = leftX + 0.1;
+
                         if (p1IsLeft) { newP1 = [leftX, centerY]; newP2 = [rightX, centerY]; }
                         else { newP1 = [rightX, centerY]; newP2 = [leftX, centerY]; }
                     }
