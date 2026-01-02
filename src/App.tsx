@@ -214,7 +214,7 @@ function App() {
       // 1. Save to Local Storage (Client-side backup)
       localStorage.setItem(STORAGE_KEY, JSON.stringify(layout));
 
-      // 2. Save to File in Repo (Server-side persistence)
+      // 2. Save to File in Repo (Server-side persistence - works in dev mode)
       const response = await fetch('/api/save-layout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -230,7 +230,7 @@ function App() {
       }
     } catch (e) {
       console.error('Failed to save to storage', e);
-      alert('Failed to save map completely. Check console.');
+      alert('Saved to Local Storage only. (API save only works in dev mode)');
     }
   }, [layout]);
 

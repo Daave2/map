@@ -1672,3 +1672,59 @@ body {
     height: 100px !important;
   }
 }
+
+/* 3D View - Fullscreen on mobile */
+@media (max-width: 768px) {
+  /* Make 3D canvas container fullscreen, covering toolbar */
+  .canvas-area:has(> div > canvas[id="store-3d-canvas"]) {
+    position: fixed !important;
+    inset: 0 !important;
+    z-index: 200;
+    width: 100vw !important;
+    height: 100vh !important;
+  }
+  
+  /* Also hide sidebar toggle when in 3D */
+  .canvas-area:has(> div > canvas[id="store-3d-canvas"]) ~ .sidebar,
+  .canvas-area:has(> div > canvas[id="store-3d-canvas"]) ~ .sidebar .sidebar-toggle {
+    display: none !important;
+  }
+}
+
+/* Mobile sidebar toggle fix - always visible */
+@media (max-width: 768px) {
+  /* Left sidebar toggle - fixed position when collapsed */
+  .left-sidebar.collapsed .sidebar-toggle {
+    position: fixed;
+    left: 8px;
+    top: 64px;
+    right: auto !important;
+    z-index: 60;
+  }
+  
+  /* Right sidebar toggle - fixed position when collapsed */
+  .right-sidebar.collapsed .sidebar-toggle {
+    position: fixed;
+    right: 8px;
+    left: auto !important;
+    top: 64px;
+    z-index: 60;
+  }
+  
+  /* Make toggle buttons larger for touch on mobile */
+  .sidebar-toggle {
+    width: 40px;
+    height: 40px;
+  }
+}
+
+/* Mobile controls - ONLY show on mobile devices */
+.mobile-controls {
+  display: none !important;
+}
+
+@media (max-width: 768px) {
+  .mobile-controls {
+    display: block !important;
+  }
+}
