@@ -870,7 +870,14 @@ export function StoreScene3D({ aisles, rangeData = [], categoryMappings = {}, on
     }, [handleKeyDown]);
 
     return (
-        <div style={{ width: '100%', height: '100%', position: 'relative' }}>
+        <div style={{
+            position: 'fixed',
+            inset: 0,
+            width: '100vw',
+            height: '100vh',
+            zIndex: 1000,
+            background: '#000'
+        }}>
             <Canvas
                 frameloop="always"
                 shadows
@@ -898,54 +905,56 @@ export function StoreScene3D({ aisles, rangeData = [], categoryMappings = {}, on
             </Canvas>
 
             {/* Selection Detail Panel */}
-            {selectedCategory && (
-                <div style={{
-                    position: 'absolute',
-                    top: 16,
-                    right: 120, // To left of exit button
-                    width: 300,
-                    backgroundColor: 'rgba(15, 23, 42, 0.95)',
-                    color: 'white',
-                    padding: 20,
-                    borderRadius: 12,
-                    boxShadow: '0 10px 25px rgba(0,0,0,0.5)',
-                    border: '1px solid rgba(255,255,255,0.1)',
-                    backdropFilter: 'blur(10px)'
-                }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-                        <h3 style={{ margin: 0, fontSize: 18, fontWeight: 'bold', color: '#60a5fa' }}>{selectedCategory}</h3>
-                        <button
-                            onClick={() => { setSelectedCategory(undefined); setSelectedStats(null); }}
-                            style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', fontSize: 20 }}
-                        >×</button>
-                    </div>
-
-                    {selectedStats ? (
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-                            <div style={{ display: 'flex', gap: 8 }}>
-                                <div style={{ flex: 1, padding: 10, background: 'rgba(34, 197, 94, 0.2)', borderRadius: 8, border: '1px solid rgba(34, 197, 94, 0.3)' }}>
-                                    <div style={{ fontSize: 12, color: '#86efac' }}>New Lines</div>
-                                    <div style={{ fontSize: 24, fontWeight: 'bold', color: '#22c55e' }}>+{selectedStats.newLines}</div>
-                                </div>
-                                <div style={{ flex: 1, padding: 10, background: 'rgba(239, 68, 68, 0.2)', borderRadius: 8, border: '1px solid rgba(239, 68, 68, 0.3)' }}>
-                                    <div style={{ fontSize: 12, color: '#fca5a5' }}>Delisted</div>
-                                    <div style={{ fontSize: 24, fontWeight: 'bold', color: '#ef4444' }}>-{selectedStats.delistLines}</div>
-                                </div>
-                            </div>
-
-                            <div style={{ fontSize: 14, color: '#cbd5e1', lineHeight: '1.5' }}>
-                                <div style={{ marginBottom: 4 }}><span style={{ color: '#94a3b8' }}>Net Change:</span> <strong style={{ color: (selectedStats.newLines - selectedStats.delistLines) >= 0 ? '#4ade80' : '#f87171' }}>{selectedStats.newLines - selectedStats.delistLines}</strong></div>
-                                {selectedStats.reason && <div><span style={{ color: '#94a3b8' }}>Reason:</span> {selectedStats.reason}</div>}
-                            </div>
-                            <div style={{ fontSize: 12, color: '#64748b', marginTop: 4, fontStyle: 'italic' }}>
-                                Click 'Edit' in 2D map to modify layout.
-                            </div>
+            {
+                selectedCategory && (
+                    <div style={{
+                        position: 'absolute',
+                        top: 16,
+                        right: 120, // To left of exit button
+                        width: 300,
+                        backgroundColor: 'rgba(15, 23, 42, 0.95)',
+                        color: 'white',
+                        padding: 20,
+                        borderRadius: 12,
+                        boxShadow: '0 10px 25px rgba(0,0,0,0.5)',
+                        border: '1px solid rgba(255,255,255,0.1)',
+                        backdropFilter: 'blur(10px)'
+                    }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+                            <h3 style={{ margin: 0, fontSize: 18, fontWeight: 'bold', color: '#60a5fa' }}>{selectedCategory}</h3>
+                            <button
+                                onClick={() => { setSelectedCategory(undefined); setSelectedStats(null); }}
+                                style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', fontSize: 20 }}
+                            >×</button>
                         </div>
-                    ) : (
-                        <div style={{ color: '#94a3b8', fontStyle: 'italic' }}>No range activity data available for this section.</div>
-                    )}
-                </div>
-            )}
+
+                        {selectedStats ? (
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                                <div style={{ display: 'flex', gap: 8 }}>
+                                    <div style={{ flex: 1, padding: 10, background: 'rgba(34, 197, 94, 0.2)', borderRadius: 8, border: '1px solid rgba(34, 197, 94, 0.3)' }}>
+                                        <div style={{ fontSize: 12, color: '#86efac' }}>New Lines</div>
+                                        <div style={{ fontSize: 24, fontWeight: 'bold', color: '#22c55e' }}>+{selectedStats.newLines}</div>
+                                    </div>
+                                    <div style={{ flex: 1, padding: 10, background: 'rgba(239, 68, 68, 0.2)', borderRadius: 8, border: '1px solid rgba(239, 68, 68, 0.3)' }}>
+                                        <div style={{ fontSize: 12, color: '#fca5a5' }}>Delisted</div>
+                                        <div style={{ fontSize: 24, fontWeight: 'bold', color: '#ef4444' }}>-{selectedStats.delistLines}</div>
+                                    </div>
+                                </div>
+
+                                <div style={{ fontSize: 14, color: '#cbd5e1', lineHeight: '1.5' }}>
+                                    <div style={{ marginBottom: 4 }}><span style={{ color: '#94a3b8' }}>Net Change:</span> <strong style={{ color: (selectedStats.newLines - selectedStats.delistLines) >= 0 ? '#4ade80' : '#f87171' }}>{selectedStats.newLines - selectedStats.delistLines}</strong></div>
+                                    {selectedStats.reason && <div><span style={{ color: '#94a3b8' }}>Reason:</span> {selectedStats.reason}</div>}
+                                </div>
+                                <div style={{ fontSize: 12, color: '#64748b', marginTop: 4, fontStyle: 'italic' }}>
+                                    Click 'Edit' in 2D map to modify layout.
+                                </div>
+                            </div>
+                        ) : (
+                            <div style={{ color: '#94a3b8', fontStyle: 'italic' }}>No range activity data available for this section.</div>
+                        )}
+                    </div>
+                )
+            }
 
             {/* UI Overlay */}
             <div style={{
@@ -987,27 +996,31 @@ export function StoreScene3D({ aisles, rangeData = [], categoryMappings = {}, on
                 Exit 3D View
             </button>
 
-            {/* AR Button */}
-            {!arMode && (
-                <button
-                    onClick={handleEnterAR}
-                    style={{
-                        position: 'absolute',
-                        top: 16,
-                        right: 140,
-                        padding: '10px 20px',
-                        backgroundColor: '#8b5cf6',
-                        color: '#fff',
-                        border: 'none',
-                        borderRadius: 8,
-                        cursor: 'pointer',
-                        fontWeight: 'bold',
-                        fontSize: 14,
-                    }}
-                >
-                    📱 Enter AR
-                </button>
-            )}
+            {/* AR Button - Bottom center for mobile visibility */}
+            {
+                !arMode && (
+                    <button
+                        onClick={handleEnterAR}
+                        style={{
+                            position: 'absolute',
+                            bottom: 80,
+                            left: '50%',
+                            transform: 'translateX(-50%)',
+                            padding: '14px 28px',
+                            backgroundColor: '#8b5cf6',
+                            color: '#fff',
+                            border: 'none',
+                            borderRadius: 12,
+                            cursor: 'pointer',
+                            fontWeight: 'bold',
+                            fontSize: 16,
+                            boxShadow: '0 4px 20px rgba(139, 92, 246, 0.4)',
+                        }}
+                    >
+                        📱 Enter AR Mode
+                    </button>
+                )
+            }
 
             {/* Crosshair */}
             <div style={{
@@ -1041,7 +1054,7 @@ export function StoreScene3D({ aisles, rangeData = [], categoryMappings = {}, on
 
             {/* Mobile Controls Overlay */}
             <MobileControls moveState={moveState} />
-        </div>
+        </div >
     );
 }
 
