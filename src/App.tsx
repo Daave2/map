@@ -216,19 +216,7 @@ function App() {
 
   // Autosave validation: detecting large changes or issues could go here
 
-  // Silent save handler for autosave (file only)
-  const silentSave = useCallback(async (currentLayout: MapLayout) => {
-    try {
-      // Save to File in Repo (Server-side persistence - works in dev mode)
-      await fetch('/api/save-layout', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(currentLayout),
-      });
-    } catch (e) {
-      console.error('Failed to autosave to file', e);
-    }
-  }, []);
+
 
   // Debounced autosave to file
   // useEffect(() => {

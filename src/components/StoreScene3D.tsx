@@ -252,7 +252,7 @@ function ShelfMesh({ aisle, rangeData = [], categoryMappings = {}, onSelect, sel
     }, [aisle, rangeData, categoryMappings]);
 
     const material = useMemo(() => getMaterialForType(aisle.type), [aisle.type]);
-    const promoMaterial = useMemo(() => new THREE.MeshStandardMaterial({ color: '#22c55e', roughness: 0.6 }), []);
+
 
     // Helper to color sections based on stats
     const getSectionColor = (stats: any) => {
