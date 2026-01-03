@@ -352,57 +352,22 @@ function ShelfMesh({ aisle, rangeData = [], categoryMappings = {}, onSelect, sel
             {/* Promo ends */}
             {promoEnds.map((promo, index) => {
                 // Calculate position based on main/side unit
-                const isPositiveDir = isVertical ? dy > 0 : dx > 0;
-
-                // "Front" promo corresponds to Max Coordinate (matches 2D map logic)
-                // "Back" promo corresponds to Min Coordinate
-
-                let targetLocalX = 0;
-                let baseRotationY = 0; // 0 faces +Z? No, wait. 
-                // We need: -X end -> Face -X (-PI/2). +X end -> Face +X (+PI/2).
-
-                const placeAtPlusX = () => {
-                    targetLocalX = size.width / 2 + 0.3;
-                    baseRotationY = Math.PI / 2;
-                };
-
-                const placeAtMinusX = () => {
-                    targetLocalX = -size.width / 2 - 0.3;
-                    baseRotationY = -Math.PI / 2;
-                };
-
-                if (promo.position === 'front') {
-                    // Target Max Coord
-                    if (isPositiveDir) {
-                        // Max is P2 (+X)
-                        placeAtPlusX();
-                    } else {
-                        // Max is P1 (-X) - e.g. Upward or Leftward aisle
-                        placeAtMinusX();
-                    }
-                } else {
-                    // Target Min Coord (Back)
-                    if (isPositiveDir) {
-                        // Min is P1 (-X)
-                        placeAtMinusX();
-                    } else {
-                        // Min is P2 (+X)
-                        placeAtPlusX();
-                    }
-                }
-
-                let xPos = targetLocalX;
+                let xPos = promo.position === 'front' ? -size.width / 2 - 0.3 : size.width / 2 + 0.3;
                 let zPos = 0;
                 let width = 0.5;
                 let depth = size.depth;
-                let rotationY = baseRotationY;
+                let rotationY = promo.position === 'front' ? -Math.PI / 2 : Math.PI / 2;
 
                 // Adjust for side units
                 if (promo.subPosition === 'left') {
+                    // Left side unit (relative to facing the promo)
+                    // If front (facing towards +X from outside), left is -Z
                     zPos = -size.depth / 2 - 0.3;
-                    depth = 0.5;
+                    depth = 0.5; // thinner depth for side unit
                     width = 0.5;
+                    // Rotation needed?
                 } else if (promo.subPosition === 'right') {
+                    // Right side unit
                     zPos = size.depth / 2 + 0.3;
                     depth = 0.5;
                     width = 0.5;
