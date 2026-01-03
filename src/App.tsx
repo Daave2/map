@@ -13,6 +13,7 @@ import { useHistory } from './hooks/useHistory';
 import { useClipboard } from './hooks/useClipboard';
 import { matchesRangeCategory } from './utils/categoryMatching';
 import { DEFAULT_CATEGORY_MAPPINGS } from './constants/defaultCategoryMappings';
+import { PROMO_END_GROUPS } from './constants/promoEndGroups';
 import './App.css';
 
 const STORAGE_KEY = 'store_map_editor_layout';
@@ -22,10 +23,10 @@ function App() {
   // Initialize with saved layout if available, otherwise default
   const getInitialLayout = (): MapLayout => {
     try {
-      const saved = localStorage.getItem(STORAGE_KEY);
-      if (saved) {
-        return JSON.parse(saved);
-      }
+      // const saved = localStorage.getItem(STORAGE_KEY);
+      // if (saved) {
+      //   return JSON.parse(saved);
+      // }
     } catch (e) {
       console.error('Failed to load from storage', e);
     }
@@ -70,7 +71,7 @@ function App() {
   const [searchTerm, setSearchTerm] = useState('');
 
   // Tab and Range state
-  const [activeTab, setActiveTab] = useState<'range' | 'edit'>('range');
+  const [activeTab, setActiveTab] = useState<'range' | 'edit' | 'promo'>('range');
   const [rangeData, setRangeData] = useState<RangeActivity[]>([]);
   const [selectedRangeCategory, setSelectedRangeCategory] = useState<string | null>(null);
   const [categoryMappings, setCategoryMappings] = useState<Record<string, string>>(getInitialMappings());
@@ -207,6 +208,36 @@ function App() {
       if (uniqueUnmatched.length > 0) setShowMapper(true);
     }
   };
+
+  // Autosave layout to local storage whenever it changes
+  // useEffect(() => {
+  //   localStorage.setItem(STORAGE_KEY, JSON.stringify(layout));
+  // }, [layout]);
+
+  // Autosave validation: detecting large changes or issues could go here
+
+  // Silent save handler for autosave (file only)
+  const silentSave = useCallback(async (currentLayout: MapLayout) => {
+    try {
+      // Save to File in Repo (Server-side persistence - works in dev mode)
+      await fetch('/api/save-layout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(currentLayout),
+      });
+    } catch (e) {
+      console.error('Failed to autosave to file', e);
+    }
+  }, []);
+
+  // Debounced autosave to file
+  // useEffect(() => {
+  //   const handler = setTimeout(() => {
+  //     silentSave(layout);
+  //   }, 2000); // Save after 2 seconds of inactivity
+
+  //   return () => clearTimeout(handler);
+  // }, [layout, silentSave]);
 
   // Manual save handler
   const handleSave = useCallback(async () => {
@@ -568,6 +599,7 @@ function App() {
               aisles={layout.aisles}
               rangeData={rangeData}
               categoryMappings={categoryMappings}
+              activeTab={activeTab}
               onExit={() => setViewMode('2d')}
             />
           ) : (
@@ -589,6 +621,40 @@ function App() {
             />
           )}
         </main>
+
+        {/* Mobile Menu Buttons - Always visible on mobile when in 2D view */}
+        {viewMode === '2d' && (
+          <>
+            {/* Left menu button */}
+            {appMode === 'edit' && leftSidebarCollapsed && (
+              <button
+                className="mobile-menu-btn mobile-menu-left"
+                onClick={() => setLeftSidebarCollapsed(false)}
+                aria-label="Open Aisle List"
+              >
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <line x1="3" y1="6" x2="21" y2="6" />
+                  <line x1="3" y1="12" x2="21" y2="12" />
+                  <line x1="3" y1="18" x2="21" y2="18" />
+                </svg>
+              </button>
+            )}
+
+            {/* Right menu button */}
+            {rightSidebarCollapsed && (
+              <button
+                className="mobile-menu-btn mobile-menu-right"
+                onClick={() => setRightSidebarCollapsed(false)}
+                aria-label="Open Settings"
+              >
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <circle cx="12" cy="12" r="3" />
+                  <path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83" />
+                </svg>
+              </button>
+            )}
+          </>
+        )}
 
         {/* Print Summary Tables - Page 2 (hidden in normal view, shown when printing) */}
         {printMode && activeTab === 'range' && rangeData.length > 0 && (() => {
@@ -972,6 +1038,12 @@ function App() {
                       Range
                     </button>
                     <button
+                      className={`sidebar-tab ${activeTab === 'promo' ? 'active' : ''}`}
+                      onClick={() => setActiveTab('promo')}
+                    >
+                      Promo
+                    </button>
+                    <button
                       className={`sidebar-tab ${activeTab === 'edit' ? 'active' : ''}`}
                       onClick={() => setActiveTab('edit')}
                     >
@@ -1040,6 +1112,49 @@ function App() {
                           />
                         );
                       })()}
+                    </div>
+                  ) : activeTab === 'promo' ? (
+                    <div style={{ padding: 16, overflow: 'auto' }}>
+                      <h3 style={{ margin: '0 0 16px 0', fontSize: 14, color: 'var(--text-secondary)' }}>
+                        Promo End Groups
+                      </h3>
+                      <p style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 16 }}>
+                        Click a promo end on the map, then assign a group in the Aisle tab.
+                      </p>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                        {PROMO_END_GROUPS.map(group => {
+                          // Count promo ends with this group
+                          let count = 0;
+                          layout.aisles.forEach(a => {
+                            if (a.promoEnds) {
+                              const ends = [
+                                a.promoEnds.front,
+                                a.promoEnds.frontLeft,
+                                a.promoEnds.frontRight,
+                                a.promoEnds.back,
+                                a.promoEnds.backLeft,
+                                a.promoEnds.backRight,
+                              ];
+                              ends.forEach(end => {
+                                if (end?.group === group.id) count++;
+                              });
+                            }
+                          });
+                          return (
+                            <div key={group.id} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                              <span style={{
+                                width: 20,
+                                height: 20,
+                                borderRadius: 4,
+                                backgroundColor: group.color,
+                                flexShrink: 0,
+                              }} />
+                              <span style={{ flex: 1, fontSize: 13 }}>{group.label}</span>
+                              <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{count}</span>
+                            </div>
+                          );
+                        })}
+                      </div>
                     </div>
                   ) : (
                     <AisleEditor

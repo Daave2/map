@@ -2,6 +2,7 @@ import React, { useRef, useEffect, useCallback, useState } from 'react';
 import type { Aisle, ViewState, Point, EditorSettings, RangeActivity } from '../types';
 import { getGridLines } from '../utils/grid';
 import { matchesRangeCategory } from '../utils/categoryMatching';
+import { getPromoEndGroupColor, PROMO_END_GROUPS } from '../constants/promoEndGroups';
 
 
 
@@ -25,7 +26,7 @@ interface MapCanvasProps {
     searchTerm?: string;
     // Range highlighting
     rangeData?: RangeActivity[];
-    activeTab?: 'range' | 'edit';
+    activeTab?: 'range' | 'edit' | 'promo';
     // Print mode for B&W friendly output
     printMode?: boolean;
     // Theme for canvas rendering
@@ -119,6 +120,18 @@ export const MapCanvas: React.FC<MapCanvasProps> = ({
     // For multi-item drag: Store original positions map: { id: { p1, p2, labelPosition? } }
     const [dragOrigins, setDragOrigins] = useState<Record<string, { p1: [number, number], p2: [number, number], labelPosition?: { x: number, y: number } }>>({});
     const [dragHoverTarget, setDragHoverTarget] = useState<{ aisleId: string; sectionIndex: number } | null>(null);
+
+    // Promo end popup state (for clicking promo ends in Promo tab)
+    const [promoEndPopup, setPromoEndPopup] = useState<{
+        aisleId: string;
+        endKey: string;
+        screenX: number;
+        screenY: number;
+    } | null>(null);
+
+    // Track promo end positions for click detection
+    type PromoEndBound = { aisleId: string; endKey: string; minX: number; maxX: number; minY: number; maxY: number };
+    const promoEndBoundsRef = useRef<PromoEndBound[]>([]);
 
     // Convert screen coordinates to world coordinates
     const screenToWorld = useCallback((screenX: number, screenY: number): Point => {
@@ -302,6 +315,17 @@ export const MapCanvas: React.FC<MapCanvasProps> = ({
         return null;
     }, [aisles, isPointInAisle]);
 
+    // Find promo end at point (for clicking promo ends directly)
+    const findPromoEndAtPoint = useCallback((point: Point): { aisleId: string; endKey: string } | null => {
+        for (const bound of promoEndBoundsRef.current) {
+            if (point.x >= bound.minX && point.x <= bound.maxX &&
+                point.y >= bound.minY && point.y <= bound.maxY) {
+                return { aisleId: bound.aisleId, endKey: bound.endKey };
+            }
+        }
+        return null;
+    }, []);
+
     // Find which resize handle the point is over (only for selected aisle)
     const findHandleAtPoint = useCallback((point: Point): string | null => {
         if (selectedAisleIds.length !== 1) return null;
@@ -448,6 +472,9 @@ export const MapCanvas: React.FC<MapCanvasProps> = ({
             isRangeAffected: boolean;
         }
         const printLabels: PrintLabel[] = [];
+
+        // Clear promo end bounds before drawing
+        promoEndBoundsRef.current = [];
 
         // Draw aisles
         aisles.forEach((aisle) => {
@@ -619,6 +646,21 @@ export const MapCanvas: React.FC<MapCanvasProps> = ({
                                 } else {
                                     ctx.fillStyle = catColor.replace(/[\d.]+\)$/, '0.15)');
                                     ctx.strokeStyle = 'rgba(100, 116, 139, 0.2)';
+                                    ctx.lineWidth = 0.5;
+                                }
+                            }
+
+                            // 4. Promo End Group coloring
+                            else if (activeTab === 'promo' && !isDragHover && !isSelected) {
+                                const promoColor = getPromoEndGroupColor(aisle.promoEndGroup);
+                                if (promoColor) {
+                                    ctx.fillStyle = promoColor + 'aa'; // Add transparency
+                                    ctx.strokeStyle = promoColor;
+                                    ctx.lineWidth = 2;
+                                } else {
+                                    // No group assigned - show dimmed
+                                    ctx.fillStyle = 'rgba(100, 100, 100, 0.2)';
+                                    ctx.strokeStyle = 'rgba(100, 116, 139, 0.3)';
                                     ctx.lineWidth = 0.5;
                                 }
                             }
@@ -1006,7 +1048,19 @@ export const MapCanvas: React.FC<MapCanvasProps> = ({
                 const gap = 2;
 
                 // Helper to draw promo box
-                const drawPromoBox = (x: number, y: number, w: number, h: number, label: string) => {
+                const drawPromoBox = (x: number, y: number, w: number, h: number, label: string, promoInfo?: { group?: string }, endKey?: string) => {
+                    // Register bounds for click detection
+                    if (endKey) {
+                        promoEndBoundsRef.current.push({
+                            aisleId: aisle.id,
+                            endKey,
+                            minX: x,
+                            maxX: x + w,
+                            minY: y,
+                            maxY: y + h,
+                        });
+                    }
+
                     let fillStyle = isSelected ? '#a855f7' : '#9333ea';
                     let strokeStyle = '#e9d5ff';
                     let lineWidth = 1;
@@ -1015,6 +1069,19 @@ export const MapCanvas: React.FC<MapCanvasProps> = ({
                         fillStyle = 'rgba(220, 220, 220, 0.5)';
                         strokeStyle = '#333';
                         lineWidth = 1.5;
+                    } else if (activeTab === 'promo') {
+                        // Color by promo end group
+                        const promoColor = promoInfo?.group ? getPromoEndGroupColor(promoInfo.group as any) : null;
+                        if (promoColor) {
+                            fillStyle = promoColor;
+                            strokeStyle = '#fff';
+                            lineWidth = 2;
+                        } else {
+                            // No group assigned - show dimmed gray
+                            fillStyle = 'rgba(100, 100, 100, 0.4)';
+                            strokeStyle = 'rgba(100, 116, 139, 0.5)';
+                            lineWidth = 1;
+                        }
                     } else if (activeTab === 'range') {
                         // Check Range Status
                         const matchResult = findRangeActivity(label);
@@ -1072,21 +1139,21 @@ export const MapCanvas: React.FC<MapCanvasProps> = ({
                         // Standard: Front is "Down" (MaxY)
                         const px = centerX - promoWidth / 2;
                         const py = bounds.maxY + gap;
-                        drawPromoBox(px, py, promoWidth, promoDepth, aisle.promoEnds.front.code);
+                        drawPromoBox(px, py, promoWidth, promoDepth, aisle.promoEnds.front.code, aisle.promoEnds.front, 'front');
 
                         // Side units for front
                         const sideWidth = 10;
                         if (aisle.promoEnds.frontLeft) {
-                            drawPromoBox(px - sideWidth - 1, py, sideWidth, promoDepth, aisle.promoEnds.frontLeft.code);
+                            drawPromoBox(px - sideWidth - 1, py, sideWidth, promoDepth, aisle.promoEnds.frontLeft.code, aisle.promoEnds.frontLeft, 'frontLeft');
                         }
                         if (aisle.promoEnds.frontRight) {
-                            drawPromoBox(px + promoWidth + 1, py, sideWidth, promoDepth, aisle.promoEnds.frontRight.code);
+                            drawPromoBox(px + promoWidth + 1, py, sideWidth, promoDepth, aisle.promoEnds.frontRight.code, aisle.promoEnds.frontRight, 'frontRight');
                         }
                     } else {
                         const px = bounds.maxX + gap;
                         const py = centerY - promoWidth / 2;
                         // Swap dimensions for horizontal
-                        drawPromoBox(px, py, promoDepth, promoWidth, aisle.promoEnds.front.code);
+                        drawPromoBox(px, py, promoDepth, promoWidth, aisle.promoEnds.front.code, aisle.promoEnds.front, 'front');
 
                         // Side units for front (horizontal)
                         const sideWidth = 10;
@@ -1096,11 +1163,11 @@ export const MapCanvas: React.FC<MapCanvasProps> = ({
                             // Facing "Front" (Right side), "Left" is Up (minY direction), "Right" is Down (maxY direction)
                             // Let's assume standard orientation matching the vertical logic
                             // Top side (minY)
-                            drawPromoBox(px, py - sideWidth - 1, promoDepth, sideWidth, aisle.promoEnds.frontLeft.code);
+                            drawPromoBox(px, py - sideWidth - 1, promoDepth, sideWidth, aisle.promoEnds.frontLeft.code, aisle.promoEnds.frontLeft, 'frontLeft');
                         }
                         if (aisle.promoEnds.frontRight) {
                             // Bottom side (maxY)
-                            drawPromoBox(px, py + promoWidth + 1, promoDepth, sideWidth, aisle.promoEnds.frontRight.code);
+                            drawPromoBox(px, py + promoWidth + 1, promoDepth, sideWidth, aisle.promoEnds.frontRight.code, aisle.promoEnds.frontRight, 'frontRight');
                         }
                     }
                 }
@@ -1110,20 +1177,20 @@ export const MapCanvas: React.FC<MapCanvasProps> = ({
                     if (isVertical) {
                         const px = centerX - promoWidth / 2;
                         const py = bounds.minY - gap - promoDepth;
-                        drawPromoBox(px, py, promoWidth, promoDepth, aisle.promoEnds.back.code);
+                        drawPromoBox(px, py, promoWidth, promoDepth, aisle.promoEnds.back.code, aisle.promoEnds.back, 'back');
 
                         // Side units for back
                         const sideWidth = 10;
                         if (aisle.promoEnds.backLeft) {
-                            drawPromoBox(px - sideWidth - 1, py, sideWidth, promoDepth, aisle.promoEnds.backLeft.code);
+                            drawPromoBox(px - sideWidth - 1, py, sideWidth, promoDepth, aisle.promoEnds.backLeft.code, aisle.promoEnds.backLeft, 'backLeft');
                         }
                         if (aisle.promoEnds.backRight) {
-                            drawPromoBox(px + promoWidth + 1, py, sideWidth, promoDepth, aisle.promoEnds.backRight.code);
+                            drawPromoBox(px + promoWidth + 1, py, sideWidth, promoDepth, aisle.promoEnds.backRight.code, aisle.promoEnds.backRight, 'backRight');
                         }
                     } else {
                         const px = bounds.minX - gap - promoDepth;
                         const py = centerY - promoWidth / 2;
-                        drawPromoBox(px, py, promoDepth, promoWidth, aisle.promoEnds.back.code);
+                        drawPromoBox(px, py, promoDepth, promoWidth, aisle.promoEnds.back.code, aisle.promoEnds.back, 'back');
 
                         // Side units for back (horizontal)
                         const sideWidth = 10;
@@ -1148,11 +1215,11 @@ export const MapCanvas: React.FC<MapCanvasProps> = ({
                             // Front (Facing East): Left was Top (MinY).
                             // Back (Facing West): Left should be Bottom (MaxY).
 
-                            drawPromoBox(px, py + promoWidth + 1, promoDepth, sideWidth, aisle.promoEnds.backLeft.code);
+                            drawPromoBox(px, py + promoWidth + 1, promoDepth, sideWidth, aisle.promoEnds.backLeft.code, aisle.promoEnds.backLeft, 'backLeft');
                         }
                         if (aisle.promoEnds.backRight) {
                             // Right side (Top/MinY)
-                            drawPromoBox(px, py - sideWidth - 1, promoDepth, sideWidth, aisle.promoEnds.backRight.code);
+                            drawPromoBox(px, py - sideWidth - 1, promoDepth, sideWidth, aisle.promoEnds.backRight.code, aisle.promoEnds.backRight, 'backRight');
                         }
                     }
                 }
@@ -1445,6 +1512,21 @@ export const MapCanvas: React.FC<MapCanvasProps> = ({
             setDragStart({ x: e.clientX, y: e.clientY });
             setDragOffset({ x: viewState.offsetX, y: viewState.offsetY });
         } else if (e.button === 0) {
+            // PROMO MODE: Check for promo end click first
+            if (activeTab === 'promo') {
+                const promoEnd = findPromoEndAtPoint(worldPoint);
+                if (promoEnd) {
+                    setPromoEndPopup({
+                        aisleId: promoEnd.aisleId,
+                        endKey: promoEnd.endKey,
+                        screenX: e.clientX,
+                        screenY: e.clientY,
+                    });
+                    return;
+                }
+                setPromoEndPopup(null);
+            }
+
             // Check if clicking on a resize/rotate handle first (Only if exactly one item selected AND in edit mode)
             let handleClicked = false;
             // Only allow handles if in edit mode
@@ -1829,6 +1911,133 @@ export const MapCanvas: React.FC<MapCanvasProps> = ({
                 <span>•</span>
                 <span>Aisles: {aisles.length}</span>
             </div>
+
+            {/* Promo End Group Selector Popup */}
+            {promoEndPopup && (() => {
+                const aisle = aisles.find(a => a.id === promoEndPopup.aisleId);
+                const endInfo = aisle?.promoEnds?.[promoEndPopup.endKey as keyof typeof aisle.promoEnds];
+                if (!aisle || !endInfo) return null;
+
+                return (
+                    <div
+                        style={{
+                            position: 'fixed',
+                            left: promoEndPopup.screenX,
+                            top: promoEndPopup.screenY,
+                            transform: 'translate(-50%, 8px)',
+                            background: 'var(--card-bg, #1e293b)',
+                            border: '1px solid var(--border-color, #334155)',
+                            borderRadius: 8,
+                            padding: 8,
+                            boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
+                            zIndex: 1000,
+                            minWidth: 160,
+                        }}
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <input
+                            type="text"
+                            value={endInfo.code}
+                            placeholder="Code"
+                            onChange={(e) => {
+                                const newEnds = { ...aisle.promoEnds };
+                                const endKey = promoEndPopup.endKey as keyof typeof newEnds;
+                                if (newEnds[endKey]) {
+                                    newEnds[endKey] = {
+                                        ...newEnds[endKey]!,
+                                        code: e.target.value
+                                    };
+                                }
+                                onUpdateAisle(aisle.id, { promoEnds: newEnds });
+                            }}
+                            style={{
+                                width: '100%',
+                                padding: '4px 8px',
+                                background: 'var(--input-bg, #0f172a)',
+                                border: '1px solid var(--border-color, #334155)',
+                                borderRadius: 4,
+                                color: 'var(--text-muted)',
+                                fontSize: 12,
+                                marginBottom: 6,
+                            }}
+                        />
+                        <input
+                            type="text"
+                            value={endInfo.label}
+                            placeholder="Label"
+                            onChange={(e) => {
+                                const newEnds = { ...aisle.promoEnds };
+                                const endKey = promoEndPopup.endKey as keyof typeof newEnds;
+                                if (newEnds[endKey]) {
+                                    newEnds[endKey] = {
+                                        ...newEnds[endKey]!,
+                                        label: e.target.value
+                                    };
+                                }
+                                onUpdateAisle(aisle.id, { promoEnds: newEnds });
+                            }}
+                            style={{
+                                width: '100%',
+                                padding: '4px 8px',
+                                background: 'var(--input-bg, #0f172a)',
+                                border: '1px solid var(--border-color, #334155)',
+                                borderRadius: 4,
+                                color: 'var(--text-primary, #fff)',
+                                fontSize: 12,
+                                marginBottom: 6,
+                            }}
+                        />
+                        <select
+                            value={endInfo.group || ''}
+                            onChange={(e) => {
+                                const newEnds = { ...aisle.promoEnds };
+                                const endKey = promoEndPopup.endKey as keyof typeof newEnds;
+                                if (newEnds[endKey]) {
+                                    newEnds[endKey] = {
+                                        ...newEnds[endKey]!,
+                                        group: (e.target.value || undefined) as any
+                                    };
+                                }
+                                onUpdateAisle(aisle.id, { promoEnds: newEnds });
+                                setPromoEndPopup(null);
+                            }}
+                            style={{
+                                width: '100%',
+                                padding: '6px 8px',
+                                background: 'var(--input-bg, #0f172a)',
+                                border: '1px solid var(--border-color, #334155)',
+                                borderRadius: 4,
+                                color: 'var(--text-primary, #fff)',
+                                fontSize: 12,
+                            }}
+                            autoFocus
+                        >
+                            <option value="">-- None --</option>
+                            {PROMO_END_GROUPS.map((group) => (
+                                <option key={group.id} value={group.id}>
+                                    {group.label}
+                                </option>
+                            ))}
+                        </select>
+                        <button
+                            onClick={() => setPromoEndPopup(null)}
+                            style={{
+                                marginTop: 6,
+                                width: '100%',
+                                padding: '4px 8px',
+                                background: 'transparent',
+                                border: '1px solid var(--border-color, #334155)',
+                                borderRadius: 4,
+                                color: 'var(--text-muted)',
+                                fontSize: 11,
+                                cursor: 'pointer',
+                            }}
+                        >
+                            Cancel
+                        </button>
+                    </div>
+                );
+            })()}
         </div>
     );
 };

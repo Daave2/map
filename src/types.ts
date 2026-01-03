@@ -31,10 +31,24 @@ export interface AisleSection {
   side?: 'L' | 'R';
 }
 
+// Promo End Group for categorizing promo ends
+export type PromoEndGroup =
+  | 'impulse_a'
+  | 'core_grocery_b'
+  | 'bws_petcare_c'
+  | 'household_d'
+  | 'health_beauty_baby'
+  | 'fresh_bakery'
+  | 'frozen'
+  | 'general_merchandise'
+  | 'event_ends'
+  | 'other';
+
 export interface PromoEndInfo {
   code: string;
   label: string;
   name: string;
+  group?: PromoEndGroup; // Which promo end group this end belongs to
 }
 
 export interface PromoEnds {
@@ -64,6 +78,7 @@ export interface Aisle {
   labelSize?: LabelSize;
   sections?: AisleSection[];
   promoEnds?: PromoEnds;
+  promoEndGroup?: PromoEndGroup;
 }
 
 export interface EditorSettings {

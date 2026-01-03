@@ -1,5 +1,6 @@
 import React from 'react';
 import type { Aisle, AisleSection } from '../types';
+import { PROMO_END_GROUPS, getPromoEndGroupColor } from '../constants/promoEndGroups';
 
 interface AisleEditorProps {
     aisle: Aisle | null;
@@ -727,6 +728,56 @@ export const AisleEditor: React.FC<AisleEditorProps> = ({
                     </div>
                 )
             }
+
+            {/* Promo End Groups - per individual end */}
+            {aisle.promoEnds && (
+                <div className="editor-section">
+                    <label className="editor-label">Promo End Groups</label>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                        {Object.entries(aisle.promoEnds).map(([key, end]) => {
+                            if (!end) return null;
+                            const endKey = key as keyof typeof aisle.promoEnds;
+                            return (
+                                <div key={key} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                                    <span
+                                        style={{
+                                            width: 14,
+                                            height: 14,
+                                            borderRadius: 3,
+                                            backgroundColor: end.group ? getPromoEndGroupColor(end.group) || '#666' : '#444',
+                                            flexShrink: 0,
+                                            border: '1px solid rgba(255,255,255,0.2)',
+                                        }}
+                                    />
+                                    <span style={{ fontSize: 12, minWidth: 40 }}>{end.code}</span>
+                                    <select
+                                        className="editor-input"
+                                        value={end.group || ''}
+                                        onChange={(e) => {
+                                            const newEnds = { ...aisle.promoEnds };
+                                            if (newEnds[endKey]) {
+                                                newEnds[endKey] = {
+                                                    ...newEnds[endKey]!,
+                                                    group: (e.target.value || undefined) as any
+                                                };
+                                            }
+                                            onUpdateAisle(aisle.id, { promoEnds: newEnds });
+                                        }}
+                                        style={{ flex: 1, padding: '2px 4px', fontSize: 11 }}
+                                    >
+                                        <option value="">-- None --</option>
+                                        {PROMO_END_GROUPS.map((group) => (
+                                            <option key={group.id} value={group.id}>
+                                                {group.label}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+                            );
+                        })}
+                    </div>
+                </div>
+            )}
         </div >
     );
 };

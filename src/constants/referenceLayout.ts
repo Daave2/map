@@ -535,32 +535,26 @@ export const PDF_ACCURATE_LAYOUT: MapLayout = {
                 "front": {
                     "code": "1186",
                     "label": "frozen promo 2",
-                    "name": "Frozen Promo 2"
+                    "name": "Frozen Promo 2",
+                    "group": "frozen"
                 },
                 "frontLeft": {
                     "code": "2343",
                     "label": "ice lollies",
-                    "name": "Ice Lollies"
+                    "name": "Ice Lollies",
+                    "group": "other"
                 },
                 "frontRight": {
                     "code": "2343",
                     "label": "ice lollies",
-                    "name": "Ice Lollies"
+                    "name": "Ice Lollies",
+                    "group": "other"
                 },
                 "back": {
                     "code": "1157",
                     "label": "frozen promo 1",
-                    "name": "Frozen Promo 1"
-                },
-                "backLeft": {
-                    "code": "3687",
-                    "label": "fro 1",
-                    "name": "Fro 1"
-                },
-                "backRight": {
-                    "code": "3688",
-                    "label": "fro 2",
-                    "name": "Fro 2"
+                    "name": "Frozen Promo 1",
+                    "group": "frozen"
                 }
             }
         },
@@ -604,32 +598,32 @@ export const PDF_ACCURATE_LAYOUT: MapLayout = {
                 "front": {
                     "code": "1169",
                     "label": "frozen promo 3",
-                    "name": "Frozen Promo 3"
-                },
-                "frontLeft": {
-                    "code": "4631",
-                    "label": "I.A paper promo",
-                    "name": "IA Paper Promo"
+                    "name": "Frozen Promo 3",
+                    "group": "frozen"
                 },
                 "frontRight": {
                     "code": "767",
                     "label": "mat stand",
-                    "name": "Mat Stand"
+                    "name": "Mat Stand",
+                    "group": "other"
                 },
                 "back": {
                     "code": "938",
                     "label": "fresh promo end 2",
-                    "name": "Fresh Promo 2"
+                    "name": "Fresh Promo 2",
+                    "group": "frozen"
                 },
                 "backLeft": {
                     "code": "4141",
                     "label": "coke stand",
-                    "name": "Coke Stand"
+                    "name": "Coke Stand",
+                    "group": "other"
                 },
                 "backRight": {
                     "code": "3713",
                     "label": "ship 21",
-                    "name": "Ship 21"
+                    "name": "Ship 21",
+                    "group": "other"
                 }
             }
         },
@@ -678,32 +672,38 @@ export const PDF_ACCURATE_LAYOUT: MapLayout = {
                 "front": {
                     "code": "2864",
                     "label": "household 3 promo",
-                    "name": "Household 3 Promo"
+                    "name": "Household 3 Promo",
+                    "group": "household_d"
                 },
                 "frontLeft": {
-                    "code": "3729",
+                    "code": "ship 27",
                     "label": "ship 27",
-                    "name": "Ship 27"
+                    "name": "Ship 27",
+                    "group": "other"
                 },
                 "frontRight": {
-                    "code": "3720",
+                    "code": "ship 26",
                     "label": "ship 26",
-                    "name": "Ship 26"
+                    "name": "Ship 26",
+                    "group": "other"
                 },
                 "back": {
                     "code": "4240",
                     "label": "branded promo",
-                    "name": "Branded Promo"
+                    "name": "Branded Promo",
+                    "group": "household_d"
                 },
                 "backLeft": {
                     "code": "2961",
                     "label": "hh 2r",
-                    "name": "HH 2R"
+                    "name": "HH 2R",
+                    "group": "household_d"
                 },
                 "backRight": {
                     "code": "2918",
                     "label": "hh 2l",
-                    "name": "HH 2L"
+                    "name": "HH 2L",
+                    "group": "household_d"
                 }
             }
         },
@@ -767,27 +767,26 @@ export const PDF_ACCURATE_LAYOUT: MapLayout = {
                 "front": {
                     "code": "4648",
                     "label": "gum end",
-                    "name": "Gum End"
-                },
-                "frontRight": {
-                    "code": "22",
-                    "label": "ship",
-                    "name": "Ship"
+                    "name": "Gum End",
+                    "group": "other"
                 },
                 "back": {
                     "code": "2862",
                     "label": "household 1 promo",
-                    "name": "Household 1 Promo"
+                    "name": "Household 1 Promo",
+                    "group": "household_d"
                 },
                 "backLeft": {
                     "code": "2960",
                     "label": "hh 1r",
-                    "name": "HH 1R"
+                    "name": "HH 1R",
+                    "group": "household_d"
                 },
                 "backRight": {
                     "code": "2917",
                     "label": "hh 1l",
-                    "name": "HH 1L"
+                    "name": "HH 1L",
+                    "group": "household_d"
                 }
             }
         },
@@ -846,27 +845,38 @@ export const PDF_ACCURATE_LAYOUT: MapLayout = {
                 "front": {
                     "code": "235",
                     "label": "batteries",
-                    "name": "Batteries"
+                    "name": "Batteries",
+                    "group": "other"
                 },
                 "frontLeft": {
                     "code": "235",
-                    "label": "battery stand",
-                    "name": "Battery Stand"
+                    "label": "batteries",
+                    "name": "Battery Stand",
+                    "group": "other"
                 },
                 "back": {
                     "code": "2867",
                     "label": "petfood 2 promo",
-                    "name": "Petfood 2 Promo"
+                    "name": "Petfood 2 Promo",
+                    "group": "household_d"
                 },
                 "backLeft": {
                     "code": "4345",
-                    "label": "house hold ship",
-                    "name": "Household Ship"
+                    "label": "Bird food",
+                    "name": "Household Ship",
+                    "group": "other"
                 },
                 "backRight": {
                     "code": "2922",
                     "label": "pet 2l",
-                    "name": "Pet 2L"
+                    "name": "Pet 2L",
+                    "group": "household_d"
+                },
+                "frontRight": {
+                    "code": "235",
+                    "label": "batteries",
+                    "name": "Promo Right",
+                    "group": "other"
                 }
             }
         },
@@ -920,32 +930,38 @@ export const PDF_ACCURATE_LAYOUT: MapLayout = {
                 "front": {
                     "code": "4940",
                     "label": "bws 7 promo",
-                    "name": "BWS 7 Promo"
+                    "name": "BWS 7 Promo",
+                    "group": "bws_petcare_c"
                 },
                 "frontLeft": {
                     "code": "3921",
                     "label": "3921",
-                    "name": "3921"
+                    "name": "3921",
+                    "group": "bws_petcare_c"
                 },
                 "frontRight": {
                     "code": "3921",
                     "label": "3921",
-                    "name": "3921"
+                    "name": "3921",
+                    "group": "bws_petcare_c"
                 },
                 "back": {
                     "code": "2866",
                     "label": "petfood 1 promo",
-                    "name": "Petfood 1 Promo"
+                    "name": "Petfood 1 Promo",
+                    "group": "household_d"
                 },
                 "backLeft": {
                     "code": "2964",
-                    "label": "pf 1r",
-                    "name": "PF 1R"
+                    "label": "pet 1r",
+                    "name": "PF 1R",
+                    "group": "household_d"
                 },
                 "backRight": {
                     "code": "687",
                     "label": "hair accs",
-                    "name": "Hair Accs"
+                    "name": "Hair Accs",
+                    "group": "other"
                 }
             }
         },
@@ -985,11 +1001,6 @@ export const PDF_ACCURATE_LAYOUT: MapLayout = {
                     "side": "L"
                 },
                 {
-                    "bay": "764",
-                    "category": "suncare",
-                    "side": "L"
-                },
-                {
                     "bay": "1017",
                     "category": "soap",
                     "side": "R"
@@ -1003,43 +1014,44 @@ export const PDF_ACCURATE_LAYOUT: MapLayout = {
                     "bay": "1175",
                     "category": "medicines ex slimming",
                     "side": "R"
-                },
-                {
-                    "bay": "577",
-                    "category": "fine frag",
-                    "side": "R"
                 }
             ],
             "promoEnds": {
                 "front": {
                     "code": "3371",
                     "label": "suncare",
-                    "name": "Suncare"
+                    "name": "Suncare",
+                    "group": "other"
                 },
                 "frontLeft": {
-                    "code": "4337",
-                    "label": "pm ship 3",
-                    "name": "PM Ship 3"
+                    "code": "764",
+                    "label": "Cos acts",
+                    "name": "PM Ship 3",
+                    "group": "other"
                 },
                 "frontRight": {
-                    "code": "22",
-                    "label": "ship",
-                    "name": "Ship"
+                    "code": "577",
+                    "label": "Fine frag",
+                    "name": "Ship",
+                    "group": "other"
                 },
                 "back": {
                     "code": "2860",
                     "label": "health & beauty 2 promo",
-                    "name": "H&B 2 Promo"
+                    "name": "H&B 2 Promo",
+                    "group": "health_beauty_baby"
                 },
                 "backLeft": {
                     "code": "2958",
-                    "label": "h/2r",
-                    "name": "H/2R"
+                    "label": "hb2r",
+                    "name": "H/2R",
+                    "group": "health_beauty_baby"
                 },
                 "backRight": {
                     "code": "2915",
                     "label": "hb 21",
-                    "name": "HB 21"
+                    "name": "HB 21",
+                    "group": "health_beauty_baby"
                 }
             }
         },
@@ -1069,11 +1081,6 @@ export const PDF_ACCURATE_LAYOUT: MapLayout = {
                     "side": "L"
                 },
                 {
-                    "bay": "786",
-                    "category": "mens shave & toiletries",
-                    "side": "L"
-                },
-                {
                     "bay": "2242",
                     "category": "weaning & bath accs",
                     "side": "R"
@@ -1098,27 +1105,26 @@ export const PDF_ACCURATE_LAYOUT: MapLayout = {
                 "front": {
                     "code": "786",
                     "label": "mens shave & toiletries",
-                    "name": "Mens Shave"
-                },
-                "frontLeft": {
-                    "code": "22",
-                    "label": "ship",
-                    "name": "Ship"
+                    "name": "Mens Shave",
+                    "group": "other"
                 },
                 "back": {
                     "code": "2859",
                     "label": "health & beauty 1 promo",
-                    "name": "H&B 1 Promo"
+                    "name": "H&B 1 Promo",
+                    "group": "health_beauty_baby"
                 },
                 "backLeft": {
                     "code": "2957",
                     "label": "hb 1r",
-                    "name": "HB 1R"
+                    "name": "HB 1R",
+                    "group": "health_beauty_baby"
                 },
                 "backRight": {
                     "code": "2914",
                     "label": "hb 11",
-                    "name": "HB 11"
+                    "name": "HB 11",
+                    "group": "health_beauty_baby"
                 }
             }
         },
@@ -1162,32 +1168,38 @@ export const PDF_ACCURATE_LAYOUT: MapLayout = {
                 "front": {
                     "code": "2240",
                     "label": "bags for life",
-                    "name": "Bags For Life"
+                    "name": "Bags For Life",
+                    "group": "other"
                 },
                 "frontLeft": {
                     "code": "3945",
                     "label": "meds promo",
-                    "name": "Meds Promo"
+                    "name": "Meds Promo",
+                    "group": "health_beauty_baby"
                 },
                 "frontRight": {
-                    "code": "1088",
-                    "label": "lunch",
-                    "name": "Lunch"
+                    "code": "Umbrella",
+                    "label": "Umbrella",
+                    "name": "Lunch",
+                    "group": "other"
                 },
                 "back": {
                     "code": "3024",
                     "label": "baby 1 promo",
-                    "name": "Baby 1 Promo"
+                    "name": "Baby 1 Promo",
+                    "group": "health_beauty_baby"
                 },
                 "backLeft": {
                     "code": "3026",
-                    "label": "bob 1r",
-                    "name": "Bob 1R"
+                    "label": "Baby 1r",
+                    "name": "Bob 1R",
+                    "group": "health_beauty_baby"
                 },
                 "backRight": {
                     "code": "3025",
-                    "label": "bob 11",
-                    "name": "Bob 11"
+                    "label": "Baby 1l",
+                    "name": "Bob 11",
+                    "group": "health_beauty_baby"
                 }
             }
         },
@@ -1218,20 +1230,10 @@ export const PDF_ACCURATE_LAYOUT: MapLayout = {
                 }
             ],
             "promoEnds": {
-                "front": {
-                    "code": "AE1",
-                    "label": "AE1",
-                    "name": "Nutmeg End 1"
-                },
                 "frontRight": {
                     "code": "AE2",
                     "label": "AE2",
                     "name": "Nutmeg End 2"
-                },
-                "back": {
-                    "code": "AE3",
-                    "label": "AE3",
-                    "name": "Nutmeg End 3"
                 },
                 "backRight": {
                     "code": "AE4",
@@ -1245,11 +1247,11 @@ export const PDF_ACCURATE_LAYOUT: MapLayout = {
             "label": "7|6",
             "type": "gondola",
             "p1": [
-                980,
+                980.6373271090649,
                 880
             ],
             "p2": [
-                980,
+                980.6373271090649,
                 580
             ],
             "aisleWidth": 30,
@@ -1270,27 +1272,26 @@ export const PDF_ACCURATE_LAYOUT: MapLayout = {
                 "front": {
                     "code": "673",
                     "label": "gift card unit",
-                    "name": "Gift Card Unit"
-                },
-                "frontRight": {
-                    "code": "3719",
-                    "label": "ship 25",
-                    "name": "Ship 25"
+                    "name": "Gift Card Unit",
+                    "group": "other"
                 },
                 "back": {
                     "code": "3666",
                     "label": "events 2 promo",
-                    "name": "Events 2 Promo"
+                    "name": "Events 2 Promo",
+                    "group": "event_ends"
                 },
                 "backLeft": {
                     "code": "3931",
-                    "label": "editing",
-                    "name": "Editing"
+                    "label": "Craft",
+                    "name": "Editing",
+                    "group": "general_merchandise"
                 },
                 "backRight": {
                     "code": "2916",
                     "label": "hb 31",
-                    "name": "HB 31"
+                    "name": "HB 31",
+                    "group": "health_beauty_baby"
                 }
             }
         },
@@ -1339,32 +1340,38 @@ export const PDF_ACCURATE_LAYOUT: MapLayout = {
                 "front": {
                     "code": "845",
                     "label": "chart books",
-                    "name": "Chart Books"
+                    "name": "Chart Books",
+                    "group": "other"
                 },
                 "frontLeft": {
-                    "code": "22",
-                    "label": "ship",
-                    "name": "Ship"
+                    "code": "ship 25",
+                    "label": "ship 25",
+                    "name": "Ship",
+                    "group": "other"
                 },
                 "frontRight": {
                     "code": "3139",
                     "label": "h/l 7",
-                    "name": "H&L 7"
+                    "name": "H&L 7",
+                    "group": "general_merchandise"
                 },
                 "back": {
                     "code": "2982",
                     "label": "events 1 promo",
-                    "name": "Events 1 Promo"
+                    "name": "Events 1 Promo",
+                    "group": "event_ends"
                 },
                 "backLeft": {
                     "code": "3138",
                     "label": "h/l 6",
-                    "name": "H&L 6"
+                    "name": "H&L 6",
+                    "group": "general_merchandise"
                 },
                 "backRight": {
                     "code": "3137",
                     "label": "h/l 5",
-                    "name": "H&L 5"
+                    "name": "H&L 5",
+                    "group": "general_merchandise"
                 }
             }
         },
@@ -1443,17 +1450,20 @@ export const PDF_ACCURATE_LAYOUT: MapLayout = {
                 "back": {
                     "code": "2659",
                     "label": "home & leisure 3 promo",
-                    "name": "H&L 3 Promo"
+                    "name": "H&L 3 Promo",
+                    "group": "general_merchandise"
                 },
                 "backLeft": {
                     "code": "2737",
                     "label": "new release",
-                    "name": "New Release"
+                    "name": "New Release",
+                    "group": "other"
                 },
                 "backRight": {
                     "code": "2664",
                     "label": "h/l 4",
-                    "name": "H&L 4"
+                    "name": "H&L 4",
+                    "group": "general_merchandise"
                 }
             }
         },
@@ -1527,17 +1537,20 @@ export const PDF_ACCURATE_LAYOUT: MapLayout = {
                 "back": {
                     "code": "2658",
                     "label": "home & leisure 2 promo",
-                    "name": "H&L 2 Promo"
+                    "name": "H&L 2 Promo",
+                    "group": "general_merchandise"
                 },
                 "backLeft": {
                     "code": "2663",
                     "label": "h/l 3",
-                    "name": "H&L 3"
+                    "name": "H&L 3",
+                    "group": "general_merchandise"
                 },
                 "backRight": {
                     "code": "2662",
                     "label": "h/l 2",
-                    "name": "H&L 2"
+                    "name": "H&L 2",
+                    "group": "general_merchandise"
                 }
             }
         },
@@ -1606,17 +1619,20 @@ export const PDF_ACCURATE_LAYOUT: MapLayout = {
                 "back": {
                     "code": "2657",
                     "label": "home & leisure 1 promo",
-                    "name": "H&L 1 Promo"
+                    "name": "H&L 1 Promo",
+                    "group": "general_merchandise"
                 },
                 "backLeft": {
                     "code": "2661",
                     "label": "h/l",
-                    "name": "H&L"
+                    "name": "H&L",
+                    "group": "general_merchandise"
                 },
                 "backRight": {
                     "code": "3142",
-                    "label": "10",
-                    "name": "Promo 10"
+                    "label": "HL 10",
+                    "name": "Promo 10",
+                    "group": "general_merchandise"
                 }
             }
         },
@@ -1685,17 +1701,20 @@ export const PDF_ACCURATE_LAYOUT: MapLayout = {
                 "back": {
                     "code": "2851",
                     "label": "grocery & impulse 1a",
-                    "name": "G&I 1A"
+                    "name": "G&I 1A",
+                    "group": "impulse_a"
                 },
                 "backLeft": {
                     "code": "2906",
                     "label": "g&i 1a left",
-                    "name": "G&I 1A Left"
+                    "name": "G&I 1A Left",
+                    "group": "impulse_a"
                 },
                 "backRight": {
                     "code": "2949",
                     "label": "g&i 1a right",
-                    "name": "G&I 1A Right"
+                    "name": "G&I 1A Right",
+                    "group": "impulse_a"
                 }
             }
         },
@@ -1727,9 +1746,22 @@ export const PDF_ACCURATE_LAYOUT: MapLayout = {
             ],
             "promoEnds": {
                 "front": {
-                    "code": "3715",
-                    "label": "ship 22",
-                    "name": "Ship 22"
+                    "code": "Water",
+                    "label": "Water",
+                    "name": "Ship 22",
+                    "group": "other"
+                },
+                "back": {
+                    "code": "2520",
+                    "label": "Bws Promo 4",
+                    "name": "Promo End Back",
+                    "group": "bws_petcare_c"
+                },
+                "backLeft": {
+                    "code": "Ship 1",
+                    "label": "Ship 1",
+                    "name": "Promo Left",
+                    "group": "other"
                 }
             }
         },
@@ -2107,7 +2139,21 @@ export const PDF_ACCURATE_LAYOUT: MapLayout = {
                     "bay": "171",
                     "category": "bagged salad"
                 }
-            ]
+            ],
+            "promoEnds": {
+                "back": {
+                    "code": "2519",
+                    "label": "Bws Promo 3",
+                    "name": "Promo End Back",
+                    "group": "bws_petcare_c"
+                },
+                "backRight": {
+                    "code": "Orange",
+                    "label": "Machine",
+                    "name": "Promo Right",
+                    "group": "other"
+                }
+            }
         },
         {
             "id": "G-34-33",
@@ -2154,32 +2200,32 @@ export const PDF_ACCURATE_LAYOUT: MapLayout = {
                 "front": {
                     "code": "1149",
                     "label": "fresh promo end 4",
-                    "name": "Fresh Promo End 4"
+                    "name": "Fresh Promo End 4",
+                    "group": "fresh_bakery"
                 },
                 "frontLeft": {
                     "code": "970",
                     "label": "salami stand",
-                    "name": "Salami Stand"
-                },
-                "frontRight": {
-                    "code": "3677",
-                    "label": "hp chill 4",
-                    "name": "HP Chill 4"
+                    "name": "Salami Stand",
+                    "group": "other"
                 },
                 "back": {
                     "code": "100",
-                    "label": "for £10",
-                    "name": "For £10"
+                    "label": "3 for £10",
+                    "name": "For £10",
+                    "group": "fresh_bakery"
                 },
                 "backLeft": {
                     "code": "3015",
                     "label": "fresh integral 1",
-                    "name": "Fresh Integral 1"
+                    "name": "Fresh Integral 1",
+                    "group": "fresh_bakery"
                 },
                 "backRight": {
                     "code": "979",
                     "label": "schwartz",
-                    "name": "Schwartz"
+                    "name": "Schwartz",
+                    "group": "other"
                 }
             }
         },
@@ -2237,18 +2283,21 @@ export const PDF_ACCURATE_LAYOUT: MapLayout = {
             "promoEnds": {
                 "front": {
                     "code": "16",
-                    "label": "fresh promo end",
-                    "name": "Fresh Promo End"
+                    "label": "fresh promo end 1",
+                    "name": "Fresh Promo End",
+                    "group": "fresh_bakery"
                 },
                 "back": {
                     "code": "1129",
                     "label": "fresh promo end 3",
-                    "name": "Fresh Promo End 3"
+                    "name": "Fresh Promo End 3",
+                    "group": "fresh_bakery"
                 },
-                "backLeft": {
-                    "code": "3679",
-                    "label": "hp chill 3",
-                    "name": "HP Chill 3"
+                "backRight": {
+                    "code": "Half pallet",
+                    "label": "Eggs",
+                    "name": "Promo Right",
+                    "group": "other"
                 }
             }
         },
@@ -2302,27 +2351,26 @@ export const PDF_ACCURATE_LAYOUT: MapLayout = {
                 "front": {
                     "code": "2854",
                     "label": "grocery & impulse 5b promo",
-                    "name": "G&I 5B Promo"
-                },
-                "frontRight": {
-                    "code": "2796",
-                    "label": "ba",
-                    "name": "BA"
+                    "name": "G&I 5B Promo",
+                    "group": "core_grocery_b"
                 },
                 "back": {
                     "code": "4392",
                     "label": "branded promo 2",
-                    "name": "Branded Promo 2"
+                    "name": "Branded Promo 2",
+                    "group": "household_d"
                 },
                 "backLeft": {
-                    "code": "3709",
-                    "label": "ship",
-                    "name": "Ship"
+                    "code": "ship 17",
+                    "label": "ship 17",
+                    "name": "Ship",
+                    "group": "other"
                 },
                 "backRight": {
-                    "code": "3721",
+                    "code": "ship 28",
                     "label": "ship 28",
-                    "name": "Ship 28"
+                    "name": "Ship 28",
+                    "group": "other"
                 }
             }
         },
@@ -2357,11 +2405,6 @@ export const PDF_ACCURATE_LAYOUT: MapLayout = {
                     "side": "L"
                 },
                 {
-                    "bay": "2373",
-                    "category": "free",
-                    "side": "L"
-                },
-                {
                     "bay": "3267",
                     "category": "salad & meal accomps",
                     "side": "R"
@@ -2386,32 +2429,37 @@ export const PDF_ACCURATE_LAYOUT: MapLayout = {
                 "front": {
                     "code": "2863",
                     "label": "household 2 promo",
-                    "name": "Household 2 Promo"
+                    "name": "Household 2 Promo",
+                    "group": "household_d"
                 },
                 "frontLeft": {
-                    "code": "3736",
-                    "label": "sm",
+                    "code": "2373",
+                    "label": "Free from",
                     "name": "SM"
                 },
                 "frontRight": {
-                    "code": "9488",
-                    "label": "g&i right",
-                    "name": "G&I Right"
+                    "code": "2939",
+                    "label": "g&i6b right",
+                    "name": "G&I Right",
+                    "group": "core_grocery_b"
                 },
                 "back": {
                     "code": "4007",
                     "label": "bread & cakes promo 1",
-                    "name": "Bread & Cakes Promo 1"
+                    "name": "Bread & Cakes Promo 1",
+                    "group": "fresh_bakery"
                 },
                 "backLeft": {
-                    "code": "1161",
-                    "label": "clear",
-                    "name": "Clear"
+                    "code": "RTC",
+                    "label": "RTC",
+                    "name": "Clear",
+                    "group": "other"
                 },
                 "backRight": {
-                    "code": "3722",
+                    "code": "ship 29",
                     "label": "ship 29",
-                    "name": "Ship 29"
+                    "name": "Ship 29",
+                    "group": "other"
                 }
             }
         },
@@ -2465,22 +2513,26 @@ export const PDF_ACCURATE_LAYOUT: MapLayout = {
                 "front": {
                     "code": "2983",
                     "label": "paper 1 promo",
-                    "name": "Paper 1 Promo"
+                    "name": "Paper 1 Promo",
+                    "group": "household_d"
                 },
                 "back": {
-                    "code": "257",
+                    "code": "cakeshop",
                     "label": "combined cakeshop",
-                    "name": "Combined Cakeshop"
+                    "name": "Combined Cakeshop",
+                    "group": "other"
                 },
                 "backLeft": {
-                    "code": "3708",
-                    "label": "ship",
-                    "name": "Ship"
+                    "code": "ship 16",
+                    "label": "ship 16",
+                    "name": "Ship",
+                    "group": "other"
                 },
                 "backRight": {
-                    "code": "3707",
+                    "code": "ship 15",
                     "label": "ship 15",
-                    "name": "Ship 15"
+                    "name": "Ship 15",
+                    "group": "other"
                 }
             }
         },
@@ -2534,27 +2586,38 @@ export const PDF_ACCURATE_LAYOUT: MapLayout = {
                 "front": {
                     "code": "4189",
                     "label": "drinks promo 3",
-                    "name": "Drinks Promo 3"
+                    "name": "Drinks Promo 3",
+                    "group": "impulse_a"
                 },
                 "frontLeft": {
-                    "code": "4338",
-                    "label": "cereal ship",
-                    "name": "Cereal Ship"
+                    "code": "4194",
+                    "label": "Drinks 3l",
+                    "name": "Cereal Ship",
+                    "group": "impulse_a"
                 },
                 "back": {
                     "code": "4015",
                     "label": "MS end 3",
-                    "name": "MS End 3"
+                    "name": "MS End 3",
+                    "group": "other"
                 },
                 "backLeft": {
-                    "code": "3706",
+                    "code": "ship 14",
                     "label": "ship 14",
-                    "name": "Ship 14"
+                    "name": "Ship 14",
+                    "group": "other"
                 },
                 "backRight": {
-                    "code": "3705",
+                    "code": "ship 13",
                     "label": "ship 13",
-                    "name": "Ship 13"
+                    "name": "Ship 13",
+                    "group": "other"
+                },
+                "frontRight": {
+                    "code": "4195",
+                    "label": "Drinks 3r",
+                    "name": "Promo Right",
+                    "group": "impulse_a"
                 }
             }
         },
@@ -2603,32 +2666,38 @@ export const PDF_ACCURATE_LAYOUT: MapLayout = {
                 "front": {
                     "code": "4188",
                     "label": "drinks promo 2",
-                    "name": "Drinks Promo 2"
+                    "name": "Drinks Promo 2",
+                    "group": "impulse_a"
                 },
                 "frontLeft": {
-                    "code": "3733",
-                    "label": "sm",
-                    "name": "SM"
+                    "code": "4192",
+                    "label": "Drinks 2L",
+                    "name": "SM",
+                    "group": "impulse_a"
                 },
                 "frontRight": {
-                    "code": "2796",
-                    "label": "ba",
-                    "name": "BA"
+                    "code": "4193",
+                    "label": "Drinks 2r",
+                    "name": "BA",
+                    "group": "impulse_a"
                 },
                 "back": {
                     "code": "2838",
                     "label": "grocery & impulse 3b promo",
-                    "name": "G&I 3B Promo"
+                    "name": "G&I 3B Promo",
+                    "group": "core_grocery_b"
                 },
                 "backLeft": {
-                    "code": "3704",
-                    "label": "ship 19",
-                    "name": "Ship 19"
+                    "code": "ship 12",
+                    "label": "ship 12",
+                    "name": "Ship 19",
+                    "group": "other"
                 },
                 "backRight": {
-                    "code": "3699",
+                    "code": "ship 7",
                     "label": "ship 7",
-                    "name": "Ship 7"
+                    "name": "Ship 7",
+                    "group": "other"
                 }
             }
         },
@@ -2687,32 +2756,38 @@ export const PDF_ACCURATE_LAYOUT: MapLayout = {
                 "front": {
                     "code": "2840",
                     "label": "grocery & impulse 4b promo",
-                    "name": "G&I 4B Promo"
+                    "name": "G&I 4B Promo",
+                    "group": "core_grocery_b"
                 },
                 "frontLeft": {
-                    "code": "2895",
+                    "code": "2865",
                     "label": "g&i4b left",
-                    "name": "G&I 4B Left"
+                    "name": "G&I 4B Left",
+                    "group": "core_grocery_b"
                 },
                 "frontRight": {
-                    "code": "2896",
+                    "code": "2938",
                     "label": "g&i4b right",
-                    "name": "G&I 4B Right"
+                    "name": "G&I 4B Right",
+                    "group": "core_grocery_b"
                 },
                 "back": {
                     "code": "4013",
                     "label": "MS end 1",
-                    "name": "MS End 1"
+                    "name": "MS End 1",
+                    "group": "other"
                 },
                 "backLeft": {
-                    "code": "3703",
-                    "label": "ship 11",
-                    "name": "Ship 11"
+                    "code": "(HB)",
+                    "label": "(HB)",
+                    "name": "Ship 11",
+                    "group": "other"
                 },
                 "backRight": {
-                    "code": "4336",
-                    "label": "fam pack 2",
-                    "name": "Fam Pack 2"
+                    "code": "Ship 11",
+                    "label": "Ship 11",
+                    "name": "Fam Pack 2",
+                    "group": "other"
                 }
             }
         },
@@ -2759,19 +2834,22 @@ export const PDF_ACCURATE_LAYOUT: MapLayout = {
             ],
             "promoEnds": {
                 "front": {
-                    "code": "SH2605",
-                    "label": "V events Bay promo",
-                    "name": "V Events Bay Promo"
+                    "code": "1260",
+                    "label": "events 3",
+                    "name": "V Events Bay Promo",
+                    "group": "event_ends"
                 },
                 "frontLeft": {
-                    "code": "3731",
-                    "label": "sm",
-                    "name": "SM"
+                    "code": "ship 19",
+                    "label": "ship 19",
+                    "name": "SM",
+                    "group": "other"
                 },
                 "frontRight": {
-                    "code": "3710",
+                    "code": "ship 18",
                     "label": "ship 18",
-                    "name": "Ship 18"
+                    "name": "Ship 18",
+                    "group": "other"
                 },
                 "back": {
                     "code": "4838",
@@ -2779,14 +2857,16 @@ export const PDF_ACCURATE_LAYOUT: MapLayout = {
                     "name": "The Best End"
                 },
                 "backLeft": {
-                    "code": "3702",
-                    "label": "ship 19",
-                    "name": "Ship 19"
+                    "code": "ship 10",
+                    "label": "ship 10",
+                    "name": "Ship 19",
+                    "group": "other"
                 },
                 "backRight": {
-                    "code": "3724",
-                    "label": "ship 5",
-                    "name": "Ship 5"
+                    "code": "ship 31",
+                    "label": "ship 31",
+                    "name": "Ship 5",
+                    "group": "other"
                 }
             }
         },
@@ -2835,32 +2915,36 @@ export const PDF_ACCURATE_LAYOUT: MapLayout = {
                 "front": {
                     "code": "3073",
                     "label": "grocery & impulse 9b promo",
-                    "name": "G&I 9B Promo"
+                    "name": "G&I 9B Promo",
+                    "group": "core_grocery_b"
                 },
                 "frontLeft": {
                     "code": "3687",
-                    "label": "eye 2",
+                    "label": "eve 2",
                     "name": "Eye 2"
                 },
                 "frontRight": {
-                    "code": "3008",
-                    "label": "2r",
+                    "code": "3668",
+                    "label": "eve 2r",
                     "name": "2R"
                 },
                 "back": {
                     "code": "2858",
                     "label": "grocery & impulse 8b promo",
-                    "name": "G&I 8B Promo"
+                    "name": "G&I 8B Promo",
+                    "group": "core_grocery_b"
                 },
                 "backLeft": {
-                    "code": "3701",
+                    "code": "ship 9",
                     "label": "ship 9",
-                    "name": "Ship 9"
+                    "name": "Ship 9",
+                    "group": "other"
                 },
                 "backRight": {
-                    "code": "3721",
+                    "code": "ship 30",
                     "label": "ship 30",
-                    "name": "Ship 30"
+                    "name": "Ship 30",
+                    "group": "other"
                 }
             }
         },
@@ -2908,28 +2992,32 @@ export const PDF_ACCURATE_LAYOUT: MapLayout = {
             "promoEnds": {
                 "front": {
                     "code": "SVB",
-                    "label": "SHELVED VOLUME BAY impulse 1b promo",
-                    "name": "SVB Impulse 1B"
+                    "label": "grocery & impulse 1b promo",
+                    "name": "SVB Impulse 1B",
+                    "group": "core_grocery_b"
                 },
                 "frontLeft": {
-                    "code": "3675",
-                    "label": "sm 4",
+                    "code": "3002",
+                    "label": "eve 1l",
                     "name": "SM 4"
                 },
                 "frontRight": {
-                    "code": "3712",
+                    "code": "Ship 20",
                     "label": "ship 20",
-                    "name": "Ship 20"
+                    "name": "Ship 20",
+                    "group": "other"
                 },
                 "back": {
-                    "code": "2987",
+                    "code": "POS",
                     "label": "POS printer",
-                    "name": "POS Printer"
+                    "name": "POS Printer",
+                    "group": "other"
                 },
-                "backRight": {
-                    "code": "2796",
-                    "label": "ba",
-                    "name": "BA"
+                "backLeft": {
+                    "code": "(HB)",
+                    "label": "",
+                    "name": "Promo Left",
+                    "group": "other"
                 }
             }
         },
@@ -2991,34 +3079,34 @@ export const PDF_ACCURATE_LAYOUT: MapLayout = {
             ],
             "promoEnds": {
                 "front": {
-                    "code": "SVB",
-                    "label": "SHELVED VOLUME BAY promo 1",
-                    "name": "SVB Promo 1"
-                },
-                "frontLeft": {
-                    "code": "3674",
-                    "label": "sm 3",
-                    "name": "SM 3"
+                    "code": "1187",
+                    "label": "Drinks promo 1",
+                    "name": "SVB Promo 1",
+                    "group": "impulse_a"
                 },
                 "frontRight": {
-                    "code": "4181",
-                    "label": "drinks 1",
-                    "name": "Drinks 1"
+                    "code": "4191",
+                    "label": "drinks",
+                    "name": "Drinks 1",
+                    "group": "impulse_a"
                 },
                 "back": {
                     "code": "2841",
                     "label": "grocery & impulse 6B promo",
-                    "name": "G&I 6B Promo"
+                    "name": "G&I 6B Promo",
+                    "group": "core_grocery_b"
                 },
                 "backLeft": {
-                    "code": "3698",
+                    "code": "ship 6",
                     "label": "ship 6",
-                    "name": "Ship 6"
+                    "name": "Ship 6",
+                    "group": "other"
                 },
                 "backRight": {
-                    "code": "3697",
+                    "code": "ship 5",
                     "label": "ship 5",
-                    "name": "Ship 5"
+                    "name": "Ship 5",
+                    "group": "other"
                 }
             }
         },
@@ -3066,33 +3154,39 @@ export const PDF_ACCURATE_LAYOUT: MapLayout = {
             "promoEnds": {
                 "front": {
                     "code": "2836",
-                    "label": "grocery & impulse 2b promo",
-                    "name": "G&I 2B Promo"
+                    "label": "Grocery & impulse 2b",
+                    "name": "G&I 2B Promo",
+                    "group": "core_grocery_b"
                 },
                 "frontLeft": {
                     "code": "2891",
                     "label": "g&i2b left",
-                    "name": "G&I 2B Left"
+                    "name": "G&I 2B Left",
+                    "group": "core_grocery_b"
                 },
                 "frontRight": {
-                    "code": "2839",
-                    "label": "g&i2b right",
-                    "name": "G&I 2B Right"
+                    "code": "2934",
+                    "label": "g&12b right",
+                    "name": "G&I 2B Right",
+                    "group": "core_grocery_b"
                 },
                 "back": {
-                    "code": "4068",
+                    "code": "nuts",
                     "label": "nuts",
-                    "name": "Nuts"
+                    "name": "Nuts",
+                    "group": "other"
                 },
                 "backLeft": {
-                    "code": "3696",
+                    "code": "ship 4",
                     "label": "ship 4",
-                    "name": "Ship 4"
+                    "name": "Ship 4",
+                    "group": "other"
                 },
                 "backRight": {
-                    "code": "3694",
+                    "code": "ship 3",
                     "label": "ship 3",
-                    "name": "Ship 3"
+                    "name": "Ship 3",
+                    "group": "other"
                 }
             }
         },
@@ -3144,34 +3238,40 @@ export const PDF_ACCURATE_LAYOUT: MapLayout = {
             ],
             "promoEnds": {
                 "front": {
-                    "code": "SH2835B",
-                    "label": "double bay impulse 2a promo",
-                    "name": "Double Bay Impulse 2A Promo"
+                    "code": "2835",
+                    "label": "grocery & impulse 2a promo",
+                    "name": "Double Bay Impulse 2A Promo",
+                    "group": "impulse_a"
                 },
                 "frontLeft": {
                     "code": "2890",
                     "label": "g&i2a",
-                    "name": "G&I 2A"
+                    "name": "G&I 2A",
+                    "group": "impulse_a"
                 },
                 "frontRight": {
-                    "code": "625",
+                    "code": "225",
                     "label": "bar accs",
-                    "name": "Bar Accs"
+                    "name": "Bar Accs",
+                    "group": "other"
                 },
                 "back": {
-                    "code": "2855",
-                    "label": "grocery & impulse 7B promo",
-                    "name": "G&I 7B Promo"
+                    "code": "nuts",
+                    "label": "nuts",
+                    "name": "G&I 7B Promo",
+                    "group": "other"
                 },
                 "backLeft": {
-                    "code": "22",
-                    "label": "ship",
-                    "name": "Ship"
+                    "code": "(HB)",
+                    "label": "(HB)",
+                    "name": "Ship",
+                    "group": "other"
                 },
                 "backRight": {
-                    "code": "3694",
+                    "code": "ship 2",
                     "label": "ship 2",
-                    "name": "Ship 2"
+                    "name": "Ship 2",
+                    "group": "other"
                 }
             }
         },
@@ -3215,32 +3315,32 @@ export const PDF_ACCURATE_LAYOUT: MapLayout = {
                 "front": {
                     "code": "2640",
                     "label": "BWS pallet promo 2",
-                    "name": "BWS Pallet Promo 2"
-                },
-                "frontLeft": {
-                    "code": "2509",
-                    "label": "bws",
-                    "name": "BWS"
+                    "name": "BWS Pallet Promo 2",
+                    "group": "bws_petcare_c"
                 },
                 "frontRight": {
                     "code": "2503",
-                    "label": "bws",
-                    "name": "BWS"
+                    "label": "BWS pallet promo 2",
+                    "name": "BWS",
+                    "group": "bws_petcare_c"
                 },
                 "back": {
                     "code": "2517",
                     "label": "bws 1 promo",
-                    "name": "BWS 1 Promo"
+                    "name": "BWS 1 Promo",
+                    "group": "bws_petcare_c"
                 },
                 "backLeft": {
-                    "code": "2798",
+                    "code": "local",
                     "label": "local spirits",
-                    "name": "Local Spirits"
+                    "name": "Local Spirits",
+                    "group": "bws_petcare_c"
                 },
                 "backRight": {
                     "code": "2634",
                     "label": "bws 2",
-                    "name": "BWS 2"
+                    "name": "BWS 2",
+                    "group": "bws_petcare_c"
                 }
             }
         },
@@ -3289,22 +3389,32 @@ export const PDF_ACCURATE_LAYOUT: MapLayout = {
                 "front": {
                     "code": "2639",
                     "label": "BWS pallet promo 1",
-                    "name": "BWS Pallet Promo 1"
+                    "name": "BWS Pallet Promo 1",
+                    "group": "bws_petcare_c"
                 },
                 "frontRight": {
                     "code": "2633",
-                    "label": "bws",
-                    "name": "BWS"
+                    "label": "bws promo pallet 1",
+                    "name": "BWS",
+                    "group": "bws_petcare_c"
                 },
                 "backLeft": {
                     "code": "3166",
                     "label": "addition BWS pallet 2",
-                    "name": "Addition BWS Pallet 2"
+                    "name": "Addition BWS Pallet 2",
+                    "group": "bws_petcare_c"
                 },
                 "backRight": {
                     "code": "3165",
                     "label": "addition BWS pallet 1",
-                    "name": "Addition BWS Pallet 1"
+                    "name": "Addition BWS Pallet 1",
+                    "group": "bws_petcare_c"
+                },
+                "back": {
+                    "code": "BWS",
+                    "label": "Pallets",
+                    "name": "Promo End Back",
+                    "group": "bws_petcare_c"
                 }
             },
             "labelPosition": {
@@ -3346,23 +3456,21 @@ export const PDF_ACCURATE_LAYOUT: MapLayout = {
             "promoEnds": {
                 "front": {
                     "code": "2518",
-                    "label": "bws 2 promo",
-                    "name": "BWS 2 Promo"
+                    "label": "bws promo 2",
+                    "name": "BWS 2 Promo",
+                    "group": "bws_petcare_c"
                 },
                 "frontLeft": {
                     "code": "2633",
                     "label": "bws",
-                    "name": "BWS"
+                    "name": "BWS",
+                    "group": "bws_petcare_c"
                 },
                 "back": {
                     "code": "3167",
-                    "label": "addition BWS pallet",
-                    "name": "Addition BWS"
-                },
-                "backLeft": {
-                    "code": "L",
-                    "label": "",
-                    "name": "Promo Left"
+                    "label": "addition BWS pallet 4",
+                    "name": "Addition BWS",
+                    "group": "bws_petcare_c"
                 }
             }
         },
@@ -4413,19 +4521,16 @@ export const PDF_ACCURATE_LAYOUT: MapLayout = {
             ],
             "promoEnds": {
                 "front": {
-                    "code": "2518",
-                    "label": "bws 2 promo",
-                    "name": "BWS 2 Promo"
+                    "code": "2521",
+                    "label": "bus promo 5",
+                    "name": "BWS 2 Promo",
+                    "group": "bws_petcare_c"
                 },
                 "back": {
                     "code": "3167",
-                    "label": "addition BWS pallet",
-                    "name": "Addition BWS"
-                },
-                "frontRight": {
-                    "code": "R",
-                    "label": "",
-                    "name": "Promo Right"
+                    "label": "addition BWS pallet 3",
+                    "name": "Addition BWS",
+                    "group": "bws_petcare_c"
                 }
             }
         },

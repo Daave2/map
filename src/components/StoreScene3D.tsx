@@ -1,21 +1,36 @@
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { PointerLockControls, Text, Grid } from '@react-three/drei';
-import { XR, createXRStore } from '@react-three/xr';
+import { XR, createXRStore, useXR } from '@react-three/xr';
 import { useRef, useMemo, useEffect, useCallback, useState, useLayoutEffect } from 'react';
 import * as THREE from 'three';
 import type { Aisle } from '../types';
 
 import { matchesRangeCategory } from '../utils/categoryMatching';
+import { getPromoEndGroupColor } from '../constants/promoEndGroups';
 
 interface StoreScene3DProps {
     aisles: Aisle[];
     rangeData?: any[]; // Using any temporarily to avoid circular deps if types aren't exported perfectly yet
     categoryMappings?: any;
+    activeTab?: string;
     onExit: () => void;
 }
 
 // Create XR store for AR sessions
 const xrStore = createXRStore({ depthSensing: true });
+
+// Component to sync XR session state with React state
+function XRSessionSync({ onSessionChange }: { onSessionChange: (isAR: boolean) => void }) {
+    const session = useXR((state) => state.session);
+
+    useEffect(() => {
+        // Session exists when in AR/VR mode, undefined otherwise
+        const isInAR = session !== undefined && session !== null;
+        onSessionChange(isInAR);
+    }, [session, onSessionChange]);
+
+    return null;
+}
 
 // AR Scale - the store is ~100 units wide in 2D, we scale it down to fit in a room
 const AR_SCALE = 0.02; // 1 unit = 2cm, so 100 units = 2 meters
@@ -103,12 +118,13 @@ const getRangeStats = (sectionCategory: string, rangeData: any[] = [], categoryM
 };
 
 // Single Aisle/Shelf mesh component
-function ShelfMesh({ aisle, rangeData = [], categoryMappings = {}, onSelect, selectedCategory }: {
+function ShelfMesh({ aisle, rangeData = [], categoryMappings = {}, onSelect, selectedCategory, activeTab }: {
     aisle: Aisle,
     rangeData?: any[],
     categoryMappings?: any,
     onSelect: (category: string, stats?: any) => void,
-    selectedCategory?: string
+    selectedCategory?: string,
+    activeTab?: string
 }) {
     const { position, size, rotation, leftSections, rightSections, promoEnds } = useMemo(() => {
         const x1 = aisle.p1[0] * SCALE;
@@ -202,6 +218,7 @@ function ShelfMesh({ aisle, rangeData = [], categoryMappings = {}, onSelect, sel
             position: 'front' | 'back';
             subPosition: 'main' | 'left' | 'right';
             category: string;
+            group?: string;
             stats: any;
         }[] = [];
 
@@ -212,6 +229,7 @@ function ShelfMesh({ aisle, rangeData = [], categoryMappings = {}, onSelect, sel
                 position: pos,
                 subPosition: sub,
                 category,
+                group: item.group,
                 stats: getRangeStats(category, rangeData, categoryMappings)
             });
         };
@@ -238,7 +256,7 @@ function ShelfMesh({ aisle, rangeData = [], categoryMappings = {}, onSelect, sel
 
     // Helper to color sections based on stats
     const getSectionColor = (stats: any) => {
-        if (!stats) return material.color;
+        if (!stats) return material.color.getStyle();
         const net = stats.newLines - stats.delistLines;
         return net >= 0 ? '#22c55e' : '#ef4444';
     };
@@ -334,28 +352,78 @@ function ShelfMesh({ aisle, rangeData = [], categoryMappings = {}, onSelect, sel
             {/* Promo ends */}
             {promoEnds.map((promo, index) => {
                 // Calculate position based on main/side unit
-                let xPos = promo.position === 'front' ? -size.width / 2 - 0.3 : size.width / 2 + 0.3;
+                const isPositiveDir = isVertical ? dy > 0 : dx > 0;
+
+                // "Front" promo corresponds to Max Coordinate (matches 2D map logic)
+                // "Back" promo corresponds to Min Coordinate
+
+                let targetLocalX = 0;
+                let baseRotationY = 0; // 0 faces +Z? No, wait. 
+                // We need: -X end -> Face -X (-PI/2). +X end -> Face +X (+PI/2).
+
+                const placeAtPlusX = () => {
+                    targetLocalX = size.width / 2 + 0.3;
+                    baseRotationY = Math.PI / 2;
+                };
+
+                const placeAtMinusX = () => {
+                    targetLocalX = -size.width / 2 - 0.3;
+                    baseRotationY = -Math.PI / 2;
+                };
+
+                if (promo.position === 'front') {
+                    // Target Max Coord
+                    if (isPositiveDir) {
+                        // Max is P2 (+X)
+                        placeAtPlusX();
+                    } else {
+                        // Max is P1 (-X) - e.g. Upward or Leftward aisle
+                        placeAtMinusX();
+                    }
+                } else {
+                    // Target Min Coord (Back)
+                    if (isPositiveDir) {
+                        // Min is P1 (-X)
+                        placeAtMinusX();
+                    } else {
+                        // Min is P2 (+X)
+                        placeAtPlusX();
+                    }
+                }
+
+                let xPos = targetLocalX;
                 let zPos = 0;
                 let width = 0.5;
                 let depth = size.depth;
-                let rotationY = promo.position === 'front' ? -Math.PI / 2 : Math.PI / 2;
+                let rotationY = baseRotationY;
 
                 // Adjust for side units
                 if (promo.subPosition === 'left') {
-                    // Left side unit (relative to facing the promo)
-                    // If front (facing towards +X from outside), left is -Z
                     zPos = -size.depth / 2 - 0.3;
-                    depth = 0.5; // thinner depth for side unit
+                    depth = 0.5;
                     width = 0.5;
-                    // Rotation needed?
                 } else if (promo.subPosition === 'right') {
-                    // Right side unit
                     zPos = size.depth / 2 + 0.3;
                     depth = 0.5;
                     width = 0.5;
                 }
 
-                const color = promo.stats ? getSectionColor(promo.stats) : '#22c55e'; // Default promo green or stat color
+                let color = '#e2e8f0'; // Default neutral (was green #22c55e)
+
+                if (activeTab === 'promo') {
+                    if (promo.group) {
+                        const groupColor = getPromoEndGroupColor(promo.group as any);
+                        if (groupColor) color = groupColor;
+                    } else {
+                        // Dimmed if no group in promo mode
+                        color = '#94a3b8'; // Slate 400
+                    }
+                } else {
+                    // Range Mode (or others)
+                    if (promo.stats) {
+                        color = getSectionColor(promo.stats);
+                    }
+                }
 
                 // If it's a side unit, rotate label to face outward (Z axis)
                 // Left unit (-Z) label should face -Z
@@ -395,7 +463,7 @@ function ShelfMesh({ aisle, rangeData = [], categoryMappings = {}, onSelect, sel
                     >
                         <mesh position={[xPos, (promo.subPosition === 'main' ? 0 : -0.025), zPos]} castShadow>
                             <boxGeometry args={[width, size.height - (promo.subPosition === 'main' ? 0 : 0.05), depth]} />
-                            <meshStandardMaterial color={hasStats ? color : promoMaterial.color} emissive={isSelected ? (hasStats ? color : promoMaterial.color) : '#000'} emissiveIntensity={isSelected ? 0.5 : 0} />
+                            <meshStandardMaterial color={color} emissive={isSelected ? color : '#000'} emissiveIntensity={isSelected ? 0.5 : 0} />
                         </mesh>
                         <group position={[xPos + labelXOffset, 0, zPos + labelZOffset]} rotation={[0, labelRotationY, 0]}>
                             <Text
@@ -527,7 +595,7 @@ function WalkControls({ speed = 5, moveState }: { speed?: number, moveState: Rea
     return null;
 }
 
-// Mobile Controls Component
+// Mobile Controls Component - Dual joysticks
 const MobileControls = ({ moveState }: { moveState: React.MutableRefObject<MoveState> }) => {
     const moveOrigin = useRef<{ x: number, y: number } | null>(null);
     const lookOrigin = useRef<{ x: number, y: number } | null>(null);
@@ -549,27 +617,13 @@ const MobileControls = ({ moveState }: { moveState: React.MutableRefObject<MoveS
         const dx = touch.clientX - origin.x;
         const dy = touch.clientY - origin.y;
 
-        // Max distance for full speed
         const maxDist = 50;
         const x = Math.max(-1, Math.min(1, dx / maxDist));
         const y = Math.max(-1, Math.min(1, dy / maxDist));
 
         if (type === 'move') {
-            // Invert Y for movement (Up is negative screen diff but positive forward)
-            // WalkControls expects -y to be forward? Let's check:
-            // if (joystickMove.y !== 0) movement.addScaledVector(forwardVec, -joystickMove.y);
-            // If I drag UP (dy < 0), I want to move forward.
-            // If dy < 0, y is neg. -y is pos. addScaled(vec, pos) -> forward. Correct.
             moveState.current.joystickMove = { x, y };
         } else {
-            // Look
-            // Drag Right (dx > 0) -> Yaw Right (neg rotation?).
-            // WalkControls: camera.rotation.y -= joystickLook.x
-            // If dx > 0, x > 0. Rotation -= pos -> rotate right (clockwise from top). Correct.
-            // Drag Up (dy < 0) -> Pitch Up (look up).
-            // WalkControls: newPitch = rot.x - (joystickLook.y)
-            // If dy < 0, y < 0. - (neg) = + pos. Pitch increases. Look down?
-            // Usually Pitch Up is positive to look up? No, usually X rotation positive is Look Down?
             moveState.current.joystickLook = { x, y };
         }
     };
@@ -584,12 +638,11 @@ const MobileControls = ({ moveState }: { moveState: React.MutableRefObject<MoveS
         }
     };
 
-    // Styles for touch zones
     const zoneStyle: React.CSSProperties = {
         position: 'absolute',
         bottom: 20,
-        width: 120,
-        height: 120,
+        width: 100,
+        height: 100,
         background: 'rgba(255, 255, 255, 0.1)',
         border: '2px solid rgba(255, 255, 255, 0.3)',
         borderRadius: '50%',
@@ -609,7 +662,7 @@ const MobileControls = ({ moveState }: { moveState: React.MutableRefObject<MoveS
                 onTouchMove={(e) => handleTouchMove(e, 'move')}
                 onTouchEnd={(e) => handleTouchEnd(e, 'move')}
             >
-                <span style={{ fontSize: 24, opacity: 0.5 }}>🏃</span>
+                <span style={{ fontSize: 20, opacity: 0.5 }}>🏃</span>
             </div>
 
             {/* Look Zone (Right) */}
@@ -619,20 +672,21 @@ const MobileControls = ({ moveState }: { moveState: React.MutableRefObject<MoveS
                 onTouchMove={(e) => handleTouchMove(e, 'look')}
                 onTouchEnd={(e) => handleTouchEnd(e, 'look')}
             >
-                <span style={{ fontSize: 24, opacity: 0.5 }}>👀</span>
+                <span style={{ fontSize: 20, opacity: 0.5 }}>👀</span>
             </div>
         </div>
     );
 };
 
 // Main 3D scene
-function Scene({ aisles, rangeData, categoryMappings, onSelect, selectedCategory, moveState }: {
+function Scene({ aisles, rangeData, categoryMappings, onSelect, selectedCategory, moveState, activeTab }: {
     aisles: Aisle[],
     rangeData: any[],
     categoryMappings?: any,
     onSelect: (cat: string, stats?: any) => void,
     selectedCategory?: string,
-    moveState: React.MutableRefObject<MoveState>
+    moveState: React.MutableRefObject<MoveState>,
+    activeTab?: string
 }) {
     const controlsRef = useRef<any>(null);
     const { camera } = useThree();
@@ -756,6 +810,7 @@ function Scene({ aisles, rangeData, categoryMappings, onSelect, selectedCategory
                     categoryMappings={categoryMappings}
                     onSelect={onSelect}
                     selectedCategory={selectedCategory}
+                    activeTab={activeTab}
                 />
             ))}
 
@@ -767,12 +822,90 @@ function Scene({ aisles, rangeData, categoryMappings, onSelect, selectedCategory
     );
 }
 
-// AR Scene - Simplified version for augmented reality viewing
-function ARScene({ aisles, rangeData, categoryMappings }: {
+// AR HUD - 3D UI that follows camera in AR mode
+function ARHUD({ scale, onExit }: { scale: number, onExit: () => void }) {
+    const { camera } = useThree();
+    const hudRef = useRef<THREE.Group>(null);
+
+    // Update HUD position to follow camera each frame
+    useFrame(() => {
+        if (hudRef.current) {
+            // Position HUD in front of camera
+            const offset = new THREE.Vector3(0, 0, -0.5); // 50cm in front
+            offset.applyQuaternion(camera.quaternion);
+            hudRef.current.position.copy(camera.position).add(offset);
+            hudRef.current.quaternion.copy(camera.quaternion);
+        }
+    });
+
+    return (
+        <group ref={hudRef}>
+            {/* Exit button - top left of view */}
+            <group position={[-0.15, 0.1, 0]} onClick={onExit}>
+                <mesh>
+                    <planeGeometry args={[0.1, 0.04]} />
+                    <meshBasicMaterial color="#ef4444" />
+                </mesh>
+                <Text
+                    position={[0, 0, 0.001]}
+                    fontSize={0.02}
+                    color="#ffffff"
+                    anchorX="center"
+                    anchorY="middle"
+                >
+                    ✕ Exit
+                </Text>
+            </group>
+
+            {/* Scale indicator - top center */}
+            <group position={[0, 0.1, 0]}>
+                <mesh>
+                    <planeGeometry args={[0.08, 0.03]} />
+                    <meshBasicMaterial color="#000000" opacity={0.6} transparent />
+                </mesh>
+                <Text
+                    position={[0, 0, 0.001]}
+                    fontSize={0.015}
+                    color="#ffffff"
+                    anchorX="center"
+                    anchorY="middle"
+                >
+                    {Math.round(scale * 100)}%
+                </Text>
+            </group>
+
+            {/* Instructions - bottom center */}
+            <group position={[0, -0.12, 0]}>
+                <mesh>
+                    <planeGeometry args={[0.25, 0.03]} />
+                    <meshBasicMaterial color="#000000" opacity={0.6} transparent />
+                </mesh>
+                <Text
+                    position={[0, 0, 0.001]}
+                    fontSize={0.012}
+                    color="#ffffff"
+                    anchorX="center"
+                    anchorY="middle"
+                >
+                    Drag: Rotate • Pinch: Scale
+                </Text>
+            </group>
+        </group>
+    );
+}
+
+// AR Scene - Enhanced with surface detection and gestures
+function ARScene({ aisles, rangeData, categoryMappings, position, rotation, scale, activeTab }: {
     aisles: Aisle[],
     rangeData: any[],
-    categoryMappings?: any
+    categoryMappings?: any,
+    position: [number, number, number],
+    rotation: number,
+    scale: number,
+    activeTab?: string,
 }) {
+    const groupRef = useRef<THREE.Group>(null);
+
     // Filter visible aisles (same logic as Scene)
     const visibleAisles = useMemo(() =>
         aisles.filter(a => a.type !== 'door'),
@@ -780,7 +913,7 @@ function ARScene({ aisles, rangeData, categoryMappings }: {
     );
 
     // Calculate bounds for centering
-    const { center } = useMemo(() => {
+    const { center, size } = useMemo(() => {
         let minX = Infinity, maxX = -Infinity, minZ = Infinity, maxZ = -Infinity;
         aisles.forEach(a => {
             const x1 = a.p1[0] * SCALE;
@@ -793,22 +926,36 @@ function ARScene({ aisles, rangeData, categoryMappings }: {
             maxZ = Math.max(maxZ, z1, z2);
         });
         return {
-            center: { x: (minX + maxX) / 2, z: (minZ + maxZ) / 2 }
+            center: { x: (minX + maxX) / 2, z: (minZ + maxZ) / 2 },
+            size: { x: maxX - minX, z: maxZ - minZ }
         };
     }, [aisles]);
 
+    const finalScale = AR_SCALE * scale;
+
     return (
-        <group scale={[AR_SCALE, AR_SCALE, AR_SCALE]} position={[0, 0, -1]}>
+        <group
+            ref={groupRef}
+            position={position}
+            rotation={[0, rotation, 0]}
+            scale={[finalScale, finalScale, finalScale]}
+        >
             {/* Offset to center the model */}
             <group position={[-center.x, 0, -center.z]}>
                 {/* Lighting for AR */}
                 <ambientLight intensity={0.8} />
                 <directionalLight position={[5, 10, 5]} intensity={0.6} />
 
-                {/* Floor indicator */}
-                <mesh rotation={[-Math.PI / 2, 0, 0]} position={[center.x, 0, center.z]}>
-                    <circleGeometry args={[50, 32]} />
-                    <meshBasicMaterial color="#3b82f6" opacity={0.2} transparent />
+                {/* Floor indicator - shows store footprint */}
+                <mesh rotation={[-Math.PI / 2, 0, 0]} position={[center.x, 0.01, center.z]}>
+                    <planeGeometry args={[size.x + 20, size.z + 20]} />
+                    <meshBasicMaterial color="#3b82f6" opacity={0.15} transparent />
+                </mesh>
+
+                {/* Store boundary using a simple ring */}
+                <mesh rotation={[-Math.PI / 2, 0, 0]} position={[center.x, 0.02, center.z]}>
+                    <ringGeometry args={[Math.max(size.x, size.z) / 2 + 5, Math.max(size.x, size.z) / 2 + 8, 4]} />
+                    <meshBasicMaterial color="#60a5fa" opacity={0.5} transparent />
                 </mesh>
 
                 {/* Render all shelves */}
@@ -820,6 +967,7 @@ function ARScene({ aisles, rangeData, categoryMappings }: {
                         categoryMappings={categoryMappings}
                         onSelect={() => { }}
                         selectedCategory={undefined}
+                        activeTab={activeTab}
                     />
                 ))}
             </group>
@@ -828,10 +976,17 @@ function ARScene({ aisles, rangeData, categoryMappings }: {
 }
 
 // Main exported component
-export function StoreScene3D({ aisles, rangeData = [], categoryMappings = {}, onExit }: StoreScene3DProps) {
+export function StoreScene3D({ aisles, rangeData = [], categoryMappings = {}, onExit, activeTab }: StoreScene3DProps) {
     const [selectedCategory, setSelectedCategory] = useState<string | undefined>(undefined);
     const [selectedStats, setSelectedStats] = useState<any>(null);
     const [arMode, setArMode] = useState(false);
+
+    // AR gesture state
+    const [arRotation, setArRotation] = useState(0);
+    const [arScale, setArScale] = useState(1);
+
+    // Touch gesture tracking for AR
+    const touchStartRef = useRef<{ x: number, y: number, distance?: number } | null>(null);
 
     // Shared state for movement (Keyboard + Mobile)
     const moveState = useRef<MoveState>({
@@ -848,6 +1003,53 @@ export function StoreScene3D({ aisles, rangeData = [], categoryMappings = {}, on
             console.error('Failed to enter AR:', e);
             alert('AR not supported on this device. Requires ARCore (Android) or Safari on iOS.');
         }
+    };
+
+    const handleExitAR = () => {
+        setArMode(false);
+        setArRotation(0);
+        setArScale(1);
+    };
+
+    // Touch handlers for AR gestures
+    const handleTouchStart = (e: React.TouchEvent) => {
+        if (!arMode) return;
+
+        if (e.touches.length === 1) {
+            touchStartRef.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+        } else if (e.touches.length === 2) {
+            const dx = e.touches[0].clientX - e.touches[1].clientX;
+            const dy = e.touches[0].clientY - e.touches[1].clientY;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            touchStartRef.current = {
+                x: (e.touches[0].clientX + e.touches[1].clientX) / 2,
+                y: (e.touches[0].clientY + e.touches[1].clientY) / 2,
+                distance
+            };
+        }
+    };
+
+    const handleTouchMove = (e: React.TouchEvent) => {
+        if (!arMode || !touchStartRef.current) return;
+
+        if (e.touches.length === 1) {
+            // Single finger drag = rotate
+            const dx = e.touches[0].clientX - touchStartRef.current.x;
+            setArRotation(prev => prev + dx * 0.01);
+            touchStartRef.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+        } else if (e.touches.length === 2 && touchStartRef.current.distance) {
+            // Pinch = scale
+            const dx = e.touches[0].clientX - e.touches[1].clientX;
+            const dy = e.touches[0].clientY - e.touches[1].clientY;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            const scaleDelta = distance / touchStartRef.current.distance;
+            setArScale(prev => Math.max(0.2, Math.min(3, prev * scaleDelta)));
+            touchStartRef.current.distance = distance;
+        }
+    };
+
+    const handleTouchEnd = () => {
+        touchStartRef.current = null;
     };
 
     const handleSelect = useCallback((category: string, stats?: any) => {
@@ -870,14 +1072,19 @@ export function StoreScene3D({ aisles, rangeData = [], categoryMappings = {}, on
     }, [handleKeyDown]);
 
     return (
-        <div style={{
-            position: 'fixed',
-            inset: 0,
-            width: '100vw',
-            height: '100vh',
-            zIndex: 1000,
-            background: '#000'
-        }}>
+        <div
+            style={{
+                position: 'fixed',
+                inset: 0,
+                width: '100vw',
+                height: '100vh',
+                zIndex: 1000,
+                background: '#000'
+            }}
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
+        >
             <Canvas
                 frameloop="always"
                 shadows
@@ -885,12 +1092,27 @@ export function StoreScene3D({ aisles, rangeData = [], categoryMappings = {}, on
                 onCreated={({ gl }) => { gl.domElement.id = 'store-3d-canvas'; }}
             >
                 <XR store={xrStore}>
+                    {/* Sync XR session state with React state */}
+                    <XRSessionSync onSessionChange={setArMode} />
+
                     {arMode ? (
-                        <ARScene
-                            aisles={aisles}
-                            rangeData={rangeData}
-                            categoryMappings={categoryMappings}
-                        />
+                        <>
+                            {/* 3D HUD that follows camera */}
+                            <ARHUD scale={arScale} onExit={handleExitAR} />
+
+                            {/* Store model */}
+                            <ARScene
+                                aisles={aisles}
+                                rangeData={rangeData}
+                                categoryMappings={categoryMappings}
+                                position={[0, -0.5, -2]} // 2m in front, slightly below eye level
+                                rotation={arRotation}
+                                scale={arScale}
+                                activeTab={activeTab}
+                            />
+                            {/* Ambient light for AR */}
+                            <ambientLight intensity={1} />
+                        </>
                     ) : (
                         <Scene
                             aisles={aisles}
@@ -899,6 +1121,7 @@ export function StoreScene3D({ aisles, rangeData = [], categoryMappings = {}, on
                             onSelect={handleSelect}
                             selectedCategory={selectedCategory}
                             moveState={moveState}
+                            activeTab={activeTab}
                         />
                     )}
                 </XR>
@@ -997,30 +1220,86 @@ export function StoreScene3D({ aisles, rangeData = [], categoryMappings = {}, on
             </button>
 
             {/* AR Button - Bottom center for mobile visibility */}
-            {
-                !arMode && (
+            {!arMode && (
+                <button
+                    onClick={handleEnterAR}
+                    style={{
+                        position: 'absolute',
+                        bottom: 80,
+                        left: '50%',
+                        transform: 'translateX(-50%)',
+                        padding: '14px 28px',
+                        backgroundColor: '#8b5cf6',
+                        color: '#fff',
+                        border: 'none',
+                        borderRadius: 12,
+                        cursor: 'pointer',
+                        fontWeight: 'bold',
+                        fontSize: 16,
+                        boxShadow: '0 4px 20px rgba(139, 92, 246, 0.4)',
+                    }}
+                >
+                    📱 Enter AR Mode
+                </button>
+            )}
+
+            {/* AR Mode UI */}
+            {arMode && (
+                <>
+                    {/* Exit AR Button */}
                     <button
-                        onClick={handleEnterAR}
+                        onClick={handleExitAR}
                         style={{
                             position: 'absolute',
-                            bottom: 80,
-                            left: '50%',
-                            transform: 'translateX(-50%)',
-                            padding: '14px 28px',
-                            backgroundColor: '#8b5cf6',
+                            top: 16,
+                            left: 16,
+                            padding: '12px 20px',
+                            backgroundColor: '#ef4444',
                             color: '#fff',
                             border: 'none',
-                            borderRadius: 12,
+                            borderRadius: 8,
                             cursor: 'pointer',
                             fontWeight: 'bold',
-                            fontSize: 16,
-                            boxShadow: '0 4px 20px rgba(139, 92, 246, 0.4)',
+                            fontSize: 14,
+                            zIndex: 10,
                         }}
                     >
-                        📱 Enter AR Mode
+                        ✕ Exit AR
                     </button>
-                )
-            }
+
+                    {/* AR Instructions */}
+                    <div style={{
+                        position: 'absolute',
+                        bottom: 30,
+                        left: '50%',
+                        transform: 'translateX(-50%)',
+                        backgroundColor: 'rgba(0, 0, 0, 0.7)',
+                        color: '#fff',
+                        padding: '12px 20px',
+                        borderRadius: 8,
+                        fontSize: 14,
+                        textAlign: 'center',
+                        maxWidth: '80%',
+                    }}>
+                        <span>☝️ Drag to rotate • 🤏 Pinch to scale</span>
+                    </div>
+
+                    {/* Scale indicator */}
+                    <div style={{
+                        position: 'absolute',
+                        top: 16,
+                        left: '50%',
+                        transform: 'translateX(-50%)',
+                        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                        color: '#fff',
+                        padding: '6px 12px',
+                        borderRadius: 4,
+                        fontSize: 12,
+                    }}>
+                        Scale: {Math.round(arScale * 100)}%
+                    </div>
+                </>
+            )}
 
             {/* Crosshair */}
             <div style={{
