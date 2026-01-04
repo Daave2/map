@@ -109,6 +109,9 @@ function App() {
   // 3D View mode
   const [viewMode, setViewMode] = useState<'2d' | '3d'>('2d');
 
+  // Highlighted promo groups (for filtering in promo tab) - empty = all visible
+  const [highlightedPromoGroups, setHighlightedPromoGroups] = useState<string[]>([]);
+
   // Get selected range activity for details panel
   const selectedRangeActivity = rangeData.find(r => r.category === selectedRangeCategory) || null;
   // Compute match reason if a section is selected
@@ -588,6 +591,7 @@ function App() {
               rangeData={rangeData}
               categoryMappings={categoryMappings}
               activeTab={activeTab}
+              highlightedPromoGroups={highlightedPromoGroups}
               onExit={() => setViewMode('2d')}
             />
           ) : (
@@ -606,6 +610,7 @@ function App() {
               theme={theme}
               customMappings={categoryMappings}
               onAssignMapping={handleAssignMapping}
+              highlightedPromoGroups={highlightedPromoGroups}
             />
           )}
         </main>
@@ -1103,9 +1108,152 @@ function App() {
                     </div>
                   ) : activeTab === 'promo' ? (
                     <div style={{ padding: 16, overflow: 'auto' }}>
-                      <h3 style={{ margin: '0 0 16px 0', fontSize: 14, color: 'var(--text-secondary)' }}>
-                        Promo End Groups
-                      </h3>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+                        <h3 style={{ margin: 0, fontSize: 14, color: 'var(--text-secondary)' }}>
+                          Promo End Groups
+                        </h3>
+                        <button
+                          className="btn btn-sm btn-secondary"
+                          onClick={() => {
+                            // Collect all promo ends data
+                            const promoEnds: { aisle: string; position: string; code: string; label: string; group: string; groupColor: string }[] = [];
+                            layout.aisles.forEach(aisle => {
+                              if (aisle.promoEnds) {
+                                const positions = ['front', 'frontLeft', 'frontRight', 'back', 'backLeft', 'backRight'] as const;
+                                positions.forEach(pos => {
+                                  const end = aisle.promoEnds?.[pos];
+                                  if (end) {
+                                    // Check if this group is in the filter (or no filter = show all)
+                                    const hasFilter = highlightedPromoGroups.length > 0;
+                                    const inFilter = !hasFilter || highlightedPromoGroups.includes(end.group || '');
+                                    if (inFilter) {
+                                      const groupInfo = PROMO_END_GROUPS.find(g => g.id === end.group);
+                                      promoEnds.push({
+                                        aisle: aisle.label,
+                                        position: pos.replace(/([A-Z])/g, ' $1').trim(),
+                                        code: end.code || '',
+                                        label: end.label || end.name || '',
+                                        group: groupInfo?.label || 'Unassigned',
+                                        groupColor: groupInfo?.color || '#6b7280',
+                                      });
+                                    }
+                                  }
+                                });
+                              }
+                            });
+
+                            // Get canvas for map image
+                            const canvas = document.querySelector('.map-canvas-container canvas') as HTMLCanvasElement;
+                            if (!canvas) {
+                              alert('Canvas not found');
+                              return;
+                            }
+
+                            const savedViewState = { ...viewState };
+                            const savedWidth = canvas.width;
+                            const savedHeight = canvas.height;
+                            const savedPrintMode = printMode;
+                            const savedRightSidebarCollapsed = rightSidebarCollapsed;
+                            const savedLeftSidebarCollapsed = leftSidebarCollapsed;
+
+                            // Collapse BOTH sidebars first, wait for layout change
+                            setRightSidebarCollapsed(true);
+                            setLeftSidebarCollapsed(true);
+                            setPrintMode(true);
+
+                            // Wait for sidebars to collapse before setting canvas size
+                            setTimeout(() => {
+                              // Wider canvas for full map capture
+                              canvas.width = 2400;
+                              canvas.height = 1500;
+                              setViewState({ scale: 0.45, offsetX: 80, offsetY: 50 });
+
+                              requestAnimationFrame(() => {
+                                requestAnimationFrame(() => {
+                                  requestAnimationFrame(() => {
+                                    const mapImage = canvas.toDataURL('image/png');
+                                    canvas.width = savedWidth;
+                                    canvas.height = savedHeight;
+                                    setPrintMode(savedPrintMode);
+                                    setViewState(savedViewState);
+                                    setRightSidebarCollapsed(savedRightSidebarCollapsed);
+                                    setLeftSidebarCollapsed(savedLeftSidebarCollapsed);
+
+                                    // Group by promo group for the table
+                                    const grouped = promoEnds.reduce((acc, end) => {
+                                      if (!acc[end.group]) acc[end.group] = { color: end.groupColor, items: [] };
+                                      acc[end.group].items.push(end);
+                                      return acc;
+                                    }, {} as Record<string, { color: string; items: typeof promoEnds }>);
+
+                                    const printFrame = document.createElement('iframe');
+                                    printFrame.style.cssText = 'position:fixed;right:0;bottom:0;width:0;height:0;border:none;';
+                                    document.body.appendChild(printFrame);
+
+                                    const printDoc = printFrame.contentWindow?.document;
+                                    if (!printDoc) { alert('Could not create print frame'); return; }
+
+                                    printDoc.open();
+                                    printDoc.write(`
+                                    <!DOCTYPE html><html><head><title>Promo Ends - Print</title>
+                                    <style>
+                                      * { margin: 0; padding: 0; box-sizing: border-box; }
+                                      @page { size: A4 landscape; margin: 5mm; }
+                                      body { font-family: Inter, system-ui, sans-serif; }
+                                      .page1 { 
+                                        page-break-after: always; 
+                                        width: 100%; 
+                                        display: flex; 
+                                        justify-content: center; 
+                                        align-items: center; 
+                                      }
+                                      .page1 img { 
+                                        max-width: 100%; 
+                                        max-height: 100%; 
+                                        object-fit: contain;
+                                      }
+                                      .page2 { padding: 10px; }
+                                      h2 { font-size: 14px; margin: 0 0 8px; display: flex; align-items: center; gap: 8px; }
+                                      .color-dot { width: 12px; height: 12px; border-radius: 3px; display: inline-block; }
+                                      table { width: 100%; border-collapse: collapse; font-size: 10px; margin-bottom: 16px; }
+                                      th { background: #e0e0e0; padding: 5px; text-align: left; border: 1px solid #000; }
+                                      td { padding: 4px 5px; border: 1px solid #ccc; }
+                                      tr:nth-child(even) { background: #f5f5f5; }
+                                      .group-section { margin-bottom: 16px; }
+                                    </style></head><body>
+                                    <div class="page1"><img src="${mapImage}" alt="Store Map - Promo Ends" style="width:100%; height:auto;" /></div>
+                                    <div class="page2">
+                                      <h1 style="font-size:16px;margin-bottom:12px;">Promo Ends Summary (${promoEnds.length} total)</h1>
+                                      ${Object.entries(grouped).map(([groupName, data]) => `
+                                        <div class="group-section">
+                                          <h2><span class="color-dot" style="background:${data.color}"></span>${groupName} (${data.items.length})</h2>
+                                          <table>
+                                            <tr><th>Aisle</th><th>Position</th><th>Code</th><th>Label</th></tr>
+                                            ${data.items.map(item => `
+                                              <tr><td>${item.aisle}</td><td>${item.position}</td><td>${item.code}</td><td>${item.label}</td></tr>
+                                            `).join('')}
+                                          </table>
+                                        </div>
+                                      `).join('')}
+                                    </div>
+                                    </body></html>
+                                  `);
+                                    printDoc.close();
+
+                                    setTimeout(() => {
+                                      printFrame.contentWindow?.print();
+                                      setTimeout(() => document.body.removeChild(printFrame), 1000);
+                                    }, 500);
+                                  });
+                                });
+                              });
+                            }, 100); // Wait 100ms for sidebar to collapse
+                          }}
+                          title="Print Promo Ends"
+                        >
+                          🖨️ Print
+                        </button>
+                      </div>
                       <p style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 16 }}>
                         Click a promo end on the map, then assign a group in the Aisle tab.
                       </p>
@@ -1128,16 +1276,43 @@ function App() {
                               });
                             }
                           });
+                          const isSelected = highlightedPromoGroups.includes(group.id);
+                          const hasFilter = highlightedPromoGroups.length > 0;
                           return (
-                            <div key={group.id} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                            <div
+                              key={group.id}
+                              onClick={() => {
+                                if (isSelected) {
+                                  setHighlightedPromoGroups(prev => prev.filter(g => g !== group.id));
+                                } else {
+                                  setHighlightedPromoGroups(prev => [...prev, group.id]);
+                                }
+                              }}
+                              style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: 10,
+                                cursor: 'pointer',
+                                padding: '6px 8px',
+                                borderRadius: 6,
+                                backgroundColor: isSelected ? 'rgba(99, 102, 241, 0.2)' : 'transparent',
+                                border: isSelected ? '1px solid var(--accent-primary)' : '1px solid transparent',
+                                transition: 'all 0.15s ease',
+                              }}
+                            >
                               <span style={{
                                 width: 20,
                                 height: 20,
                                 borderRadius: 4,
                                 backgroundColor: group.color,
                                 flexShrink: 0,
+                                opacity: hasFilter && !isSelected ? 0.3 : 1,
                               }} />
-                              <span style={{ flex: 1, fontSize: 13 }}>{group.label}</span>
+                              <span style={{
+                                flex: 1,
+                                fontSize: 13,
+                                opacity: hasFilter && !isSelected ? 0.5 : 1,
+                              }}>{group.label}</span>
                               <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{count}</span>
                             </div>
                           );

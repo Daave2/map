@@ -35,6 +35,8 @@ interface MapCanvasProps {
     customMappings?: Record<string, string>;
     // Callback for drag-and-drop mapping
     onAssignMapping?: (rangeCategory: string, storeSectionCategory: string) => void;
+    // Highlighted promo groups (for filtering in promo tab) - empty = all visible
+    highlightedPromoGroups?: string[];
 }
 
 export const MapCanvas: React.FC<MapCanvasProps> = ({
@@ -52,6 +54,7 @@ export const MapCanvas: React.FC<MapCanvasProps> = ({
     theme = 'dark',
     customMappings = {},
     onAssignMapping,
+    highlightedPromoGroups = [],
 }) => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
@@ -1048,7 +1051,7 @@ export const MapCanvas: React.FC<MapCanvasProps> = ({
                 const gap = 2;
 
                 // Helper to draw promo box
-                const drawPromoBox = (x: number, y: number, w: number, h: number, label: string, promoInfo?: { group?: string }, endKey?: string) => {
+                const drawPromoBox = (x: number, y: number, w: number, h: number, label: string, promoInfo?: { group?: string; label?: string; name?: string }, endKey?: string) => {
                     // Register bounds for click detection
                     if (endKey) {
                         promoEndBoundsRef.current.push({
@@ -1066,20 +1069,24 @@ export const MapCanvas: React.FC<MapCanvasProps> = ({
                     let lineWidth = 1;
 
                     if (printMode) {
+                        // B&W for all print modes (range and promo)
                         fillStyle = 'rgba(220, 220, 220, 0.5)';
                         strokeStyle = '#333';
                         lineWidth = 1.5;
                     } else if (activeTab === 'promo') {
-                        // Color by promo end group
+                        // Color by promo end group (only when NOT in print mode)
                         const promoColor = promoInfo?.group ? getPromoEndGroupColor(promoInfo.group as any) : null;
-                        if (promoColor) {
+                        const hasFilter = highlightedPromoGroups.length > 0;
+                        const isHighlighted = !hasFilter || highlightedPromoGroups.includes(promoInfo?.group as string);
+
+                        if (promoColor && isHighlighted) {
                             fillStyle = promoColor;
                             strokeStyle = '#fff';
                             lineWidth = 2;
                         } else {
-                            // No group assigned - show dimmed gray
-                            fillStyle = 'rgba(100, 100, 100, 0.4)';
-                            strokeStyle = 'rgba(100, 116, 139, 0.5)';
+                            // No group assigned or not in highlighted groups - show dimmed gray
+                            fillStyle = 'rgba(100, 100, 100, 0.2)';
+                            strokeStyle = 'rgba(100, 116, 139, 0.3)';
                             lineWidth = 1;
                         }
                     } else if (activeTab === 'range') {
@@ -1108,26 +1115,45 @@ export const MapCanvas: React.FC<MapCanvasProps> = ({
                     ctx.fill();
                     ctx.stroke();
 
-                    // Draw label (skip in print mode - promo ends not part of range data)
+                    // Draw label (skip in print mode when not promo tab - use printLabels instead)
                     if (!(printMode && activeTab === 'range')) {
-                        const fontSize = Math.max(7, 9 / viewState.scale);
-                        ctx.font = `bold ${fontSize}px Inter, system-ui, sans-serif`;
-                        ctx.fillStyle = '#fff';
-                        ctx.textAlign = 'center';
-                        ctx.textBaseline = 'middle';
+                        // In promo print mode, add to printLabels for diagonal style
+                        if (printMode && activeTab === 'promo') {
+                            const hasFilter = highlightedPromoGroups.length > 0;
+                            const isHighlighted = !hasFilter || highlightedPromoGroups.includes(promoInfo?.group as string);
+                            if (isHighlighted) {
+                                const centerX = x + w / 2;
+                                const centerY = y + h / 2;
+                                // Use label/name for print (e.g. "drinks promo 3") instead of code
+                                const printText = promoInfo?.label || promoInfo?.name || label;
+                                printLabels.push({
+                                    x: centerX,
+                                    y: centerY,
+                                    text: printText,
+                                    isRangeAffected: true
+                                });
+                            }
+                        } else {
+                            // Normal inline label
+                            const fontSize = Math.max(7, 9 / viewState.scale);
+                            ctx.font = `bold ${fontSize}px Inter, system-ui, sans-serif`;
+                            ctx.fillStyle = '#fff';
+                            ctx.textAlign = 'center';
+                            ctx.textBaseline = 'middle';
 
-                        const textWidth = ctx.measureText(label).width;
-                        const availableWidth = isVertical ? h : w;
+                            const textWidth = ctx.measureText(label).width;
+                            const availableWidth = isVertical ? h : w;
 
-                        if (textWidth < availableWidth * 1.3) { // Allow slight overflow for small promo codes
-                            if (isVertical) {
-                                ctx.save();
-                                ctx.translate(x + w / 2, y + h / 2);
-                                ctx.rotate(-Math.PI / 2);
-                                ctx.fillText(label, 0, 0);
-                                ctx.restore();
-                            } else {
-                                ctx.fillText(label, x + w / 2, y + h / 2);
+                            if (textWidth < availableWidth * 1.3) { // Allow slight overflow for small promo codes
+                                if (isVertical) {
+                                    ctx.save();
+                                    ctx.translate(x + w / 2, y + h / 2);
+                                    ctx.rotate(-Math.PI / 2);
+                                    ctx.fillText(label, 0, 0);
+                                    ctx.restore();
+                                } else {
+                                    ctx.fillText(label, x + w / 2, y + h / 2);
+                                }
                             }
                         }
                     }
@@ -1327,7 +1353,7 @@ export const MapCanvas: React.FC<MapCanvasProps> = ({
         });
 
         // PRINT MODE: Draw all collected labels on top with consistent diagonal style
-        if (printMode && activeTab === 'range' && printLabels.length > 0) {
+        if (printMode && (activeTab === 'range' || activeTab === 'promo') && printLabels.length > 0) {
             const fontSize = Math.max(8, 10 / viewState.scale);
             ctx.font = `bold ${fontSize}px Inter, system-ui, sans-serif`;
             ctx.textAlign = 'center';
@@ -1467,7 +1493,7 @@ export const MapCanvas: React.FC<MapCanvasProps> = ({
         }
 
         ctx.restore();
-    }, [aisles, selectedAisleIds, viewState, getAisleBounds, editorSettings, searchTerm, rangeData, activeTab, printMode, theme, dragHoverTarget, customMappings]);
+    }, [aisles, selectedAisleIds, viewState, getAisleBounds, editorSettings, searchTerm, rangeData, activeTab, printMode, theme, dragHoverTarget, customMappings, highlightedPromoGroups]);
 
     // Handle resize
     useEffect(() => {
@@ -1483,7 +1509,19 @@ export const MapCanvas: React.FC<MapCanvasProps> = ({
 
         handleResize();
         window.addEventListener('resize', handleResize);
-        return () => window.removeEventListener('resize', handleResize);
+
+        // Also watch container size changes (e.g. when sidebar collapses)
+        const container = containerRef.current;
+        let resizeObserver: ResizeObserver | null = null;
+        if (container) {
+            resizeObserver = new ResizeObserver(handleResize);
+            resizeObserver.observe(container);
+        }
+
+        return () => {
+            window.removeEventListener('resize', handleResize);
+            resizeObserver?.disconnect();
+        };
     }, [draw]);
 
     // Redraw when state changes

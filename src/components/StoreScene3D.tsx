@@ -13,6 +13,7 @@ interface StoreScene3DProps {
     rangeData?: any[]; // Using any temporarily to avoid circular deps if types aren't exported perfectly yet
     categoryMappings?: any;
     activeTab?: string;
+    highlightedPromoGroups?: string[];
     onExit: () => void;
 }
 
@@ -118,13 +119,14 @@ const getRangeStats = (sectionCategory: string, rangeData: any[] = [], categoryM
 };
 
 // Single Aisle/Shelf mesh component
-function ShelfMesh({ aisle, rangeData = [], categoryMappings = {}, onSelect, selectedCategory, activeTab }: {
+function ShelfMesh({ aisle, rangeData = [], categoryMappings = {}, onSelect, selectedCategory, activeTab, highlightedPromoGroups = [] }: {
     aisle: Aisle,
     rangeData?: any[],
     categoryMappings?: any,
     onSelect: (category: string, stats?: any) => void,
     selectedCategory?: string,
-    activeTab?: string
+    activeTab?: string,
+    highlightedPromoGroups?: string[]
 }) {
     const { position, size, rotation, leftSections, rightSections, promoEnds } = useMemo(() => {
         const x1 = aisle.p1[0] * SCALE;
@@ -376,12 +378,14 @@ function ShelfMesh({ aisle, rangeData = [], categoryMappings = {}, onSelect, sel
                 let color = '#e2e8f0'; // Default neutral (was green #22c55e)
 
                 if (activeTab === 'promo') {
-                    if (promo.group) {
+                    const hasFilter = highlightedPromoGroups.length > 0;
+                    const isHighlighted = !hasFilter || highlightedPromoGroups.includes(promo.group as string);
+                    if (promo.group && isHighlighted) {
                         const groupColor = getPromoEndGroupColor(promo.group as any);
                         if (groupColor) color = groupColor;
                     } else {
-                        // Dimmed if no group in promo mode
-                        color = '#94a3b8'; // Slate 400
+                        // Dimmed if no group or not in highlighted groups
+                        color = '#6b7280'; // Gray 500
                     }
                 } else {
                     // Range Mode (or others)
@@ -605,7 +609,7 @@ const MobileControls = ({ moveState }: { moveState: React.MutableRefObject<MoveS
 
     const zoneStyle: React.CSSProperties = {
         position: 'absolute',
-        bottom: 20,
+        bottom: 80,
         width: 100,
         height: 100,
         background: 'rgba(255, 255, 255, 0.1)',
@@ -644,14 +648,15 @@ const MobileControls = ({ moveState }: { moveState: React.MutableRefObject<MoveS
 };
 
 // Main 3D scene
-function Scene({ aisles, rangeData, categoryMappings, onSelect, selectedCategory, moveState, activeTab }: {
+function Scene({ aisles, rangeData, categoryMappings, onSelect, selectedCategory, moveState, activeTab, highlightedPromoGroups = [] }: {
     aisles: Aisle[],
     rangeData: any[],
     categoryMappings?: any,
     onSelect: (cat: string, stats?: any) => void,
     selectedCategory?: string,
     moveState: React.MutableRefObject<MoveState>,
-    activeTab?: string
+    activeTab?: string,
+    highlightedPromoGroups?: string[]
 }) {
     const controlsRef = useRef<any>(null);
     const { camera } = useThree();
@@ -776,6 +781,7 @@ function Scene({ aisles, rangeData, categoryMappings, onSelect, selectedCategory
                     onSelect={onSelect}
                     selectedCategory={selectedCategory}
                     activeTab={activeTab}
+                    highlightedPromoGroups={highlightedPromoGroups}
                 />
             ))}
 
@@ -941,7 +947,7 @@ function ARScene({ aisles, rangeData, categoryMappings, position, rotation, scal
 }
 
 // Main exported component
-export function StoreScene3D({ aisles, rangeData = [], categoryMappings = {}, onExit, activeTab }: StoreScene3DProps) {
+export function StoreScene3D({ aisles, rangeData = [], categoryMappings = {}, onExit, activeTab, highlightedPromoGroups = [] }: StoreScene3DProps) {
     const [selectedCategory, setSelectedCategory] = useState<string | undefined>(undefined);
     const [selectedStats, setSelectedStats] = useState<any>(null);
     const [arMode, setArMode] = useState(false);
@@ -1087,6 +1093,7 @@ export function StoreScene3D({ aisles, rangeData = [], categoryMappings = {}, on
                             selectedCategory={selectedCategory}
                             moveState={moveState}
                             activeTab={activeTab}
+                            highlightedPromoGroups={highlightedPromoGroups}
                         />
                     )}
                 </XR>
